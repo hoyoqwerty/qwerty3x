@@ -1,0 +1,161 @@
+#packopt name "qwerty3x"
+#packopt hide 1
+#packopt lang "1041"
+#packopt icon "appicon.ico"
+#packopt version "infomationversion.txt"
+#packopt manifest "DPI.manifest"
+
+#include "user32.as"
+#uselib "user32.dll"
+#func SetProcessDPIAware "SetProcessDPIAware"
+#func global SetProcessDpiAwarenessContext "SetProcessDpiAwarenessContext" int
+#include "kernel32.as"
+#func global GetNativeSystemInfo "GetNativeSystemInfo" sptr
+#include "shell32.as"
+#include "gdi32.as"
+#include "winmm.as"
+#include "hspext.as"
+#include "hspinet.as"
+#include "obj.as"
+#include "hspmath.as"
+#define CLSID_ActiveDesktop "{75048700-EF1F-11D0-9888-006097DEACF9}"
+#define IID_IActiveDesktop "{F490EB00-1240-11D1-9888-006097DEACF9}"
+#include "advapi32.as"
+#include "mod_fontdlg.as"
+
+#include "include code_1_module.hsp";168
+;168=168 168+161=329
+
+	qwertyver="developing_alpha_329"
+	qwertybuild="329"
+	qwertydate="2025/06/05"
+	qwertycur=dir_cur
+	qwertypath=""+dir_cur+"\\qwerty3x.exe"
+	passwordkey=96
+	randomize
+
+	title "起動中 | qwerty3x ver."+qwertyver
+
+	gosub *loadingsettingfile
+
+	if sysinfo(0)="WindowsNT ver10.0":{
+		okfullmode=2
+		#uselib "ntdll.dll"
+		#func RtlGetVersion "RtlGetVersion" sptr
+		// バージョン取得
+		dim OSVERSIONINFO, 37
+		OSVERSIONINFO = varsize(OSVERSIONINFO)
+		RtlGetVersion varptr(OSVERSIONINFO)
+		majorVersion = OSVERSIONINFO(1)
+		buildNumber = OSVERSIONINFO(3)
+		// 判定
+		if (majorVersion >= 10) {
+			if (buildNumber >= 22000) {
+				windowsname="Windows 11"
+			}else{
+				if buildNumber=20348:{
+					windowsname="Windows Server 2022"
+				}else:if buildNumber=17763:{
+					windowsname="Windows Server 2019"
+				}else:if buildNumber=14393:{
+					windowsname="Windows Server 2016"
+				}else{
+					windowsname="Windows 10"
+				}
+			}
+			;if buildNumber>=18362:{;Windows10 1903以降
+			;}else{
+			;}
+		}
+		#define WM_COMMAND $111
+	}
+	if sysinfo(0)="WindowsNT ver6.3"{okfullmode=1:windowsname="Windows 8.1 / Server2012 R2"}
+	if sysinfo(0)="WindowsNT ver6.2"{okfullmode=1:windowsname="Windows 8 / Server2012"}
+	if sysinfo(0)="WindowsNT ver6.1"{okfullmode=1:windowsname="Windows 7 / Server2008 R2"}
+	if sysinfo(0)="WindowsNT ver6.0"{okfullmode=0:windowsname="Windows Vista / Server2008"}
+	if sysinfo(0)="WindowsNT ver5.2"{okfullmode=0:windowsname="Windows Server2003 / XP x64Edition"}
+	if sysinfo(0)="WindowsNT ver5.1"{okfullmode=0:windowsname="Windows XP"}
+	if sysinfo(0)="WindowsNT ver5.0"{okfullmode=-1:windowsname="Windows 2000"}
+	if sysinfo(0)="WindowsNT ver4.0"{okfullmode=-1:windowsname="Windows NT 4.0"}
+	if sysinfo(0)="WindowsNT ver3.51"{okfullmode=-1:windowsname="Windows NT 3.51"}
+	if sysinfo(0)="WindowsNT ver3.5"{okfullmode=-1:windowsname="Windows NT 3.5"}
+	if sysinfo(0)="WindowsNT ver3.1"{okfullmode=-1:windowsname="Windows NT 3.1"}
+	if sysinfo(0)="Windows9X ver4.9"{okfullmode=-1:windowsname="Windows Me"}
+	if sysinfo(0)="Windows9X ver4.1"{okfullmode=-1:windowsname="Windows 98 / 98 Second Edition"}
+	if sysinfo(0)="Windows9X ver4.0"{okfullmode=-1:windowsname="Windows 95"}
+
+	gosub *langstrrepupdate
+	langstrset langstrrep
+	if okfullmode=2:{
+		dialog langstr(loadset("1001",languagedata)),0,langstr(loadset("0001",languagedata))
+	}
+
+	goto *systemrepeat
+
+*systemrepeat
+
+	title " | qwerty3x ver."+qwertyver
+	
+	await 1000
+	goto *systemrepeat
+
+*loadingsettingfile
+	settingfile=""+qwertycur+"\\settingdata"
+	languagefile=""+qwertycur+"\\languagedata"
+
+	;設定ファイル読み込み
+	chdir qwertycur
+	dirlist dummy,settingfile,5
+	if stat=0:{
+		mkdir "settingdata"
+	}
+	chdir settingfile
+	exist "setting.q3sf"
+	if strsize=-1:{
+		notesel settingdata
+		settingdata={"WINDOW_POSX===0
+		WINDOW_POSY===0
+		WINDOW_SIZX===0
+		WINDOW_SIZY===0
+		LANGUAGE===ja_JP"}
+
+		encword passwordkey,settingdata,encsettingdata
+		notesel encsettingdata
+		notesave "setting.q3sf"
+	}
+	notesel decsettingdata
+	noteload "setting.q3sf"
+	decword passwordkey,decsettingdata,settingdata
+
+	;言語ファイル読み込み
+	chdir qwertycur
+	dirlist dummy,languagefile,5
+	if stat=0:{
+		mkdir "languagedata"
+	}
+	chdir languagefile
+	exist ""+loadset("LANGUAGE",settingdata)+".txt"
+	if strsize=-1:{
+		dialog "The language file could not be found.\nThe language setting eill be changed to Japanese.\n\n言語ファイルが見つかりませんでした。\n言語設定を日本語に変更します。"
+		saveset "LANGUAGE",settingdata,"ja_JP"
+		exist ""+loadset("LANGUAGE",settingdata)+".txt"
+		if strsize=-1:{
+			dialog "The Japanese language file could not be found.\nStartup Process cannot continue.\nqwerty3x will now exit.\n\n日本語の言語ファイルが見つかりませんでした。\n起動処理を続行できません。\nqwerty3xを終了します。"
+			end 
+		}
+	}
+	notesel languagedata
+	noteload ""+loadset("LAUGUAGE",settingdata)+".txt"
+
+	gosub *langstrrepupdate
+	langstrset langstrrep
+
+	return
+
+*langstrrepupdate
+	;言語ファイル変換表の作成
+	langstrrep=""
+	langstrrep+="%qwertyver%==="+qwertyver+""
+	langstrrep+="\n%windowsname%==="+windowsname+""
+
+	return
