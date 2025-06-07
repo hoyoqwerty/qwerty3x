@@ -1,0 +1,123 @@
+*bufferallupdate
+//////////////////////////////////////////////////////////////////////
+//スタートメインメニューボタン描画
+//////////////////////////////////////////////////////////////////////
+	buffer 1001,xsiz(1),ysiz(1),0
+	exist ""+qwertycur+"\\appicon.png"
+	if strsize=-1:{
+		dialog langstr(0002),1,"qwerty3x ver."+qwertyver
+		end
+	}
+	picload ""+qwertycur+"\\appicon.png",0
+	backx=ginfo(12)
+	backy=ginfo(13)
+	boxfofmes int(loadset("DISPCOLORMODE",settingdata)),xsiz(0),ysiz(0),backx,backy
+	picload ""+qwertycur+"\\appicon.png",0
+	backx=ginfo(12)
+	backy=ginfo(13)
+
+	buffer 1002,backx,backy,0
+	pos xsiz(0),ysiz(0)
+	boxfofmes int(loadset("DISPCOLORMODE",settingdata)),xsiz(0),ysiz(0),backx,backy
+	gmode 2,backx,backy,0
+	gcopy 1001,xsiz(0),ysiz(0),backx,backy
+	
+	buffer 1003,xsiz(150),ysiz(30),0
+	boxfofmes int(loadset("DISPCOLORMODE",settingdata)),xsiz(0),ysiz(0),xsiz(150),ysiz(30)
+	line xsiz(1),ysiz(1),xsiz(149),ysiz(1)
+	line xsiz(1),ysiz(1),xsiz(1),ysiz(29)
+	line xsiz(149),ysiz(1),xsiz(149),ysiz(29)
+	line xsiz(1),ysiz(29),xsiz(149),ysiz(29)
+	pos xsiz(3),ysiz(3)
+	gzoom xsiz(24),ysiz(24),1002,xsiz(0),ysiz(0),backx,backy,1
+	pos xsiz(32),ysiz(5)
+	mes "スタート"
+
+	buffer 1004,xsiz(150),ysiz(30),0
+	boxfofmes int(loadset("DISPCOLORMODE",settingdata)),xsiz(0),ysiz(0),xsiz(150),ysiz(30)
+	color 0,141,181
+	line xsiz(1),ysiz(1),xsiz(149),ysiz(1)
+	line xsiz(1),ysiz(1),xsiz(1),ysiz(29)
+	line xsiz(149),ysiz(1),xsiz(149),ysiz(29)
+	line xsiz(1),ysiz(29),xsiz(149),ysiz(29)
+	pos xsiz(3),ysiz(3)
+	gzoom xsiz(24),ysiz(24),1002,xsiz(0),ysiz(0),backx,backy,1
+	pos xsiz(32),ysiz(5)
+	mes "閉じる"
+
+//////////////////////////////////////////////////////////////////////
+//ウィンドウボタン描画
+//////////////////////////////////////////////////////////////////////
+
+	buffer 1008,xsiz(240),ysiz(90),0;一個60px
+	boxfofmes int(loadset("DISPCOLORMODE",settingdata)),xsiz(0),ysiz(0),xsiz(240),ysiz(60)
+	pos xsiz(0),ysiz(0);最小化
+	line xsiz(10),ysiz(50),xsiz(50),ysiz(50)
+	line xsiz(10),ysiz(49),xsiz(50),ysiz(49)
+	line xsiz(10),ysiz(48),xsiz(50),ysiz(48)
+	line xsiz(10),ysiz(47),xsiz(50),ysiz(47)
+
+	pos xsiz(60),ysiz(0);最大化前
+	line xsiz(10+60),ysiz(10),xsiz(50+60),ysiz(10);上
+	line xsiz(10+60),ysiz(11),xsiz(50+60),ysiz(11)
+	line xsiz(10+60),ysiz(12),xsiz(50+60),ysiz(12)
+	line xsiz(10+60),ysiz(13),xsiz(50+60),ysiz(13)
+	line xsiz(10+60),ysiz(10),xsiz(10+60),ysiz(50);左
+	line xsiz(11+60),ysiz(10),xsiz(11+60),ysiz(50)
+	line xsiz(12+60),ysiz(10),xsiz(12+60),ysiz(50)
+	line xsiz(13+60),ysiz(10),xsiz(13+60),ysiz(50)
+	line xsiz(50+60),ysiz(10),xsiz(50+60),ysiz(50);右
+	line xsiz(49+60),ysiz(10),xsiz(49+60),ysiz(50)
+	line xsiz(48+60),ysiz(10),xsiz(48+60),ysiz(50)
+	line xsiz(47+60),ysiz(10),xsiz(47+60),ysiz(50)
+	line xsiz(10+60),ysiz(50),xsiz(50+60),ysiz(50);下
+	line xsiz(10+60),ysiz(49),xsiz(50+60),ysiz(49)
+	line xsiz(10+60),ysiz(48),xsiz(50+60),ysiz(48)
+	line xsiz(10+60),ysiz(47),xsiz(50+60),ysiz(47)
+
+	pos xsiz(120),ysiz(0);最大化後
+	line xsiz(10+120),ysiz(10),xsiz(50+120),ysiz(10);上
+	line xsiz(10+120),ysiz(11),xsiz(50+120),ysiz(11)
+	line xsiz(10+120),ysiz(12),xsiz(50+120),ysiz(12)
+	line xsiz(10+120),ysiz(13),xsiz(50+120),ysiz(13)
+	line xsiz(10+120),ysiz(10),xsiz(10+120),ysiz(50);左
+	line xsiz(11+120),ysiz(10),xsiz(11+120),ysiz(50)
+	line xsiz(12+120),ysiz(10),xsiz(12+120),ysiz(50)
+	line xsiz(13+120),ysiz(10),xsiz(13+120),ysiz(50)
+	line xsiz(50+120),ysiz(10),xsiz(50+120),ysiz(50);右
+	line xsiz(49+120),ysiz(10),xsiz(49+120),ysiz(50)
+	line xsiz(48+120),ysiz(10),xsiz(48+120),ysiz(50)
+	line xsiz(47+120),ysiz(10),xsiz(47+120),ysiz(50)
+	line xsiz(10+120),ysiz(50),xsiz(50+120),ysiz(50);下
+	line xsiz(10+120),ysiz(49),xsiz(50+120),ysiz(49)
+	line xsiz(10+120),ysiz(48),xsiz(50+120),ysiz(48)
+	line xsiz(10+120),ysiz(47),xsiz(50+120),ysiz(47)
+	line xsiz(10+120),ysiz(25),xsiz(40+120),ysiz(25);二つ目上
+	line xsiz(10+120),ysiz(26),xsiz(40+120),ysiz(26)
+	line xsiz(10+120),ysiz(27),xsiz(40+120),ysiz(27)
+	line xsiz(10+120),ysiz(28),xsiz(40+120),ysiz(28)
+	line xsiz(40+120),ysiz(25),xsiz(40+120),ysiz(50);二つ目右
+	line xsiz(39+120),ysiz(25),xsiz(39+120),ysiz(50)
+	line xsiz(38+120),ysiz(25),xsiz(38+120),ysiz(50)
+	line xsiz(37+120),ysiz(25),xsiz(37+120),ysiz(50)
+
+	pos xsiz(180),ysiz(0);終了
+	line xsiz(10+180),ysiz(10),xsiz(50+180),ysiz(47);左上から右下
+	line xsiz(10+180),ysiz(11),xsiz(50+180),ysiz(48)
+	line xsiz(10+180),ysiz(12),xsiz(50+180),ysiz(49)
+	line xsiz(10+180),ysiz(13),xsiz(50+180),ysiz(50)
+	line xsiz(10+180),ysiz(47),xsiz(50+180),ysiz(10);左下から右上
+	line xsiz(10+180),ysiz(48),xsiz(50+180),ysiz(11)
+	line xsiz(10+180),ysiz(49),xsiz(50+180),ysiz(12)
+	line xsiz(10+180),ysiz(50),xsiz(50+180),ysiz(13)
+
+	pos xsiz(0),ysiz(60)
+	gzoom xsiz(30),ysiz(30),1008,xsiz(0),ysiz(0),xsiz(60),ysiz(60),1;最小化
+	pos xsiz(30),ysiz(60)
+	gzoom xsiz(30),ysiz(30),1008,xsiz(60),ysiz(0),xsiz(60),ysiz(60),1;最大化前
+	pos xsiz(60),ysiz(60)
+	gzoom xsiz(30),ysiz(30),1008,xsiz(120),ysiz(0),xsiz(60),ysiz(60),1;最大化後
+	pos xsiz(90),ysiz(60)
+	gzoom xsiz(30),ysiz(30),1008,xsiz(180),ysiz(0),xsiz(60),ysiz(60),1;終了
+	
+	return

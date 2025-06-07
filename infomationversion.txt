@@ -1,0 +1,9 @@
+_FILEVERSION=1.0.0.0
+_PRODUCTVERSION=1.0.0.0
+FileDescription=qwerty3x
+FileVersion=1.00
+InternalName=qwerty-XX ver.1.00
+LegalCopyright=Copyright (C) 2025 hoyoqwerty All Rights Reserved.
+OriginalFilename=qwerty3x.exe
+ProductName=qwerty3x
+ProductVersion=1.00

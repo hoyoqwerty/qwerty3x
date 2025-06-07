@@ -23,20 +23,38 @@
 #include "advapi32.as"
 #include "mod_fontdlg.as"
 
-#include "include code_1_module.hsp";168
-;168=168 168+161=329
+#include "module/include code_1_module.hsp";244
+#include "module/include code_2_default.hsp";8
+;#include "module/include code_3_buffer.hsp";123
+;244+8+123=375 375+492=867
 
-	qwertyver="developing_alpha_329"
-	qwertybuild="329"
-	qwertydate="2025/06/05"
+	qwertyver="developing_alpha_867"
+	qwertybuild="867"
+	qwertydate="2025/06/08"
 	qwertycur=dir_cur
 	qwertypath=""+dir_cur+"\\qwerty3x.exe"
 	passwordkey=96
 	randomize
 
-	title "起動中 | qwerty3x ver."+qwertyver
-
 	gosub *loadingsettingfile
+
+	screen 0000,ginfo(20),ginfo(21),0
+	getwindowlong hwnd,-16
+	setwindowlong hwnd,-16,stat|$10000|$40000
+	getwindowlong hwnd,-16
+	setwindowlong hwnd,-16,stat-$80000
+	title "Starting... | qwerty3x ver."+qwertyver
+	width 800,500,10,10
+
+	screen 0001,ginfo(20),ginfo(21),2+4
+	getwindowlong hwnd,-16
+	setwindowlong hwnd,-16,stat-$800000-$40000
+
+	gsel 0000,int(loadset("ALWAYSFRONT",settingdata))+1
+
+	gosub *langstrrepupdate
+
+	title ""+langstr(1002)+" | qwerty3x ver."+qwertyver;1002=起動中
 
 	if sysinfo(0)="WindowsNT ver10.0":{
 		okfullmode=2
@@ -69,6 +87,18 @@
 		}
 		#define WM_COMMAND $111
 	}
+	if windowsname="Windows 11":{
+		#uselib "dwmapi.dll"
+		#func global DwmSetWindowAttribute "DwmSetWindowAttribute" int, int, int, int
+		#func global DwmExtendFrameIntoClientArea "DwmExtendFrameIntoClientArea" int,int
+		#define DWMWA_USE_HOSTBACKDROPBRUSH 17            
+		#define DWMWA_USE_IMMERSIVE_DARK_MODE 20
+		#define DWMWA_SYSTEMBACKDROP_TYPE 38
+		
+		#enum DWMWA_BORDER_COLOR = 34
+		#enum DWMWA_CAPTION_COLOR
+		#enum DWMWA_TEXT_COLOR
+	}
 	if sysinfo(0)="WindowsNT ver6.3"{okfullmode=1:windowsname="Windows 8.1 / Server2012 R2"}
 	if sysinfo(0)="WindowsNT ver6.2"{okfullmode=1:windowsname="Windows 8 / Server2012"}
 	if sysinfo(0)="WindowsNT ver6.1"{okfullmode=1:windowsname="Windows 7 / Server2008 R2"}
@@ -85,19 +115,282 @@
 	if sysinfo(0)="Windows9X ver4.0"{okfullmode=-1:windowsname="Windows 95"}
 
 	gosub *langstrrepupdate
-	langstrset langstrrep
-	if okfullmode=2:{
-		dialog langstr(loadset("1001",languagedata)),0,langstr(loadset("0001",languagedata))
+	if okfullmode=0:{
+		dialog langstr(1001),0,"qwerty3x ver."+qwertyver
+		;1001=サポートしていないWindowsバージョンを検出しました：windowsname
+		;起動は続行できますが、想定していない動作が発生する可能性があります。
 	}
 
+	if windowsname="Windows 11":{
+		if loadset("DISPCOLORMODE",settingdata)=0:{
+			opt=rgb(32,32,32)
+			dwmsetwindowattribute hwnd,DWMWA_CAPTION_COLOR,varptr(opt),4
+			dwmsetwindowattribute hwnd,DWMWA_BORDER_COLOR,varptr(opt),4
+			opt=rgb(255,255,255)
+			dwmsetwindowattribute hwnd,DWMWA_TEXT_COLOR,varptr(opt),4
+		}else:if loadset("DISPCOLORMODE",settingdata)=1:{
+			opt=rgb(255,255,255)
+			dwmsetwindowattribute hwnd,DWMWA_CAPTION_COLOR,varptr(opt),4
+			dwmsetwindowattribute hwnd,DWMWA_BORDER_COLOR,varptr(opt),4
+			opt=rgb(0,0,0)
+			dwmsetwindowattribute hwnd,DWMWA_TEXT_COLOR,varptr(opt),4
+		}
+	}
+
+	#define logpixelsx $00000058
+	#define logpixelsy $0000005A
+	#define ctype xsiz(%1) int(round(double(%1)*xdpi/96))
+	#define ctype ysiz(%1) int(round(double(%1)*ydpi/96))
+	#define ctype sizx(%1) int(%1*96/xdpi)
+	#define ctype sizy(%1) int(%1*96/ydpi)
+	if okfullmode=0:{;Windows XP、Windows Vista
+		xdpi2=96
+		ydpi2=96
+		nowxsize="100%(OS側の画面拡大率設定非対応に基づく)"
+		nowxsizebuf=100
+		xdpi=96
+		ydpi=96
+	}else{
+		setprocessdpiaware
+		xdpi2=getdevicecaps(hdc,logpixelsx)
+		ydpi2=getdevicecaps(hdc,logpixelsy)
+		xdpi=xdpi2
+		ydpi=ydpi2
+		nowxsize=""+xsiz(100)+"%(システム設定に基づく)"
+		nowxsizebuf=xsiz(100)
+		xdpi=96
+		ydpi=96
+	}
+	dismaxx=ginfo(20)
+	dismaxy=ginfo(21)
+
+	gsel 0000,int(loadset("ALWAYSFRONT",settingdata))+1
+	width int(loadset("WINDOW_SIZX",settingdata)),int(loadset("WINDOW_SIZY",settingdata)),int(loadset("WINDOW_POSX",settingdata)),int(loadset("WINDOW_POSY",settingdata))
+	if loadset("ISZOOMED",settingdata)="1":{
+		sendmsg hwnd,$112,$F030
+	}
+
+	IsZoomed hwnd
+	iszoom=stat
+	screenname=langstr(3001);ランチャー
+
+	gosub *makescreen
+
 	goto *systemrepeat
 
-*systemrepeat
+#include "module/include code_3_buffer.hsp"
 
-	title " | qwerty3x ver."+qwertyver
+*makescreen
+
+	clrobj
+	gosub *bufferallupdate
+	gsel 0000,int(loadset("ALWAYSFRONT",settingdata))+1
+
+	pos xsiz(0),ysiz(0)
+	boxfofmes int(loadset("DISPCOLORMODE",settingdata)),xsiz(0),ysiz(0),ginfo(12),ysiz(30)
+
+	pos ginfo(12)-xsiz(30),ysiz(0)
+	objsize xsiz(30),ysiz(30)
+	objimage 1008,xsiz(90),ysiz(59),xsiz(90),ysiz(59),xsiz(90),ysiz(60)
+	button "",*systemshutdown
+	endadr=stat
+	pos ginfo(12)-xsiz(60),ysiz(0)
+	if iszoom=0:{
+		objimage 1008,xsiz(30),ysiz(59),xsiz(30),ysiz(59),xsiz(30),ysiz(60)
+	}else{
+		objimage 1008,xsiz(60),ysiz(59),xsiz(60),ysiz(59),xsiz(60),ysiz(60)
+	}
+	button gosub "",*windowmanualsizechange
+	maxadr=stat
+	pos ginfo(12)-xsiz(90),ysiz(0)
+	objimage 1008,xsiz(0),ysiz(59),xsiz(0),ysiz(59),xsiz(0),ysiz(60)
+	button gosub "",*windowmanualsizechange
+	minadr=stat
+	objimage -1
+
+	pos xsiz(0),ysiz(0)
+	objsize xsiz(150),ysiz(30)
+	if screenname=langstr(3002):{;スタートメインメニュー
+		objimage 1004,xsiz(0),ysiz(0),xsiz(0),ysiz(0),xsiz(0),ysiz(1)
+	}else{
+		objimage 1003,xsiz(0),ysiz(0),xsiz(0),ysiz(0),xsiz(0),ysiz(1)
+	}
+	button gosub "",*startmainmenuchange
+	startmainmenuadr=stat
+
+	if screenname=langstr(3001):{;ランチャー
+		
+	}
+
+	return
+
+*startmainmenuchange
+	if startmainmenubuf=0:{
+		bufscreenname=screenname
+		screenname=langstr(3002)
+		startmainmenubuf=1
+	}else{
+		screenname=bufscreenname
+		startmainmenubuf=0
+	}
+	clrobj startmainmenuadr,startmainmenuadr
+	pos xsiz(0),ysiz(0)
+	objsize xsiz(150),ysiz(30)
+	if screenname=langstr(3002):{;スタートメインメニュー
+		objimage 1004,xsiz(0),ysiz(0),xsiz(0),ysiz(0),xsiz(0),ysiz(1)
+	}else{
+		objimage 1003,xsiz(0),ysiz(0),xsiz(0),ysiz(0),xsiz(0),ysiz(1)
+	}
+	button gosub "",*startmainmenuchange
+	startmainmenuadr=stat
+
+	return
+
+*windowmanualsizechange
+	if maxadr=stat:{
+		IsZoomed hwnd
+		iszoom=stat
+		if iszoom=1:{
+			sendmsg hwnd,$112,$F120;SC_RESTORE
+		}else{
+			sendmsg hwnd,$112,$F030;SC_MAXIMIZE
+		}
+	}else:if minadr=stat:{
+		sendmsg hwnd,$112,$F020;SC_MINIMIZE
+	}
 	
-	await 1000
+	return
+
+//////////////////////////////////////////////////////////////////////
+//システムスクリプト
+//////////////////////////////////////////////////////////////////////
+
+*sizechange
+	if ginfo(3)!0000:{
+		gsel 0000,1
+	}
+	pos xsiz(0),ysiz(0)
+	boxfofmes int(loadset("DISPCOLORMODE",settingdata)),xsiz(0),ysiz(0),ginfo(12),ysiz(30)
+		
+	size=0,0,(ginfo(12)-xsiz(30)),0
+	resizeobj endadr,size,2
+	size=0,0,(ginfo(12)-xsiz(60)),0
+	resizeobj maxadr,size,2
+	size=0,0,(ginfo(12)-xsiz(90)),0
+	resizeobj minadr,size,2
+
+	return
+
+*movechange
+	IsZoomed hwnd
+	if iszoom!stat:{
+		iszoom=stat
+		clrobj maxadr,maxadr
+		pos ginfo(12)-xsiz(60),ysiz(0)
+		objsize xsiz(30),ysiz(30)
+		if iszoom=0:{
+			objimage 1008,xsiz(30),ysiz(59),xsiz(30),ysiz(59),xsiz(30),ysiz(60)
+		}else{
+			objimage 1008,xsiz(60),ysiz(59),xsiz(60),ysiz(59),xsiz(60),ysiz(60)
+		}
+		button gosub "",*windowmanualsizechange
+		maxadr=stat
+	}else{
+		iszoom=stat
+	}
+
+	return
+
+*onclickjump
+	if wparam=1:{
+		sendmsg hwnd,$A1,2
+	}
+
+	return
+
+*OnNCHITTEST
+	dim area
+	mposx = ginfo_mx - ginfo_wx1
+	mposy = ginfo_my - ginfo_wy1
+	if (mposx <= BORDERWIDTH)             : area |= LEFT
+	if (mposx >= ginfo_winx - BORDERWIDTH): area |= RIGHT
+	if (mposy <= BORDERWIDTH)             : area |= TOP
+	if (mposy >= ginfo_winy - BORDERWIDTH): area |= BOTTOM
+	if (area & LEFT) {
+		if (area & TOP)    : return HTTOPLEFT
+		if (area & BOTTOM) : return HTBOTTOMLEFT
+		return HTLEFT
+	}
+	if (area & RIGHT) {
+		if (area & TOP)    : return HTTOPRIGHT
+		if (area & BOTTOM) : return HTBOTTOMRIGHT
+		return HTRIGHT
+	}
+	if (area & TOP)    : return HTTOP
+	if (area & BOTTOM) : return HTBOTTOM
+	if (mposy <= CAPTIONHEIGHT) : return HTCAPTION
+	
+	return HTCLIENT
+	
+*systemrepeat
+	//システム
+	IsZoomed hwnd
+	if iszoom!stat:{
+		iszoom=stat
+		clrobj maxadr,maxadr
+		pos ginfo(12)-xsiz(60),ysiz(0)
+		objsize xsiz(30),ysiz(30)
+		if iszoom=0:{
+			objimage 1008,xsiz(30),ysiz(59),xsiz(30),ysiz(59),xsiz(30),ysiz(60)
+		}else{
+			objimage 1008,xsiz(60),ysiz(59),xsiz(60),ysiz(59),xsiz(60),ysiz(60)
+		}
+		button gosub "",*windowmanualsizechange
+		maxadr=stat
+	}else{
+		iszoom=stat
+	}
+	IsIconic hwnd
+	isicon=stat
+
+	//ジャンプ
+	onexit *shutdownwindowssystem
+	onclick gosub *onclickjump
+
+	oncmd gosub *sizechange,$005;WM_SIZE
+	oncmd gosub *OnNCHITTEST, $084;WM_NCHITTEST
+	oncmd gosub *movechange,$003;WM_MOVE
+
+
+	//システム
+	titlebarstr=""
+	if screenname=langstr(3002):{;スタートメインメニュー
+		titlebarstr=""+screenname+"/"+bufscreenname+" | qwerty3x ver."+qwertyver
+	}else{
+		titlebarstr=""+screenname+" | "+langstr(0001);qwerty3x ver.%qwertyver%
+	}
+	title titlebarstr
+
+	saveset "ISZOOMED",settingdata,str(iszoom)
+	if iszoom!1:{
+		saveset "WINDOW_POSX",settingdata,str(ginfo(4))
+		saveset "WINDOW_POSY",settingdata,str(ginfo(5))
+		saveset "WINDOW_SIZX",settingdata,str(ginfo(12))
+		saveset "WINDOW_SIZY",settingdata,str(ginfo(13))
+	}
+
+	gosub *langstrrepupdate
+
+	if isicon=1:{
+		await 1000
+	}else{
+		await (1000/30)
+	}
 	goto *systemrepeat
+
+//////////////////////////////////////////////////////////////////////
+//設定読み書きスクリプト
+//////////////////////////////////////////////////////////////////////
 
 *loadingsettingfile
 	settingfile=""+qwertycur+"\\settingdata"
@@ -112,12 +405,7 @@
 	chdir settingfile
 	exist "setting.q3sf"
 	if strsize=-1:{
-		notesel settingdata
-		settingdata={"WINDOW_POSX===0
-		WINDOW_POSY===0
-		WINDOW_SIZX===0
-		WINDOW_SIZY===0
-		LANGUAGE===ja_JP"}
+		settingdata=defaultsettingdata
 
 		encword passwordkey,settingdata,encsettingdata
 		notesel encsettingdata
@@ -136,19 +424,16 @@
 	chdir languagefile
 	exist ""+loadset("LANGUAGE",settingdata)+".txt"
 	if strsize=-1:{
-		dialog "The language file could not be found.\nThe language setting eill be changed to Japanese.\n\n言語ファイルが見つかりませんでした。\n言語設定を日本語に変更します。"
+		dialog "The language file could not be found.\nThe language setting eill be changed to Japanese.\n\n言語ファイルが見つかりませんでした。\n言語設定を日本語に変更します。",0,"qwerty3x ver."+qwertyver
 		saveset "LANGUAGE",settingdata,"ja_JP"
 		exist ""+loadset("LANGUAGE",settingdata)+".txt"
 		if strsize=-1:{
-			dialog "The Japanese language file could not be found.\nStartup Process cannot continue.\nqwerty3x will now exit.\n\n日本語の言語ファイルが見つかりませんでした。\n起動処理を続行できません。\nqwerty3xを終了します。"
+			dialog "The Japanese language file could not be found.\nStartup Process cannot continue.\nqwerty3x will now exit.\n\n日本語の言語ファイルが見つかりませんでした。\n起動処理を続行できません。\nqwerty3xを終了します。",0,"qwerty3x ver."+qwertyver
 			end 
 		}
 	}
 	notesel languagedata
-	noteload ""+loadset("LAUGUAGE",settingdata)+".txt"
-
-	gosub *langstrrepupdate
-	langstrset langstrrep
+	noteload ""+loadset("LANGUAGE",settingdata)+".txt"
 
 	return
 
@@ -159,3 +444,49 @@
 	langstrrep+="\n%windowsname%==="+windowsname+""
 
 	return
+
+*saveingsettingfile
+	chdir qwertycur
+	dirlist dummy,settingfile,5
+	if stat=0:{
+		mkdir "settingdata"
+	}
+	if settingdata="":{
+		settingdata=defaultsettingdata
+	}
+	
+	chdir settingfile
+	encword passwordkey,settingdata,encsettingdata
+	notesel encsettingdata
+	notesave "setting.q3sf"
+
+	return
+
+//////////////////////////////////////////////////////////////////////
+//シャットダウンスクリプト
+//////////////////////////////////////////////////////////////////////
+
+*shutdownwindowssystem
+	if iparam=0:{
+		;ユーザーの意思で終了
+		shutdownmode=0
+		restartmode=0
+	}else:if iparam=0:{
+		;Windowsシャットダウンで終了
+		shutdownmode=1
+		restartmode=0
+	}
+
+	goto *systemshutdown
+
+*systemshutdown
+	if endadr=stat:{
+		;ユーザーの意志で終了
+		shutdownmode=0
+		restartmode=0
+	}
+	title ""+langstr(2001)+" | qwerty3x ver."+qwertyver
+
+	gosub *saveingsettingfile
+
+	end

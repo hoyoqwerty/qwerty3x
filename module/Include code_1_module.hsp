@@ -1,0 +1,244 @@
+#module qwerty3x
+
+#deffunc testmodule
+
+	dialog defaultsettingdata@
+
+	return
+
+#deffunc encword int p1,var p2,var p3
+; encword命令 文字列を暗号化する
+;p1 int 暗号化強度bit
+;p2 var 暗号化前文字列
+;p3 var 暗号化後文字列
+	passwordkey=p1
+	nagasa=strlen(p2)
+	sdim password,(nagasa*2)
+	repeat nagasa
+		buf=peek(p2,cnt)
+		buf2=buf+passwordkey
+
+		poke password,cnt,buf2
+	loop
+	p3=password
+
+	return
+
+#deffunc decword int p1,var p2,var p3
+; decword命令 文字列の暗号化を解除する
+;p1 int 暗号化強度bit
+;p2 var 暗号化解除前文字列
+;p3 var 暗号化解除後文字列
+	passwordkey=p1
+	nagasa=strlen(p2)
+	sdim password,(nagasa*2)
+	sdim p3,(nagasa*2)
+	repeat nagasa
+		buf=(peek(p2,cnt)-passwordkey)
+
+		poke password,cnt,buf
+	loop
+	p3=password
+
+	return
+
+
+#defcfunc loadset str p1,var p2
+; loadset関数 設定を読み込む
+;p1 str 参照設定名文字列
+;p2 var 参照文字列変数
+;戻り値:refstr=設定内容
+	notesel p2
+	if notefind(p1,1)=-1:{
+		notesel defaultsettingdata@
+		if notefind(p1,1)=-1:{
+			dialog "qwerty3x Critical error\n\nerror code: SAVESET_DEFAULT_NOT_FOUND\n\nsaveset命令から参照したデフォルト設定データに、指定された内容がありませんでした。\n指定内容が間違っている可能性があります。\n\nerror function infomation:\ndefaultsettingdata="+defaultsettingdata+"\np1:"+p1,1,"qwerty3x 内部モジュールエラー"
+			end
+		}
+		noteget buf,notefind(p1,1)
+		notesel p2
+		noteadd buf,-1,0
+	}
+	modulesettingtype=""
+	modulesettingdata=""
+	moduleok=0
+	repeat notemax
+		noteget buf,cnt
+	
+		split buf,"===",modulesettingtype,modulesettingdata
+
+		if getpath(modulesettingtype,16)=getpath(p1,16):{
+			moduleok=1
+			break
+		}
+	loop
+	if moduleok!1:{
+		dialog "qwerty3x Critical error\n\nerror code: LOADSET_NOT_FOUND\n\nloadset関数の指定内容が間違っている可能性があります。\n\nerror function infomation:\nmoduleok="+moduleok+"\nmodulesettingtype="+modulesettingtype+"\nmodulesettingdata="+modulesettingdata+"\np1="+p1,1,"qwerty3x 内部モジュールエラー"
+		end
+	}
+	noteunsel
+	
+	return modulesettingdata
+
+#deffunc saveset str p1,var p2,str p3
+; saveset命令 設定を保存する
+;p1 str 参照設定名文字列
+;p2 var 参照文字列変数
+;p3 str 変更後設定内容
+;戻り値:stat=参照設定の行数
+	notesel p2
+	if notefind(p1,1)=-1:{
+		notesel defaultsettingdata@
+		if notefind(p1,1)=-1:{
+			dialog "qwerty3x Critical error\n\nerror code: SAVESET_DEFAULT_NOT_FOUND\n\nsaveset命令から参照したデフォルト設定データに、指定された内容がありませんでした。\n指定内容が間違っている可能性があります。\n\nerror function infomation:\ndefaultsettingdata="+defaultsettingdata+"\np1:"+p1,1,"qwerty3x 内部モジュールエラー"
+			end
+		}
+		noteget buf,notefind(p1,1)
+		notesel p2
+		noteadd buf,-1,0
+	}
+	modulesettingtype=""
+	modulesettingdata=""
+	repeat notemax
+		noteget buf,cnt
+		split buf,"===",modulesettingtype,modulesettingdata
+
+		if getpath(modulesettingtype,16)=getpath(p1,16):{
+			buf2=""+modulesettingtype+"==="+p3
+			buf3=cnt
+			noteadd buf2,buf3,1
+			break
+		}
+	loop
+	noteunsel
+
+	return p2
+
+#defcfunc langstr int p1
+; langstr関数 言語ファイル変換を行う
+;p1 int 言語データの参照設定名文字列
+;戻り値:refstr=変換後の文字列
+	titlestrdata=loadset(strf("%04d",p1),languagedata@)
+	notesel langstrrep@
+	repeat notemax
+		noteget buf,cnt
+		split buf,"===",modulelangstrback,modulelangstrnext
+
+		strrep titlestrdata,modulelangstrback,modulelangstrnext
+	loop
+	titlestrdata2=""
+	notesel titlestrdata
+	if notefind("\\n",2)!-1:{
+		split titlestrdata,"\\n",modulelangstrsplit
+		repeat stat
+			notesel titlestrdata2
+			noteadd modulelangstrsplit.cnt,-1,0
+		loop
+	}else{
+		titlestrdata2=titlestrdata
+	}
+
+	return titlestrdata2
+
+	return
+
+#deffunc boxfofmes int p1,int p2,int p3,int p4,int p5
+;boxfofmes命令 画面モードに合わせてboxf命令を動かす
+;p1 0or1 (ダークモードorライトモード)
+;p2 boxf命令の1p (四角形描画の左上x座標)
+;p3 boxf命令の2p (四角形描画の左上y座標)
+;p4 boxf命令の3p (四角形描画の右下x座標)
+;p5 boxf命令の4p (四角形描画の右下y座標)
+
+	if p1=0:{
+		color 32,32,32
+	}else{
+		color 255,255,255
+	}
+
+	boxf p2,p3,p4,p5
+
+	if p1=0:{
+		color 255,255,255
+	}else{
+		color 0,0,0
+	}
+
+	return
+
+#global
+
+#define DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2	-4
+#define HTLEFT						0x0000000A
+#define HTRIGHT						0x0000000B
+#define HTTOP						0x0000000C
+#define HTTOPLEFT					0x0000000D
+#define HTTOPRIGHT					0x0000000E
+#define HTBOTTOM					0x0000000F
+#define HTBOTTOMLEFT				0x00000010
+#define HTBOTTOMRIGHT				0x00000011
+#define HTCLIENT					0x00000001
+#define HTCAPTION					0x00000002
+#define SCREEN_WIDTH				xsiz(640)
+#define SCREEN_HEIGHT				ysiz(480)
+#define CAPTIONHEIGHT				ysiz(30)
+#define BORDERWIDTH					xsiz(4)
+#define LEFT						0x00000001
+#define RIGHT						0x00000002
+#define TOP							0x00000004
+#define BOTTOM						0x00000008
+
+#define ctype RGB(%1,%2,%3) (($FF & %1)|(($FF & %2) << 8)|(($FF & %3)<<16))
+
+#ifdef _debug
+//デバッグ時（F5実行）にもDPIを反映させる
+if okfullmode=2:{
+opt = DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2:SetProcessDpiAwarenessContext opt
+}
+//デバッグ時（F5実行）にマニフェストファイルを保存
+exist "DPI.manifest"
+if strsize <= 0{
+mani = {"
+<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>
+<assembly xmlns=\"urn:schemas-microsoft-com:asm.v1\" manifestVersion=\"1.0\" xmlns:asmv3=\"urn:schemas-microsoft-com:asm.v3\">
+<assemblyIdentity
+version=\"1.0.0.0\"
+processorArchitecture=\"*\"
+name=\"OnionSoftware.hsp3.exe\"
+type=\"win32\"
+/>
+
+<application xmlns=\"urn:schemas-microsoft-com:asm.v3\">
+<windowsSettings>
+<dpiAware xmlns=\"http://schemas.microsoft.com/SMI/2005/WindowsSettings\">true</dpiAware>
+<dpiAwareness xmlns=\"http://schemas.microsoft.com/SMI/2016/WindowsSettings\">PerMonitorV2</dpiAwareness>
+</windowsSettings>
+</application>
+
+<description>XPStyle</description>
+<dependency>
+<dependentAssembly>
+<assemblyIdentity
+type=\"win32\"
+name=\"Microsoft.Windows.Common-Controls\"
+version=\"6.0.0.0\"
+processorArchitecture=\"*\"
+publicKeyToken=\"6595b64144ccf1df\"
+language=\"*\"
+/>
+</dependentAssembly>
+</dependency>
+<compatibility xmlns=\"urn:schemas-microsoft-com:compatibility.v1\">
+  <application>
+    <supportedOS Id=\"{35138b9a-5d96-4fbd-8e2d-a2440225f93a}\" />
+    <supportedOS Id=\"{4a2f28e3-53b9-4441-ba9c-d69d4a4a6e38}\" />
+    <supportedOS Id=\"{1f676c76-80e1-4239-95bb-83d0f6d0da78}\" />
+    <supportedOS Id=\"{8e0f7a12-bfb3-4fe8-b9a5-48fd50a15a9a}\" />
+  </application>
+</compatibility>
+</assembly>
+"}
+notesel mani
+notesave "DPI.manifest"
+}
+#endif
