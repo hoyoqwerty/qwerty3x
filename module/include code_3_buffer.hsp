@@ -23,6 +23,8 @@
 	gcopy 1001,xsiz(0),ysiz(0),backx,backy
 	
 	buffer 1003,xsiz(150),ysiz(30),0
+	font fontstr,fontsize,0,0
+	objmode 2,1
 	boxfofmes int(loadset("DISPCOLORMODE",settingdata)),xsiz(0),ysiz(0),xsiz(150),ysiz(30)
 	line xsiz(1),ysiz(1),xsiz(149),ysiz(1)
 	line xsiz(1),ysiz(1),xsiz(1),ysiz(29)
@@ -34,6 +36,8 @@
 	mes "スタート"
 
 	buffer 1004,xsiz(150),ysiz(30),0
+	font fontstr,fontsize,0,0
+	objmode 2,1
 	boxfofmes int(loadset("DISPCOLORMODE",settingdata)),xsiz(0),ysiz(0),xsiz(150),ysiz(30)
 	color 0,141,181
 	line xsiz(1),ysiz(1),xsiz(149),ysiz(1)
@@ -45,6 +49,32 @@
 	pos xsiz(32),ysiz(5)
 	mes "閉じる"
 
+//////////////////////////////////////////////////////////////////////
+//通常ボタン描画
+//////////////////////////////////////////////////////////////////////
+	buffer 1005,xsiz(1),ysiz(1),0
+	font fontstr,fontsize,0,0
+	objmode 2,1
+
+//////////////////////////////////////////////////////////////////////
+//文字サイズ測定
+//////////////////////////////////////////////////////////////////////
+	buffer 1006,xsiz(100),ysiz(100),0
+	dim fontysizedata,2;.0=15pxY .1=22pxY .2=15pxX .3=22pxX
+	font fontstr,fontsize,0,0
+	objmode 2,1
+	mes "123"
+	fontysizedata.0=ginfo(15)
+	mes "qwerty3x"
+	fontysizedata.2=ginfo(14)
+
+	font fontstr,fontsize+ysiz(7),0,0
+	objmode 2,1
+	mes "123"
+	fontysizedata.1=ginfo(15)
+	mes "qwerty3x"
+	fontysizedata.3=ginfo(14)
+	
 //////////////////////////////////////////////////////////////////////
 //ウィンドウボタン描画
 //////////////////////////////////////////////////////////////////////

@@ -23,13 +23,21 @@
 #include "advapi32.as"
 #include "mod_fontdlg.as"
 
-#include "module/include code_1_module.hsp";244
-#include "module/include code_2_default.hsp";8
-;#include "module/include code_3_buffer.hsp";123
-;244+8+123=375 375+492=867
+*systemstartup;qwerty3xを起動する
 
-	qwertyver="developing_alpha_867"
-	qwertybuild="867"
+#ifdef _debug
+	hspdebugmode=1
+#else
+	hspdebugmode=0
+#endif
+
+#include "module/include code_1_module.hsp";251
+#include "module/include code_2_default.hsp";9
+;#include "module/include code_3_buffer.hsp";153
+;251+9+153=413 413+719=1132
+
+	qwertyver="developing_alpha_1132"
+	qwertybuild="1132"
 	qwertydate="2025/06/08"
 	qwertycur=dir_cur
 	qwertypath=""+dir_cur+"\\qwerty3x.exe"
@@ -40,15 +48,9 @@
 
 	screen 0000,ginfo(20),ginfo(21),0
 	getwindowlong hwnd,-16
-	setwindowlong hwnd,-16,stat|$10000|$40000
-	getwindowlong hwnd,-16
 	setwindowlong hwnd,-16,stat-$80000
 	title "Starting... | qwerty3x ver."+qwertyver
 	width 800,500,10,10
-
-	screen 0001,ginfo(20),ginfo(21),2+4
-	getwindowlong hwnd,-16
-	setwindowlong hwnd,-16,stat-$800000-$40000
 
 	gsel 0000,int(loadset("ALWAYSFRONT",settingdata))+1
 
@@ -56,7 +58,22 @@
 
 	title ""+langstr(1002)+" | qwerty3x ver."+qwertyver;1002=起動中
 
-	if sysinfo(0)="WindowsNT ver10.0":{
+	windowsname=""
+	if sysinfo(0)="WindowsNT ver6.3"{okfullmode=1:windowsname="Windows 8.1 / Server2012 R2"}
+	if sysinfo(0)="WindowsNT ver6.2"{okfullmode=1:windowsname="Windows 8 / Server2012"}
+	if sysinfo(0)="WindowsNT ver6.1"{okfullmode=1:windowsname="Windows 7 / Server2008 R2"}
+	if sysinfo(0)="WindowsNT ver6.0"{okfullmode=0:windowsname="Windows Vista / Server2008"}
+	if sysinfo(0)="WindowsNT ver5.2"{okfullmode=0:windowsname="Windows Server2003 / XP x64Edition"}
+	if sysinfo(0)="WindowsNT ver5.1"{okfullmode=0:windowsname="Windows XP"}
+	if sysinfo(0)="WindowsNT ver5.0"{okfullmode=-1:windowsname="Windows 2000"}
+	if sysinfo(0)="WindowsNT ver4.0"{okfullmode=-1:windowsname="Windows NT 4.0"}
+	if sysinfo(0)="WindowsNT ver3.51"{okfullmode=-1:windowsname="Windows NT 3.51"}
+	if sysinfo(0)="WindowsNT ver3.5"{okfullmode=-1:windowsname="Windows NT 3.5"}
+	if sysinfo(0)="WindowsNT ver3.1"{okfullmode=-1:windowsname="Windows NT 3.1"}
+	if sysinfo(0)="Windows9X ver4.9"{okfullmode=-1:windowsname="Windows Me"}
+	if sysinfo(0)="Windows9X ver4.1"{okfullmode=-1:windowsname="Windows 98 / 98 Second Edition"}
+	if sysinfo(0)="Windows9X ver4.0"{okfullmode=-1:windowsname="Windows 95"}
+	if windowsname="":{
 		okfullmode=2
 		#uselib "ntdll.dll"
 		#func RtlGetVersion "RtlGetVersion" sptr
@@ -99,36 +116,35 @@
 		#enum DWMWA_CAPTION_COLOR
 		#enum DWMWA_TEXT_COLOR
 	}
-	if sysinfo(0)="WindowsNT ver6.3"{okfullmode=1:windowsname="Windows 8.1 / Server2012 R2"}
-	if sysinfo(0)="WindowsNT ver6.2"{okfullmode=1:windowsname="Windows 8 / Server2012"}
-	if sysinfo(0)="WindowsNT ver6.1"{okfullmode=1:windowsname="Windows 7 / Server2008 R2"}
-	if sysinfo(0)="WindowsNT ver6.0"{okfullmode=0:windowsname="Windows Vista / Server2008"}
-	if sysinfo(0)="WindowsNT ver5.2"{okfullmode=0:windowsname="Windows Server2003 / XP x64Edition"}
-	if sysinfo(0)="WindowsNT ver5.1"{okfullmode=0:windowsname="Windows XP"}
-	if sysinfo(0)="WindowsNT ver5.0"{okfullmode=-1:windowsname="Windows 2000"}
-	if sysinfo(0)="WindowsNT ver4.0"{okfullmode=-1:windowsname="Windows NT 4.0"}
-	if sysinfo(0)="WindowsNT ver3.51"{okfullmode=-1:windowsname="Windows NT 3.51"}
-	if sysinfo(0)="WindowsNT ver3.5"{okfullmode=-1:windowsname="Windows NT 3.5"}
-	if sysinfo(0)="WindowsNT ver3.1"{okfullmode=-1:windowsname="Windows NT 3.1"}
-	if sysinfo(0)="Windows9X ver4.9"{okfullmode=-1:windowsname="Windows Me"}
-	if sysinfo(0)="Windows9X ver4.1"{okfullmode=-1:windowsname="Windows 98 / 98 Second Edition"}
-	if sysinfo(0)="Windows9X ver4.0"{okfullmode=-1:windowsname="Windows 95"}
 
 	gosub *langstrrepupdate
-	if okfullmode=0:{
+	if okfullmode=-1:{
 		dialog langstr(1001),0,"qwerty3x ver."+qwertyver
 		;1001=サポートしていないWindowsバージョンを検出しました：windowsname
 		;起動は続行できますが、想定していない動作が発生する可能性があります。
 	}
+	if okfullmode=2:{
+		;fontautoname="Yu Gothic UI"
+		fontautoname="Yu Gothic UI"
+	}else:if okfullmode=1:{
+		fontautoname="Meiryo UI"
+	}else{
+		fontautoname="MS UI Gothic"
+	}
+	if loadset("FONTNAME",settingdata)="AUTO":{
+		fontstr=fontautoname
+	}else{
+		fontstr=loadset("FONTNAME",settingdata)
+	}
 
 	if windowsname="Windows 11":{
-		if loadset("DISPCOLORMODE",settingdata)=0:{
+		if loadset("DISPCOLORMODE",settingdata)=0:{;ダークモード
 			opt=rgb(32,32,32)
 			dwmsetwindowattribute hwnd,DWMWA_CAPTION_COLOR,varptr(opt),4
 			dwmsetwindowattribute hwnd,DWMWA_BORDER_COLOR,varptr(opt),4
 			opt=rgb(255,255,255)
 			dwmsetwindowattribute hwnd,DWMWA_TEXT_COLOR,varptr(opt),4
-		}else:if loadset("DISPCOLORMODE",settingdata)=1:{
+		}else:if loadset("DISPCOLORMODE",settingdata)=1:{;ライトモード
 			opt=rgb(255,255,255)
 			dwmsetwindowattribute hwnd,DWMWA_CAPTION_COLOR,varptr(opt),4
 			dwmsetwindowattribute hwnd,DWMWA_BORDER_COLOR,varptr(opt),4
@@ -164,6 +180,14 @@
 	dismaxx=ginfo(20)
 	dismaxy=ginfo(21)
 
+	screen 0000,ginfo(20),ginfo(21),0
+	getwindowlong hwnd,-16
+	setwindowlong hwnd,-16,stat|$10000|$40000
+	getwindowlong hwnd,-16
+	setwindowlong hwnd,-16,stat-$80000
+	title ""+langstr(1002)+" | qwerty3x ver."+qwertyver;起動中
+	width 800,500,10,10
+
 	gsel 0000,int(loadset("ALWAYSFRONT",settingdata))+1
 	width int(loadset("WINDOW_SIZX",settingdata)),int(loadset("WINDOW_SIZY",settingdata)),int(loadset("WINDOW_POSX",settingdata)),int(loadset("WINDOW_POSY",settingdata))
 	if loadset("ISZOOMED",settingdata)="1":{
@@ -173,6 +197,7 @@
 	IsZoomed hwnd
 	iszoom=stat
 	screenname=langstr(3001);ランチャー
+	fontsize=ysiz(15)
 
 	gosub *makescreen
 
@@ -180,14 +205,53 @@
 
 #include "module/include code_3_buffer.hsp"
 
-*makescreen
+*makescreen;画面新規更新
+	redraw 0
 
-	clrobj
+	getkey ctrl,17
+	if ctrl=1:{
+		if qwertydebag=0:{
+			qwertydebag=1
+		}else{
+			qwertydebag=0
+		}
+	}
+
+	if qwertydebag=1:{
+		title "<デバッグ>No.1 :フォント名を指定中/Specifying font name | qwerty3x ver."+qwertyver
+	}
+	if loadset("FONTNAME",settingdata)="AUTO":{
+		fontstr=fontautoname
+	}else{
+		fontstr=loadset("FONTNAME",settingdata)
+	}
+
+	if qwertydebag=1:{
+		title "<デバッグ>No.2 :スクリーンバッファを作成中/Creating screen buffer | qwerty3x ver."+qwertyver
+	}
 	gosub *bufferallupdate
-	gsel 0000,int(loadset("ALWAYSFRONT",settingdata))+1
 
+	if qwertydebag=1:{
+		title "<デバッグ>No.3 :画面クリア中/Clearing screen | qwerty3x ver."+qwertyver
+	}	
+	gsel 0000,int(loadset("ALWAYSFRONT",settingdata))+1
+	enablewindow hmainwindow,0
+	clrobj
+	color 0,0,0
+	boxf
+
+	if qwertydebag=1:{
+		title "<デバッグ>No.4 :フォントを設定中/Setting font | qwerty3x ver."+qwertyver
+	}
+	font fontstr,fontsize,0,0
+	objmode 2,1
+
+	if qwertydebag=1:{
+		title "<デバッグ>No.5 :タイトルバーを描画中/Drawing titlebar | qwerty3x ver."+qwertyver
+	}
 	pos xsiz(0),ysiz(0)
 	boxfofmes int(loadset("DISPCOLORMODE",settingdata)),xsiz(0),ysiz(0),ginfo(12),ysiz(30)
+	line ginfo(12),ysiz(30),xsiz(0),ysiz(30)
 
 	pos ginfo(12)-xsiz(30),ysiz(0)
 	objsize xsiz(30),ysiz(30)
@@ -210,7 +274,7 @@
 
 	pos xsiz(0),ysiz(0)
 	objsize xsiz(150),ysiz(30)
-	if screenname=langstr(3002):{;スタートメインメニュー
+	if startmainmenubuf=1:{
 		objimage 1004,xsiz(0),ysiz(0),xsiz(0),ysiz(0),xsiz(0),ysiz(1)
 	}else{
 		objimage 1003,xsiz(0),ysiz(0),xsiz(0),ysiz(0),xsiz(0),ysiz(1)
@@ -218,35 +282,56 @@
 	button gosub "",*startmainmenuchange
 	startmainmenuadr=stat
 
-	if screenname=langstr(3001):{;ランチャー
-		
+	if qwertydebag=1:{
+		title "<デバッグ>No.6 :qwerty3xアプリケーションの描画中/Drawing qwerty3x application | qwerty3x ver."+qwertyver
 	}
+	if screenname=langstr(3001):{;ランチャー
+
+	}else:if screenname=langstr(3002):{;スタートメインメニュー
+		nowysize=ysiz(0)
+		nowxsize=xsiz(0)
+		dividesize=ginfo(12)/8
+		repeat
+			redraw 0
+			nowysize+=ginfo(13)/dividesize
+			pos xsiz(0),ysiz(0)
+			boxfofmes int(loadset("DISPCOLORMODE",settingdata)),xsiz(0),nowysize-(ginfo(13)/dividesize),xsiz(150),nowysize
+
+			nowxsize+=ginfo(12)/dividesize
+			pos xsiz(0),ysiz(0)
+			boxfofmes int(loadset("DISPCOLORMODE",settingdata)),nowxsize-(ginfo(12)/dividesize),ginfo(13)-ysiz(40),nowxsize,ginfo(13)
+			redraw 1
+			await 1
+
+			if nowysize>=ginfo(13)&nowxsize>=ginfo(12):{
+				break
+			}
+		loop
+		redraw 0
+
+		line xsiz(150),ginfo(13),xsiz(150),ysiz(0)
+		line ginfo(12),ginfo(13)-ysiz(40),xsiz(0),ginfo(13)-ysiz(40)
+	}
+
+	redraw 1
+	enablewindow hmainwindow,1
 
 	return
 
-*startmainmenuchange
+*startmainmenuchange;スタートメインメニューとの切り替え
 	if startmainmenubuf=0:{
 		bufscreenname=screenname
-		screenname=langstr(3002)
+		screenname=langstr(3002);スタートメインメニュー
 		startmainmenubuf=1
 	}else{
 		screenname=bufscreenname
 		startmainmenubuf=0
 	}
-	clrobj startmainmenuadr,startmainmenuadr
-	pos xsiz(0),ysiz(0)
-	objsize xsiz(150),ysiz(30)
-	if screenname=langstr(3002):{;スタートメインメニュー
-		objimage 1004,xsiz(0),ysiz(0),xsiz(0),ysiz(0),xsiz(0),ysiz(1)
-	}else{
-		objimage 1003,xsiz(0),ysiz(0),xsiz(0),ysiz(0),xsiz(0),ysiz(1)
-	}
-	button gosub "",*startmainmenuchange
-	startmainmenuadr=stat
 
+	gosub *makescreen
 	return
 
-*windowmanualsizechange
+*windowmanualsizechange;手動での最大化、最小化の適用
 	if maxadr=stat:{
 		IsZoomed hwnd
 		iszoom=stat
@@ -265,12 +350,13 @@
 //システムスクリプト
 //////////////////////////////////////////////////////////////////////
 
-*sizechange
-	if ginfo(3)!0000:{
-		gsel 0000,1
-	}
+*sizechange;ウィンドウのサイズが変わったとき
+	redraw 0
+	color 0,0,0
+	boxf
 	pos xsiz(0),ysiz(0)
 	boxfofmes int(loadset("DISPCOLORMODE",settingdata)),xsiz(0),ysiz(0),ginfo(12),ysiz(30)
+	line ginfo(12),ysiz(30),xsiz(0),ysiz(30)
 		
 	size=0,0,(ginfo(12)-xsiz(30)),0
 	resizeobj endadr,size,2
@@ -279,9 +365,15 @@
 	size=0,0,(ginfo(12)-xsiz(90)),0
 	resizeobj minadr,size,2
 
+	if screenname=langstr(3002):{;スタートメインメニュー
+		gosub *startmenuui
+	}
+	redraw 1
+
 	return
 
-*movechange
+*movechange;ウィンドウの位置が変わったとき
+	redraw 0
 	IsZoomed hwnd
 	if iszoom!stat:{
 		iszoom=stat
@@ -299,16 +391,19 @@
 		iszoom=stat
 	}
 
+	gosub *sizechange
+	redraw 1
+
 	return
 
-*onclickjump
+*onclickjump;ウィンドウがクリックされたとき(onclick)
 	if wparam=1:{
 		sendmsg hwnd,$A1,2
 	}
 
 	return
 
-*OnNCHITTEST
+*OnNCHITTEST;タイトルバーの色を変更
 	dim area
 	mposx = ginfo_mx - ginfo_wx1
 	mposy = ginfo_my - ginfo_wy1
@@ -331,8 +426,15 @@
 	if (mposy <= CAPTIONHEIGHT) : return HTCAPTION
 	
 	return HTCLIENT
+
+*onminmax;ウィンドウの最小サイズの指定
+	dupptr minmaxinfo,lparam,40,4
+	minmaxinfo(6)=xsiz(500)
+	minmaxinfo(7)=ysiz(300)
+
+	return 0
 	
-*systemrepeat
+*systemrepeat;システムメインループ
 	//システム
 	IsZoomed hwnd
 	if iszoom!stat:{
@@ -353,6 +455,71 @@
 	IsIconic hwnd
 	isicon=stat
 
+	year=strf("%04d",gettime(0));年=year
+	month=strf("%02d",gettime(1));月=month
+	week=gettime(2)
+	if week=0:{
+		weekstr=langstr(4001);日
+	}else:if week=1:{
+		weekstr=langstr(4002);月
+	}else:if week=2:{
+		weekstr=langstr(4003);火
+	}else:if week=3:{
+		weekstr=langstr(4004);水
+	}else:if week=4:{
+		weekstr=langstr(4005);木
+	}else:if week=5:{
+		weekstr=langstr(4006);金
+	}else:if week=6:{
+		weekstr=langstr(4007);土
+	};曜日番号=week 曜日=weekstr
+	day=strf("%02d",gettime(3));日=day
+	hour=gettime(4)
+	if useampm=0:{
+		hour=strf("%02d",hour)
+	}else:if useampm=1:{
+		if gettime(4)<12:{
+			hour=strf("%02d",hour)
+			hour="am"+hour
+		}else:if gettime(4)>12&gettime(4)<=23:{
+			hour=hour-12
+			hour=strf("%02d",hour)
+			hour="pm"+hour
+		}
+	}
+	minute=strf("%02d",gettime(5))
+	second=strf("%02d",gettime(6))
+
+	dim system_power_status,3
+	getsystempowerstatus varptr(system_power_status)
+	batteryper=peek(system_power_status.0,2)
+	batteryflag=peek(system_power_status.0,1)
+	acstat=peek(system_power_status.0,0)
+	batterytime=system_power_status.1
+	//
+	batterytimeday=(batterytime/86400)
+	batterytimehour=((batterytime\86400)/3600)
+	batterytimeminute=(((batterytime\86400)\3600)/60)
+	batterytimesecond=(((batterytime\86400)\3600)\60)
+	batterytimestr=""+langstr(4008)+" ";残り
+	batterytimestr2=langstr(4008);残り
+	if batterytimeday!0:{
+		batterytimestr=batterytimestr+batterytimeday+langstr(4009);日
+		batterytimestr2=batterytimestr2+batterytimeday+":"
+	}
+	if batterytimehour!0:{
+		batterytimestr=batterytimestr+batterytimehour+langstr(4010);時間
+	}
+	batterytimestr2=batterytimestr2+strf("%02d",batterytimehour)
+	if batterytimeminute!0:{
+		batterytimestr=batterytimestr+batterytimeminute+langstr(4011);分
+	}
+	batterytimestr2=batterytimestr2+":"+strf("%02d",batterytimeminute)
+	if batterytimesecond!0:{
+		batterytimestr=batterytimestr+batterytimesecond+langstr(4012);秒
+	}
+	batterytimestr2=batterytimestr2+":"+strf("%02d",batterytimesecond)
+
 	//ジャンプ
 	onexit *shutdownwindowssystem
 	onclick gosub *onclickjump
@@ -360,16 +527,24 @@
 	oncmd gosub *sizechange,$005;WM_SIZE
 	oncmd gosub *OnNCHITTEST, $084;WM_NCHITTEST
 	oncmd gosub *movechange,$003;WM_MOVE
+	oncmd gosub *onminmax,$024;WM_GETMINMAXINFO
 
+	//アプリ
+	if screenname=langstr(3002):{;スタートメインメニュー
+		gosub *startmenuui
+	}
 
 	//システム
 	titlebarstr=""
-	if screenname=langstr(3002):{;スタートメインメニュー
-		titlebarstr=""+screenname+"/"+bufscreenname+" | qwerty3x ver."+qwertyver
+	if startmainmenubuf=1:{;スタートメインメニュー
+		titlebarstr=""+screenname+"/"+bufscreenname
 	}else{
-		titlebarstr=""+screenname+" | "+langstr(0001);qwerty3x ver.%qwertyver%
+		titlebarstr=""+screenname
 	}
-	title titlebarstr
+	if qwertydebag=1:{
+		titlebarstr="<デバッグ> posx:"+ginfo(4)+" posy:"+ginfo(5)+" sizx:"+ginfo(12)+" sizy:"+ginfo(13)+" "+titlebarstr
+	}
+	title titlebarstr+" | "+langstr(0001);qwerty3x ver.%qwertyver%
 
 	saveset "ISZOOMED",settingdata,str(iszoom)
 	if iszoom!1:{
@@ -388,11 +563,63 @@
 	}
 	goto *systemrepeat
 
+*startmenuui
+	redraw 0
+	boxfofmes int(loadset("DISPCOLORMODE",settingdata)),xsiz(0),ysiz(0),xsiz(150),ginfo(13)
+	boxfofmes int(loadset("DISPCOLORMODE",settingdata)),xsiz(0),ginfo(13)-ysiz(40),ginfo(12),ginfo(13)
+	if batteryflag!128:{;バッテリー情報なしではないとき
+		if acstat=1:{;充電中のとき
+			pos xsiz(0),ginfo(13)-ysiz(90)
+			mes ""+langstr(4013)+": "+batteryper+"%";AC電源
+			if batteryper=100:{
+				mes langstr(4014);バッテリー充電完了
+			}else{
+				mes langstr(4015);バッテリー充電中
+			}
+			boxf xsiz(0),ginfo(13)-ysiz(50),int(double(xsiz(150.0))*(double(batteryper)/100)),ginfo(13)-ysiz(45)
+		}else{
+			pos xsiz(0),ginfo(13)-ysiz(90)
+			if acstat=1:{
+				mes ""+langstr(4013)+": "+batteryper+"%";AC電源
+			}else{
+				mes ""+langstr(4016)+": "+batteryper+"%";バッテリー
+			}
+			if batterytime=-1:{
+				if batteryper=100:{
+					mes langstr(4014);バッテリー充電完了
+				}else{
+					mes langstr(4017);残り時間予測中
+				}
+			}else{
+				mes batterytimestr2
+			}
+			boxf xsiz(0),ginfo(13)-ysiz(50),int(double(xsiz(150.0))*(double(batteryper)/100)),ginfo(13)-ysiz(45)
+		}
+	}else{
+		boxf xsiz(0),ginfo(13)-ysiz(50),xsiz(150),ginfo(13)-ysiz(45)
+	}
+	line xsiz(150),ginfo(13),xsiz(150),ysiz(0)
+	line ginfo(12),ginfo(13)-ysiz(40),xsiz(0),ginfo(13)-ysiz(40)
+	fontysizepos=(ysiz(40)-fontysizedata.1)/2
+	pos xsiz(160),(ginfo(13)-ysiz(40))+fontysizepos
+	font fontstr,fontsize+ysiz(7),0,0;ysiz(22)
+	mes ""+year+"/"+month+"/"+day+"("+weekstr+") "+hour+":"+minute+":"+second
+	font fontstr,fontsize,0,0;ysiz(15)
+
+	fontxsizepos=(xsiz(150)-fontysizedata.3)/2
+	pos fontxsizepos,(ginfo(13)-ysiz(40))+fontysizepos
+	font fontstr,fontsize+ysiz(7),1+2,0;ysiz(22)
+	mes "qwerty3x"
+	font fontstr,fontsize,0,0;ysiz(15)
+	redraw 1
+
+	return
+
 //////////////////////////////////////////////////////////////////////
 //設定読み書きスクリプト
 //////////////////////////////////////////////////////////////////////
 
-*loadingsettingfile
+*loadingsettingfile;設定・言語ファイルを読み込む
 	settingfile=""+qwertycur+"\\settingdata"
 	languagefile=""+qwertycur+"\\languagedata"
 
@@ -437,7 +664,7 @@
 
 	return
 
-*langstrrepupdate
+*langstrrepupdate;言語ファイルでの変換記号先の変数を指定する
 	;言語ファイル変換表の作成
 	langstrrep=""
 	langstrrep+="%qwertyver%==="+qwertyver+""
@@ -445,7 +672,7 @@
 
 	return
 
-*saveingsettingfile
+*saveingsettingfile;設定ファイルを保存する
 	chdir qwertycur
 	dirlist dummy,settingfile,5
 	if stat=0:{
@@ -466,7 +693,7 @@
 //シャットダウンスクリプト
 //////////////////////////////////////////////////////////////////////
 
-*shutdownwindowssystem
+*shutdownwindowssystem;終了するとき(onexit)
 	if iparam=0:{
 		;ユーザーの意思で終了
 		shutdownmode=0
@@ -479,13 +706,13 @@
 
 	goto *systemshutdown
 
-*systemshutdown
+*systemshutdown;qwerty3xを終了する
 	if endadr=stat:{
 		;ユーザーの意志で終了
 		shutdownmode=0
 		restartmode=0
 	}
-	title ""+langstr(2001)+" | qwerty3x ver."+qwertyver
+	title ""+langstr(2001)+" | qwerty3x ver."+qwertyver;終了中
 
 	gosub *saveingsettingfile
 

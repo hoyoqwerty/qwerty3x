@@ -151,11 +151,11 @@
 
 #deffunc boxfofmes int p1,int p2,int p3,int p4,int p5
 ;boxfofmes命令 画面モードに合わせてboxf命令を動かす
-;p1 int 0or1 (ダークモードorライトモード)
-;p2 int boxf命令の1p (四角形描画の左上x座標)
-;p3 int boxf命令の2p (四角形描画の左上y座標)
-;p4 int boxf命令の3p (四角形描画の右下x座標)
-;p5 int boxf命令の4p (四角形描画の右下y座標)
+;p1 0or1 (ダークモードorライトモード)
+;p2 boxf命令の1p (四角形描画の左上x座標)
+;p3 boxf命令の2p (四角形描画の左上y座標)
+;p4 boxf命令の3p (四角形描画の右下x座標)
+;p5 boxf命令の4p (四角形描画の右下y座標)
 
 	if p1=0:{
 		color 32,32,32
@@ -170,6 +170,72 @@
 	}else{
 		color 0,0,0
 	}
+
+	return
+
+#deffunc contextopen str p1,int p2,int p3,str p4
+	font p4,ysiz(15),0
+	buffer 2001,ginfo(20),ginfo(21),0
+	modulecontextdata=p1
+	notesel modulecontextdata
+	sizebuf=0
+	repeat notemax
+		noteget buf,cnt
+		split buf,"<context>",modulecontextnum,modulecontexttype,modulecontexttext
+		pos xsiz(0),ysiz(0)
+		mes modulecontexttext
+
+		if sizebuf<ginfo(14):{
+			maxxsizebuf=ginfo(14)
+			maxysizebuf=ginfo(15)
+		}
+	loop;横最長サイズ
+
+	buffer 2002,(maxxsizebuf+xsiz(5)),maxysizebuf*notemax
+	cls 1
+	font p4,ysiz(15),0
+	modulecontexttext=""
+	notesel modulecontextdata
+	repeat notemax
+		noteget buf,cnt
+		split buf,"<context>",modulecontextnum,modulecontexttype,modulecontexttext
+
+		if modulecontexttype="$800":{
+			pos xsiz(2),(maxysizebuf/2)+(maxysizebuf*cnt)
+			;line xsiz(2),(maxysizebuf/2)+(maxysizebuf*cnt),(maxxsizebuf+xsiz(5))-xsiz(2),(maxysizebuf/2)+(maxysizebuf*cnt)
+		}else{
+			pos xsiz(2),ysiz(2)+(maxysizebuf*cnt)
+			mes modulecontexttext
+		}
+	loop
+	backx=ginfo(12)
+	backy=ginfo(13)
+
+	screen 0002,backx,backy,2+4,p2,p3
+	GetWindowLong hwnd, -16
+	SetWindowLong hwnd, -16, stat - $800000
+	notesel modulecontextdata
+	repeat notemax
+		noteget buf,cnt
+		split buf,"<context>",modulecontextnum,modulecontexttype,modulecontexttext
+
+		if modulecontexttype="$800":{
+			pos xsiz(2),ysiz(2)+(maxysizebuf*cnt)
+			line xsiz(2),(maxysizebuf/2)+(maxysizebuf*cnt),(maxxsizebuf+xsiz(5))-xsiz(2),(maxysizebuf/2)+(maxysizebuf*cnt)
+		}else{
+			pos xsiz(2),(maxysizebuf*cnt)
+			objimage 2002,xsiz(2),(maxysizebuf*cnt-ysiz(1)),xsiz(2),(maxysizebuf*cnt-ysiz(1)),xsiz(2),(maxysizebuf*cnt)
+			button gosub "",*modulecontextbutton
+		}
+	loop
+	redraw 1
+
+	repeat
+		wait 100
+	loop
+
+*modulecontextbutton
+	
 
 	return
 
