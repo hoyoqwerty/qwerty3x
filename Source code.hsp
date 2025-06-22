@@ -754,14 +754,14 @@
 	redraw 0
 	gsel 0001
 	mousewheelbuf=mousew
-	if mousewheelbuf>=120:{
+	if mousewheelbuf>0:{
 		mousewheelbuttonbuf=1
 		groll xsiz(0),ginfo(9)-ysiz(30)
 		if ginfo(9)=mousewheelginfobuf:{
 			mousewheelbuttonbuf=0
 		}
 		mousewheelginfobuf=ginfo(9)
-	}else:if mousewheelbuf<=-120:{
+	}else:if mousewheelbuf<0:{
 		if (ginfo(9)+ysiz(40))<nowstartmainposY+ysiz(30):{
 			mousewheelbuttonbuf=1
 			groll xsiz(0),ginfo(9)+ysiz(30)
@@ -772,12 +772,12 @@
 		}
 	}
 	if mousewheelbuf!0:{
-		objsel qweapp.0
-		objsel qweapp.1
-		objsel winapp.0
-		objsel winapp.1
-		objsel winapp.2
-		objsel winapp.3
+		;objsel qweapp.0
+		;objsel qweapp.1
+		;objsel winapp.0
+		;objsel winapp.1
+		;objsel winapp.2
+		;objsel winapp.3
 	}
 	gsel 0000
 	if mousewheelbuf!0:{
@@ -839,7 +839,6 @@
 	
 	width (clientwindowx-xsiz(150)),(clientwindowy-ysiz(70)),xsiz(150),ysiz(30)
 
-	if mousewheelbuttonbuf=1:{
 		color 0,0,0
 		boxf
 	
@@ -910,7 +909,6 @@
 		bufferbuttonY+=ysiz(30)
 		size=0,0,nowstartmainpos,nowstartmainposY-ginfo(9)
 		resizeobj winapp.3,size,2
-	}
 	
 	redraw 1
 	gsel 0000
