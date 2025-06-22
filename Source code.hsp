@@ -31,14 +31,15 @@
 	hspdebugmode=0
 #endif
 
-#include "module/include code_1_module.hsp";251
-#include "module/include code_2_default.hsp";9
-;#include "module/include code_3_buffer.hsp";153
-;251+9+153=413 413+719=1132
+#include "module/include code_1_module.hsp";281
+#include "module/include code_2_default.hsp";11
+;#include "module/include code_3_buffer.hsp";320
+;#include "module/include code_4_controlmakescreen.hsp";37
+;281+11+320+37=649 649+1022=1671
 
-	qwertyver="developing_alpha_1132"
-	qwertybuild="1132"
-	qwertydate="2025/06/08"
+	qwertyver="developing_alpha_1671"
+	qwertybuild="1671"
+	qwertydate="2025/06/22"
 	qwertycur=dir_cur
 	qwertypath=""+dir_cur+"\\qwerty3x.exe"
 	passwordkey=96
@@ -47,8 +48,9 @@
 	gosub *loadingsettingfile
 
 	screen 0000,ginfo(20),ginfo(21),0
+	hclient=hwnd
 	getwindowlong hwnd,-16
-	setwindowlong hwnd,-16,stat-$80000
+	setwindowlong hwnd,-16,stat-$80000|$CF0000
 	title "Starting... | qwerty3x ver."+qwertyver
 	width 800,500,10,10
 
@@ -59,22 +61,23 @@
 	title ""+langstr(1002)+" | qwerty3x ver."+qwertyver;1002=起動中
 
 	windowsname=""
-	if sysinfo(0)="WindowsNT ver6.3"{okfullmode=1:windowsname="Windows 8.1 / Server2012 R2"}
-	if sysinfo(0)="WindowsNT ver6.2"{okfullmode=1:windowsname="Windows 8 / Server2012"}
-	if sysinfo(0)="WindowsNT ver6.1"{okfullmode=1:windowsname="Windows 7 / Server2008 R2"}
-	if sysinfo(0)="WindowsNT ver6.0"{okfullmode=0:windowsname="Windows Vista / Server2008"}
-	if sysinfo(0)="WindowsNT ver5.2"{okfullmode=0:windowsname="Windows Server2003 / XP x64Edition"}
-	if sysinfo(0)="WindowsNT ver5.1"{okfullmode=0:windowsname="Windows XP"}
-	if sysinfo(0)="WindowsNT ver5.0"{okfullmode=-1:windowsname="Windows 2000"}
-	if sysinfo(0)="WindowsNT ver4.0"{okfullmode=-1:windowsname="Windows NT 4.0"}
-	if sysinfo(0)="WindowsNT ver3.51"{okfullmode=-1:windowsname="Windows NT 3.51"}
-	if sysinfo(0)="WindowsNT ver3.5"{okfullmode=-1:windowsname="Windows NT 3.5"}
-	if sysinfo(0)="WindowsNT ver3.1"{okfullmode=-1:windowsname="Windows NT 3.1"}
-	if sysinfo(0)="Windows9X ver4.9"{okfullmode=-1:windowsname="Windows Me"}
-	if sysinfo(0)="Windows9X ver4.1"{okfullmode=-1:windowsname="Windows 98 / 98 Second Edition"}
-	if sysinfo(0)="Windows9X ver4.0"{okfullmode=-1:windowsname="Windows 95"}
+	if sysinfo(0)="WindowsNT ver6.3"{okfullmode=1:windowsver="NT6.3":windowsname="Windows 8.1 / Server2012 R2"}
+	if sysinfo(0)="WindowsNT ver6.2"{okfullmode=1:windowsver="NT6.2":windowsname="Windows 8 / Server2012"}
+	if sysinfo(0)="WindowsNT ver6.1"{okfullmode=1:windowsver="NT6.1":windowsname="Windows 7 / Server2008 R2"}
+	if sysinfo(0)="WindowsNT ver6.0"{okfullmode=0:windowsver="NT6.0":windowsname="Windows Vista / Server2008"}
+	if sysinfo(0)="WindowsNT ver5.2"{okfullmode=0:windowsver="NT5.2":windowsname="Windows Server2003 / XP x64Edition"}
+	if sysinfo(0)="WindowsNT ver5.1"{okfullmode=0:windowsver="NT5.1":windowsname="Windows XP"}
+	if sysinfo(0)="WindowsNT ver5.0"{okfullmode=-1:windowsver="NT5.0":windowsname="Windows 2000"}
+	if sysinfo(0)="WindowsNT ver4.0"{okfullmode=-1:windowsver="NT4.0":windowsname="Windows NT 4.0"}
+	if sysinfo(0)="WindowsNT ver3.51"{okfullmode=-1:windowsver="NT3.51":windowsname="Windows NT 3.51"}
+	if sysinfo(0)="WindowsNT ver3.5"{okfullmode=-1:windowsver="NT3.5":windowsname="Windows NT 3.5"}
+	if sysinfo(0)="WindowsNT ver3.1"{okfullmode=-1:windowsver="NT3.1":windowsname="Windows NT 3.1"}
+	if sysinfo(0)="Windows9X ver4.90"{okfullmode=-1:windowsver="4.90":windowsname="Windows Me"}
+	if sysinfo(0)="Windows9X ver4.10"{okfullmode=-1:windowsver="4.10":windowsname="Windows 98 / 98 Second Edition"}
+	if sysinfo(0)="Windows9X ver4.0"{okfullmode=-1:windowsver="4.0":windowsname="Windows 95"}
 	if windowsname="":{
 		okfullmode=2
+		windowsver="NT10.0"
 		#uselib "ntdll.dll"
 		#func RtlGetVersion "RtlGetVersion" sptr
 		// バージョン取得
@@ -174,8 +177,6 @@
 		ydpi=ydpi2
 		nowxsize=""+xsiz(100)+"%(システム設定に基づく)"
 		nowxsizebuf=xsiz(100)
-		xdpi=96
-		ydpi=96
 	}
 	dismaxx=ginfo(20)
 	dismaxy=ginfo(21)
@@ -186,7 +187,17 @@
 	getwindowlong hwnd,-16
 	setwindowlong hwnd,-16,stat-$80000
 	title ""+langstr(1002)+" | qwerty3x ver."+qwertyver;起動中
-	width 800,500,10,10
+
+	bgscrwindowmax=3
+	repeat bgscrwindowmax
+		bgscr (cnt+1),ginfo(20),ginfo(21),2
+		hchild.cnt=hwnd
+		getwindowlong hwnd,-16
+		setwindowlong hwnd,-16,stat|$CF0000
+		setparent hchild.cnt,hclient
+		getwindowlong hwnd,-16
+		setwindowlong hwnd,-16,stat-$800000-$40000
+	loop;0001 0002 0003
 
 	gsel 0000,int(loadset("ALWAYSFRONT",settingdata))+1
 	width int(loadset("WINDOW_SIZX",settingdata)),int(loadset("WINDOW_SIZY",settingdata)),int(loadset("WINDOW_POSX",settingdata)),int(loadset("WINDOW_POSY",settingdata))
@@ -198,12 +209,18 @@
 	iszoom=stat
 	screenname=langstr(3001);ランチャー
 	fontsize=ysiz(15)
+	conpage=0
+	conpage2=0
+
+	if ginfo(12)<=xsiz(500)|ginfo(13)<=ysiz(500):{
+		width xsiz(500),ysiz(500)
+	}
+
+	gosub *bufferallupdate
 
 	gosub *makescreen
 
 	goto *systemrepeat
-
-#include "module/include code_3_buffer.hsp"
 
 *makescreen;画面新規更新
 	redraw 0
@@ -234,8 +251,11 @@
 	if qwertydebag=1:{
 		title "<デバッグ>No.3 :画面クリア中/Clearing screen | qwerty3x ver."+qwertyver
 	}	
+	repeat bgscrwindowmax
+		gsel (cnt+1),-1
+	loop
 	gsel 0000,int(loadset("ALWAYSFRONT",settingdata))+1
-	enablewindow hmainwindow,0
+	enablewindow hclient,0
 	clrobj
 	color 0,0,0
 	boxf
@@ -264,11 +284,11 @@
 	}else{
 		objimage 1008,xsiz(60),ysiz(59),xsiz(60),ysiz(59),xsiz(60),ysiz(60)
 	}
-	button gosub "",*windowmanualsizechange
+	button gosub "",*windowmenualsizechange
 	maxadr=stat
 	pos ginfo(12)-xsiz(90),ysiz(0)
 	objimage 1008,xsiz(0),ysiz(59),xsiz(0),ysiz(59),xsiz(0),ysiz(60)
-	button gosub "",*windowmanualsizechange
+	button gosub "",*windowmenualsizechange
 	minadr=stat
 	objimage -1
 
@@ -287,36 +307,165 @@
 	}
 	if screenname=langstr(3001):{;ランチャー
 
+	}else:if screenname=langstr(3005):{;qwerty3x 設定
+		clientwindowx=ginfo(12)
+		clientwindowy=ginfo(13)
+	
+		gsel 0003,0
+		width xsiz(150),clientwindowy-ysiz(30),xsiz(0),ysiz(30)
+		color 0,0,0
+		boxf 
+		font fontstr,fontsize,0,0
+		objmode 2,1
+
+		gosub *controlmakelist
+
+		gsel 0003,2
+		objimage -1
+		gsel 0000,int(loadset("DISPCOLORMODE",settingdata))+1
 	}else:if screenname=langstr(3002):{;スタートメインメニュー
 		nowysize=ysiz(0)
 		nowxsize=xsiz(0)
-		dividesize=ginfo(12)/8
-		repeat
+		animationspeed=45
+		repeat animationspeed
 			redraw 0
-			nowysize+=ginfo(13)/dividesize
-			pos xsiz(0),ysiz(0)
-			boxfofmes int(loadset("DISPCOLORMODE",settingdata)),xsiz(0),nowysize-(ginfo(13)/dividesize),xsiz(150),nowysize
+			setease ysiz(0),ginfo(13),ease_quartic_out
+			nowysize=getease(cnt,animationspeed)
+			boxfofmes int(loadset("DISPCOLORMODE",settingdata)),xsiz(0),ysiz(0),xsiz(150),nowysize
 
-			nowxsize+=ginfo(12)/dividesize
-			pos xsiz(0),ysiz(0)
-			boxfofmes int(loadset("DISPCOLORMODE",settingdata)),nowxsize-(ginfo(12)/dividesize),ginfo(13)-ysiz(40),nowxsize,ginfo(13)
+			setease xsiz(0),ginfo(12),ease_quartic_out
+			nowxsize=getease(cnt,animationspeed)
+			boxfofmes int(loadset("DISPCOLORMODE",settingdata)),xsiz(0),ginfo(13)-ysiz(40),nowxsize,ginfo(13)
+
 			redraw 1
-			await 1
-
-			if nowysize>=ginfo(13)&nowxsize>=ginfo(12):{
-				break
-			}
+			await 8
 		loop
 		redraw 0
 
 		line xsiz(150),ginfo(13),xsiz(150),ysiz(0)
 		line ginfo(12),ginfo(13)-ysiz(40),xsiz(0),ginfo(13)-ysiz(40)
+
+		clientwindowx=ginfo(12)
+		clientwindowy=ginfo(13)
+
+		bgscr 0001,ginfo(20),ginfo(21),2
+		hchild.0=hwnd
+		getwindowlong hwnd,-16
+		setwindowlong hwnd,-16,stat|$CF0000
+		setparent hchild.0,hclient
+		getwindowlong hwnd,-16
+		setwindowlong hwnd,-16,stat-$800000-$40000
+		color 0,0,0
+		boxf 
+		font fontstr,fontsize,0,0
+		objmode 2,1
+		gsel 0001,0
+		width (clientwindowx-xsiz(150)),(clientwindowy-ysiz(70)),xsiz(150),ysiz(30)
+
+		startmainmenuposx=(ginfo(12)-(xsiz(150)*(ginfo(12)/xsiz(150))))/2
+
+		nowstartmainposY=ysiz(10)
+		pos startmainmenuposx,nowstartmainposY
+		boxfofmes onezero(loadset("DISPCOLORMODE",settingdata)),startmainmenuposx,nowstartmainposY,startmainmenuposx+fontxsizedata.2+xsiz(10),nowstartmainposY+fontysizedata.2
+		pos startmainmenuposx+xsiz(3),nowstartmainposY
+		mes langstr(3003);・qwerty3x アプリケーション
+
+		objsize xsiz(300),ysiz(30)
+		nowstartmainpos=startmainmenuposx
+		nowstartmainposY+=ysiz(40)	
+		bufferbuttonY=ysiz(0)
+		pos nowstartmainpos,nowstartmainposY
+		objimage 1005,xsiz(0),bufferbuttonY,xsiz(0),bufferbuttonY,xsiz(300),bufferbuttonY
+		button gosub "",*startqwertyapp
+		qweapp.0=stat;ランチャー
+
+		if nowstartmainpos+(xsiz(300)*2)>=ginfo(12):{
+			nowstartmainpos=startmainmenuposx
+			nowstartmainposY+=ysiz(30)
+		}else{
+			nowstartmainpos+=xsiz(300)
+			;nowstartmainposYは変わらない
+		}
+		bufferbuttonY+=ysiz(30)
+		pos nowstartmainpos,nowstartmainposY
+		objimage 1005,xsiz(0),bufferbuttonY,xsiz(0),bufferbuttonY,xsiz(300),bufferbuttonY
+		button gosub "",*startqwertyapp
+		qweapp.1=stat;Windows 設定
+
+		nowstartmainposY+=ysiz(40)
+		pos startmainmenuposx,nowstartmainposY
+		boxfofmes onezero(loadset("DISPCOLORMODE",settingdata)),startmainmenuposx,nowstartmainposY,startmainmenuposx+fontxsizedata.2+xsiz(10),nowstartmainposY+fontysizedata.2
+		pos startmainmenuposx+xsiz(3),nowstartmainposY
+		mes langstr(3004);・Windows アプリケーション
+
+		objsize xsiz(300),ysiz(30)
+		nowstartmainpos=startmainmenuposx
+		nowstartmainposY+=ysiz(40)
+		bufferbuttonY+=ysiz(30)
+		pos nowstartmainpos,nowstartmainposY
+		objimage 1005,xsiz(0),bufferbuttonY,xsiz(0),bufferbuttonY,xsiz(300),bufferbuttonY
+		button gosub "",*startwindowsapp
+		winapp.0=stat;タスクマネージャー
+
+		winapp1cant=0
+		if okfullmode=0{winapp1cant=1}
+		if okfullmode=1&windowsver="NT6.1"{winapp1cant=1}
+		if winapp1cant!1:{
+			if nowstartmainpos+(xsiz(300)*2)>=ginfo(12):{
+				nowstartmainpos=startmainmenuposx
+				nowstartmainposY+=ysiz(30)
+			}else{
+				nowstartmainpos+=xsiz(300)
+				;nowstartmainposYは変わらない
+			}
+			bufferbuttonY+=ysiz(30)
+			pos nowstartmainpos,nowstartmainposY
+			objimage 1005,xsiz(0),bufferbuttonY,xsiz(0),bufferbuttonY,xsiz(300),bufferbuttonY
+			button gosub "",*startwindowsapp
+			winapp.1=stat;Windows 設定
+		}
+
+		if nowstartmainpos+(xsiz(300)*2)>=ginfo(12):{
+			nowstartmainpos=startmainmenuposx
+			nowstartmainposY+=ysiz(30)
+		}else{
+			nowstartmainpos+=xsiz(300)
+			;nowstartmainposYは変わらない
+		}
+		bufferbuttonY+=ysiz(30)
+		pos nowstartmainpos,nowstartmainposY
+		objimage 1005,xsiz(0),bufferbuttonY,xsiz(0),bufferbuttonY,xsiz(300),bufferbuttonY
+		button gosub "",*startwindowsapp
+		winapp.2=stat;ファイル名を指定して実行
+
+		if nowstartmainpos+(xsiz(300)*2)>=ginfo(12):{
+			nowstartmainpos=startmainmenuposx
+			nowstartmainposY+=ysiz(30)
+		}else{
+			nowstartmainpos+=xsiz(300)
+			;nowstartmainposYは変わらない
+		}
+		bufferbuttonY+=ysiz(30)
+		pos nowstartmainpos,nowstartmainposY
+		objimage 1005,xsiz(0),bufferbuttonY,xsiz(0),bufferbuttonY,xsiz(300),bufferbuttonY
+		button gosub "",*startwindowsapp
+		winapp.3=stat;コントロールパネル
+
+		gsel 0001,2
+		objimage -1
+		gsel 0000,int(loadset("DISPCOLORMODE",settingdata))+1
+		
 	}
 
 	redraw 1
-	enablewindow hmainwindow,1
+	enablewindow hclient,1
+
+	gsel 0000,int(loadset("DISPCOLORMODE",settingdata))+1
 
 	return
+
+#include "module/include code_3_buffer.hsp"
+#include "module/include code_4_controlmakescreen.hsp"
 
 *startmainmenuchange;スタートメインメニューとの切り替え
 	if startmainmenubuf=0:{
@@ -331,7 +480,7 @@
 	gosub *makescreen
 	return
 
-*windowmanualsizechange;手動での最大化、最小化の適用
+*windowmenualsizechange;手動での最大化、最小化の適用
 	if maxadr=stat:{
 		IsZoomed hwnd
 		iszoom=stat
@@ -344,6 +493,38 @@
 		sendmsg hwnd,$112,$F020;SC_MINIMIZE
 	}
 	
+	return
+
+*startqwertyapp
+	if qweapp.0=stat:{;ランチャー
+		screenname=langstr(3001)
+	}else:if qweapp.1=stat:{;qwerty3x 設定
+		screenname=langstr(3005)
+	}
+	startmainmenubuf=0
+
+	gosub *makescreen
+
+	goto *systemrepeat
+
+*startwindowsapp
+	if winapp.0=stat:{;タスクマネージャー
+		keybd_event $11,0,0,0
+		keybd_event $10,0,0,0
+		keybd_event $1B,0,0,0
+		keybd_event $11,0,2,0
+		keybd_event $10,0,2,0
+		keybd_event $1B,0,2,0
+	}else:if winapp.1=stat:{;Windows 設定
+		exec "cmd.exe /c Explorer.exe shell:AppsFolder\\Windows.ImmersiveControlPanel_cw5n1h2txyewy!microsoft.windows.immersivecontrolpanel",2
+	}else:if winapp.2=stat:{;ファイル名を指定して実行
+		findwindow "shell_traywnd",0
+		htraywnd=stat
+		sendmsg htraywnd,$111,$191
+	}else:if winapp.3=stat:{;コントロールパネル
+		exec "control"
+	}
+
 	return
 
 //////////////////////////////////////////////////////////////////////
@@ -367,6 +548,8 @@
 
 	if screenname=langstr(3002):{;スタートメインメニュー
 		gosub *startmenuui
+	}else:if screenname=langstr(3005):{;qwerty3x 設定
+		gosub *controlui
 	}
 	redraw 1
 
@@ -385,7 +568,7 @@
 		}else{
 			objimage 1008,xsiz(60),ysiz(59),xsiz(60),ysiz(59),xsiz(60),ysiz(60)
 		}
-		button gosub "",*windowmanualsizechange
+		button gosub "",*windowmenualsizechange
 		maxadr=stat
 	}else{
 		iszoom=stat
@@ -430,12 +613,13 @@
 *onminmax;ウィンドウの最小サイズの指定
 	dupptr minmaxinfo,lparam,40,4
 	minmaxinfo(6)=xsiz(500)
-	minmaxinfo(7)=ysiz(300)
+	minmaxinfo(7)=ysiz(500)
 
 	return 0
 	
 *systemrepeat;システムメインループ
 	//システム
+	gsel 0
 	IsZoomed hwnd
 	if iszoom!stat:{
 		iszoom=stat
@@ -447,7 +631,7 @@
 		}else{
 			objimage 1008,xsiz(60),ysiz(59),xsiz(60),ysiz(59),xsiz(60),ysiz(60)
 		}
-		button gosub "",*windowmanualsizechange
+		button gosub "",*windowmenualsizechange
 		maxadr=stat
 	}else{
 		iszoom=stat
@@ -533,6 +717,9 @@
 	if screenname=langstr(3002):{;スタートメインメニュー
 		gosub *startmenuui
 	}
+	if screenname=langstr(3005):{;qwerty3x 設定
+		gosub *controlui
+	}
 
 	//システム
 	titlebarstr=""
@@ -565,6 +752,38 @@
 
 *startmenuui
 	redraw 0
+	gsel 0001
+	mousewheelbuf=mousew
+	if mousewheelbuf>=120:{
+		mousewheelbuttonbuf=1
+		groll xsiz(0),ginfo(9)-ysiz(30)
+		if ginfo(9)=mousewheelginfobuf:{
+			mousewheelbuttonbuf=0
+		}
+		mousewheelginfobuf=ginfo(9)
+	}else:if mousewheelbuf<=-120:{
+		if (ginfo(9)+ysiz(40))<nowstartmainposY+ysiz(30):{
+			mousewheelbuttonbuf=1
+			groll xsiz(0),ginfo(9)+ysiz(30)
+			if ginfo(9)=mousewheelginfobuf:{
+				mousewheelbuttonbuf=0
+			}
+			mousewheelginfobuf=ginfo(9)
+		}
+	}
+	if mousewheelbuf!0:{
+		objsel qweapp.0
+		objsel qweapp.1
+		objsel winapp.0
+		objsel winapp.1
+		objsel winapp.2
+		objsel winapp.3
+	}
+	gsel 0000
+	if mousewheelbuf!0:{
+		objsel startmainmenuadr
+	}
+	
 	boxfofmes int(loadset("DISPCOLORMODE",settingdata)),xsiz(0),ysiz(0),xsiz(150),ginfo(13)
 	boxfofmes int(loadset("DISPCOLORMODE",settingdata)),xsiz(0),ginfo(13)-ysiz(40),ginfo(12),ginfo(13)
 	if batteryflag!128:{;バッテリー情報なしではないとき
@@ -606,12 +825,95 @@
 	mes ""+year+"/"+month+"/"+day+"("+weekstr+") "+hour+":"+minute+":"+second
 	font fontstr,fontsize,0,0;ysiz(15)
 
-	fontxsizepos=(xsiz(150)-fontysizedata.3)/2
+	fontxsizepos=(xsiz(150)-fontxsizedata.1)/2
 	pos fontxsizepos,(ginfo(13)-ysiz(40))+fontysizepos
 	font fontstr,fontsize+ysiz(7),1+2,0;ysiz(22)
 	mes "qwerty3x"
 	font fontstr,fontsize,0,0;ysiz(15)
+
+	clientwindowx=ginfo(12)
+	clientwindowy=ginfo(13)
 	redraw 1
+	gsel 0001,0
+	redraw 0
+	
+	width (clientwindowx-xsiz(150)),(clientwindowy-ysiz(70)),xsiz(150),ysiz(30)
+
+	if mousewheelbuttonbuf=1:{
+		color 0,0,0
+		boxf
+	
+		startmainmenuposx=(ginfo(12)-(xsiz(150)*(ginfo(12)/xsiz(150))))/2
+		
+		nowstartmainposY=ysiz(10)
+		pos startmainmenuposx,nowstartmainposY
+		boxfofmes onezero(loadset("DISPCOLORMODE",settingdata)),startmainmenuposx,nowstartmainposY,startmainmenuposx+fontxsizedata.2+xsiz(10),nowstartmainposY+fontysizedata.2
+		pos startmainmenuposx+xsiz(3),nowstartmainposY
+		mes langstr(3003);・qwerty3x アプリケーション
+	
+		nowstartmainpos=startmainmenuposx
+		nowstartmainposY+=ysiz(40)
+		bufferbuttonY=ysiz(0)
+		size=0,0,nowstartmainpos,nowstartmainposY-ginfo(9)
+		resizeobj qweapp.0,size,2;ランチャー
+		if nowstartmainpos+(xsiz(300)*2)>=ginfo(12):{
+			nowstartmainpos=startmainmenuposx
+			nowstartmainposY+=ysiz(30)
+		}else{
+			nowstartmainpos+=xsiz(300)
+			;nowstartmainposYは変わらない
+		}
+		bufferbuttonY+=ysiz(30)
+		size=0,0,nowstartmainpos,nowstartmainposY-ginfo(9)
+		resizeobj qweapp.1,size,2
+	
+		nowstartmainposY+=ysiz(40)
+		pos startmainmenuposx,nowstartmainposY
+		boxfofmes onezero(loadset("DISPCOLORMODE",settingdata)),startmainmenuposx,nowstartmainposY,startmainmenuposx+fontxsizedata.2+xsiz(10),nowstartmainposY+fontysizedata.2
+		pos startmainmenuposx+xsiz(3),nowstartmainposY
+		mes langstr(3004);・Windows アプリケーション
+	
+		nowstartmainpos=startmainmenuposx
+		nowstartmainposY+=ysiz(40)
+		bufferbuttonY+=ysiz(30)
+		size=0,0,nowstartmainpos,nowstartmainposY-ginfo(9)
+		resizeobj winapp.0,size,2
+		if winapp1cant!1:{
+			if nowstartmainpos+(xsiz(300)*2)>=ginfo(12):{
+				nowstartmainpos=startmainmenuposx
+				nowstartmainposY+=ysiz(30)
+			}else{
+				nowstartmainpos+=xsiz(300)
+				;nowstartmainposYは変わらない
+			}
+			bufferbuttonY+=ysiz(30)
+			size=0,0,nowstartmainpos,nowstartmainposY-ginfo(9)
+			resizeobj winapp.1,size,2
+		}
+		if nowstartmainpos+(xsiz(300)*2)>=ginfo(12):{
+			nowstartmainpos=startmainmenuposx
+			nowstartmainposY+=ysiz(30)
+		}else{
+			nowstartmainpos+=xsiz(300)
+			;nowstartmainposYは変わらない
+		}
+		bufferbuttonY+=ysiz(30)
+		size=0,0,nowstartmainpos,nowstartmainposY-ginfo(9)
+		resizeobj winapp.2,size,2
+		if nowstartmainpos+(xsiz(300)*2)>=ginfo(12):{
+			nowstartmainpos=startmainmenuposx
+			nowstartmainposY+=ysiz(30)
+		}else{
+			nowstartmainpos+=xsiz(300)
+			;nowstartmainposYは変わらない
+		}
+		bufferbuttonY+=ysiz(30)
+		size=0,0,nowstartmainpos,nowstartmainposY-ginfo(9)
+		resizeobj winapp.3,size,2
+	}
+	
+	redraw 1
+	gsel 0000
 
 	return
 

@@ -173,6 +173,36 @@
 
 	return
 
+#defcfunc onezero str p1
+;onezero関数 1を0に、0を1に変える
+;p1 str 内容
+
+	if p1="0":{
+		result=1
+	}else:p1="1":{
+		result=0
+	}else{
+		result=-1
+	}
+
+	return result
+
+#deffunc startline int p1,int p2,int p3
+;startline命令 スタートメインメニューのボタンの線を引く
+;p1 int サイズのX方向の大きさ
+;p2 int サイズのY方向の大きさ	
+;p3 int 描画モード
+
+	if p3=0:{
+		line ginfo(22),ginfo(23),ginfo(22)+p1,ginfo(23);上
+		line ginfo(22),ginfo(23),ginfo(22),ginfo(23)+p2;左
+	}else:if p3=1:{
+		line ginfo(22),ginfo(23),ginfo(22)+p1,ginfo(23);上
+		line ginfo(22)+p1,ginfo(23),ginfo(22)+p1,ginfo(23)+p2
+	}
+
+	return
+
 #global
 
 #define DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2	-4

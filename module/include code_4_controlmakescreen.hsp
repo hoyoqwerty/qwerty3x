@@ -1,0 +1,37 @@
+*controlmakelist	
+
+	nowstartmainposY=ysiz(10)
+	pos xsiz(2),nowstartmainposY
+	boxfofmes onezero(loadset("DISPCOLORMODE",settingdata)),xsiz(0),nowstartmainposY,xsiz(0)+fontxsizedata.3+xsiz(10),nowstartmainposY+fontysizedata.3
+	pos xsiz(2),nowstartmainposY
+	mes langstr(5006);・qwerty3x 設定リスト
+
+	objsize xsiz(150),ysiz(30)
+	nowstartmainposY+=ysiz(40)	
+	bufferbuttonY=ysiz(0)
+	pos xsiz(0),nowstartmainposY
+	if loadset("CONTROLPAGE",settingdata)="WINDOWSCREEN":{
+		objimage 1007,xsiz(150),bufferbuttonY,xsiz(150),buffetbuttonY,xsiz(150),bufferbuttonY
+	}else{
+		objimage 1007,xsiz(0),bufferbuttonY,xsiz(0),bufferbuttonY,xsiz(150),bufferbuttonY
+	}
+	button gosub "",*systemrepeat
+	controllistadr.0=stat;ウィンドウ画面設定
+
+	return
+
+*controlmakescreen
+
+	return
+
+*controlui
+	clientwindowx=ginfo(12)
+	clientwindowy=ginfo(13)
+	gsel 0003
+	redraw 0
+	width xsiz(150),clientwindowy-ysiz(30),xsiz(0),ysiz(30)
+
+	redraw 1
+	gsel 0000
+
+	return
