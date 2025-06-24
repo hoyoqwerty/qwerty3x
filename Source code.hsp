@@ -551,6 +551,21 @@
 	}else:if screenname=langstr(3005):{;qwerty3x 設定
 		gosub *controlui
 	}
+
+	timeGetTime
+	if fpsbuf!(stat/1000):{
+		fpsbuf=(stat/1000)
+		fpsbufmes=fpsbufcnt
+		fpsbufcnt=0
+	}else{
+		fpsbufcnt+=1
+	}
+	if qwertydebag=1:{
+		titlebarstr=""
+		titlebarstr="<デバッグ> "+fpsbufmes+"fps posx:"+ginfo(4)+" posy:"+ginfo(5)+" sizx:"+ginfo(12)+" sizy:"+ginfo(13)+" "+titlebarstr
+		title titlebarstr+" | "+langstr(0001);qwerty3x ver.%qwertyver%
+	}
+	await (1000/120)
 	redraw 1
 
 	return
@@ -729,7 +744,7 @@
 		titlebarstr=""+screenname
 	}
 	if qwertydebag=1:{
-		titlebarstr="<デバッグ> posx:"+ginfo(4)+" posy:"+ginfo(5)+" sizx:"+ginfo(12)+" sizy:"+ginfo(13)+" "+titlebarstr
+		titlebarstr="<デバッグ> "+fpsbufmes+"fps posx:"+ginfo(4)+" posy:"+ginfo(5)+" sizx:"+ginfo(12)+" sizy:"+ginfo(13)+" "+titlebarstr
 	}
 	title titlebarstr+" | "+langstr(0001);qwerty3x ver.%qwertyver%
 
@@ -743,16 +758,26 @@
 
 	gosub *langstrrepupdate
 
+	timeGetTime
+	if fpsbuf!(stat/1000):{
+		fpsbuf=(stat/1000)
+		fpsbufmes=fpsbufcnt
+		fpsbufcnt=0
+	}else{
+		fpsbufcnt+=1
+	}
+
 	if isicon=1:{
 		await 1000
 	}else{
-		await (1000/30)
+		await (1000/120)
 	}
 	goto *systemrepeat
 
 *startmenuui
 	redraw 0
 	gsel 0001
+	redraw 0
 	mousewheelbuf=mousew
 	if mousewheelbuf>0:{
 		mousewheelbuttonbuf=1
@@ -772,17 +797,10 @@
 		}
 	}
 	if mousewheelbuf!0:{
-		;objsel qweapp.0
-		;objsel qweapp.1
-		;objsel winapp.0
-		;objsel winapp.1
-		;objsel winapp.2
-		;objsel winapp.3
+		
 	}
+	redraw 1
 	gsel 0000
-	if mousewheelbuf!0:{
-		objsel startmainmenuadr
-	}
 	
 	boxfofmes int(loadset("DISPCOLORMODE",settingdata)),xsiz(0),ysiz(0),xsiz(150),ginfo(13)
 	boxfofmes int(loadset("DISPCOLORMODE",settingdata)),xsiz(0),ginfo(13)-ysiz(40),ginfo(12),ginfo(13)
@@ -833,7 +851,6 @@
 
 	clientwindowx=ginfo(12)
 	clientwindowy=ginfo(13)
-	redraw 1
 	gsel 0001,0
 	redraw 0
 	
@@ -909,9 +926,10 @@
 		bufferbuttonY+=ysiz(30)
 		size=0,0,nowstartmainpos,nowstartmainposY-ginfo(9)
 		resizeobj winapp.3,size,2
-	
+
 	redraw 1
 	gsel 0000
+	redraw 1
 
 	return
 

@@ -59,7 +59,7 @@
 	if notefind(p1,1)=-1:{
 		notesel defaultsettingdata@
 		if notefind(p1,1)=-1:{
-			dialog "qwerty3x Critical error\n\nerror code: SAVESET_DEFAULT_NOT_FOUND\n\nsaveset命令から参照したデフォルト設定データに、指定された内容がありませんでした。\n指定内容が間違っている可能性があります。\n\nerror function infomation:\ndefaultsettingdata="+defaultsettingdata+"\np1:"+p1,1,"qwerty3x 内部モジュールエラー"
+			dialog "qwerty3x Critical error\n\nerror code: LOADSET_IN_SAVESET_DEFAULT_NOT_FOUND\n\nloadset関数内のsaveset命令から参照したデフォルト設定データに、指定された内容がありませんでした。\n指定内容が間違っている可能性があります。\n\nerror function infomation:\ndefaultsettingdata="+defaultsettingdata+"\np1:"+p1,1,"qwerty3x 内部モジュールエラー"
 			end
 		}
 		noteget buf,notefind(p1,1)

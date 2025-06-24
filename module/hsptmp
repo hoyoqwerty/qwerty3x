@@ -1,1 +1,424 @@
-6
+#module qwerty3x
+
+#include "hspmath.as"
+
+#define ctype xsiz(%1) int(round(double(%1)*xdpi@/96))
+#define ctype ysiz(%1) int(round(double(%1)*ydpi@/96))
+#define ctype sizx(%1) int(%1*96/xdpi@)
+#define ctype sizy(%1) int(%1*96/ydpi@)
+
+#deffunc testmodule
+
+	dialog defaultsettingdata@
+
+	return
+
+#deffunc encword int p1,var p2,var p3
+; encword命令 文字列を暗号化する
+;p1 int 暗号化強度bit
+;p2 var 暗号化前文字列
+;p3 var 暗号化後文字列
+	passwordkey=p1
+	nagasa=strlen(p2)
+	sdim password,(nagasa*2)
+	repeat nagasa
+		buf=peek(p2,cnt)
+		buf2=buf+passwordkey
+
+		poke password,cnt,buf2
+	loop
+	p3=password
+
+	return
+
+#deffunc decword int p1,var p2,var p3
+; decword命令 文字列の暗号化を解除する
+;p1 int 暗号化強度bit
+;p2 var 暗号化解除前文字列
+;p3 var 暗号化解除後文字列
+	passwordkey=p1
+	nagasa=strlen(p2)
+	sdim password,(nagasa*2)
+	sdim p3,(nagasa*2)
+	repeat nagasa
+		buf=(peek(p2,cnt)-passwordkey)
+
+		poke password,cnt,buf
+	loop
+	p3=password
+
+	return
+
+
+#defcfunc loadset str p1,var p2
+; loadset関数 設定を読み込む
+;p1 str 参照設定名文字列
+;p2 var 参照文字列変数
+;戻り値:refstr=設定内容
+	notesel p2
+	if notefind(p1,1)=-1:{
+		notesel defaultsettingdata@
+		if notefind(p1,1)=-1:{
+			dialog "qwerty3x Critical error\n\nerror code: LOADSET_IN_SAVESET_DEFAULT_NOT_FOUND\n\nloadset関数内のsaveset命令から参照したデフォルト設定データに、指定された内容がありませんでした。\n指定内容が間違っている可能性があります。\n\nerror function infomation:\ndefaultsettingdata="+defaultsettingdata+"\np1:"+p1,1,"qwerty3x 内部モジュールエラー"
+			end
+		}
+		noteget buf,notefind(p1,1)
+		notesel p2
+		noteadd buf,-1,0
+	}
+	modulesettingtype=""
+	modulesettingdata=""
+	moduleok=0
+	repeat notemax
+		noteget buf,cnt
+	
+		split buf,"===",modulesettingtype,modulesettingdata
+
+		if getpath(modulesettingtype,16)=getpath(p1,16):{
+			moduleok=1
+			break
+		}
+	loop
+	if moduleok!1:{
+		dialog "qwerty3x Critical error\n\nerror code: LOADSET_NOT_FOUND\n\nloadset関数の指定内容が間違っている可能性があります。\n\nerror function infomation:\nmoduleok="+moduleok+"\nmodulesettingtype="+modulesettingtype+"\nmodulesettingdata="+modulesettingdata+"\np1="+p1,1,"qwerty3x 内部モジュールエラー"
+		end
+	}
+	noteunsel
+	
+	return modulesettingdata
+
+#deffunc saveset str p1,var p2,str p3
+; saveset命令 設定を保存する
+;p1 str 参照設定名文字列
+;p2 var 参照文字列変数
+;p3 str 変更後設定内容
+;戻り値:stat=参照設定の行数
+	notesel p2
+	if notefind(p1,1)=-1:{
+		notesel defaultsettingdata@
+		if notefind(p1,1)=-1:{
+			dialog "qwerty3x Critical error\n\nerror code: SAVESET_DEFAULT_NOT_FOUND\n\nsaveset命令から参照したデフォルト設定データに、指定された内容がありませんでした。\n指定内容が間違っている可能性があります。\n\nerror function infomation:\ndefaultsettingdata="+defaultsettingdata+"\np1:"+p1,1,"qwerty3x 内部モジュールエラー"
+			end
+		}
+		noteget buf,notefind(p1,1)
+		notesel p2
+		noteadd buf,-1,0
+	}
+	modulesettingtype=""
+	modulesettingdata=""
+	repeat notemax
+		noteget buf,cnt
+		split buf,"===",modulesettingtype,modulesettingdata
+
+		if getpath(modulesettingtype,16)=getpath(p1,16):{
+			buf2=""+modulesettingtype+"==="+p3
+			buf3=cnt
+			noteadd buf2,buf3,1
+			break
+		}
+	loop
+	noteunsel
+
+	return p2
+
+#defcfunc langstr int p1
+; langstr関数 言語ファイル変換を行う
+;p1 int 言語データの参照設定名文字列
+;戻り値:refstr=変換後の文字列
+	titlestrdata=loadset(strf("%04d",p1),languagedata@)
+	notesel langstrrep@
+	repeat notemax
+		noteget buf,cnt
+		split buf,"===",modulelangstrback,modulelangstrnext
+
+		strrep titlestrdata,modulelangstrback,modulelangstrnext
+	loop
+	titlestrdata2=""
+	notesel titlestrdata
+	if notefind("\\n",2)!-1:{
+		split titlestrdata,"\\n",modulelangstrsplit
+		repeat stat
+			notesel titlestrdata2
+			noteadd modulelangstrsplit.cnt,-1,0
+		loop
+	}else{
+		titlestrdata2=titlestrdata
+	}
+
+	return titlestrdata2
+
+	return
+
+#deffunc boxfofmes int p1,int p2,int p3,int p4,int p5
+;boxfofmes命令 画面モードに合わせてboxf命令を動かす
+;p1 int 0or1 (ダークモードorライトモード)
+;p2 int boxf命令の1p (四角形描画の左上x座標)
+;p3 int boxf命令の2p (四角形描画の左上y座標)
+;p4 int boxf命令の3p (四角形描画の右下x座標)
+;p5 int boxf命令の4p (四角形描画の右下y座標)
+
+	if p1=0:{
+		color 32,32,32
+	}else{
+		color 255,255,255
+	}
+
+	boxf p2,p3,p4,p5
+
+	if p1=0:{
+		color 255,255,255
+	}else{
+		color 0,0,0
+	}
+
+	return
+
+#defcfunc onezero str p1
+;onezero関数 1を0に、0を1に変える
+;p1 str 内容
+
+	if p1="0":{
+		result=1
+	}else:p1="1":{
+		result=0
+	}else{
+		result=-1
+	}
+
+	return result
+
+#deffunc startline int p1,int p2,int p3
+;startline命令 スタートメインメニューのボタンの線を引く
+;p1 int サイズのX方向の大きさ
+;p2 int サイズのY方向の大きさ	
+;p3 int 描画モード
+
+	if p3=0:{
+		line ginfo(22),ginfo(23),ginfo(22)+p1,ginfo(23);上
+		line ginfo(22),ginfo(23),ginfo(22),ginfo(23)+p2;左
+	}else:if p3=1:{
+		line ginfo(22),ginfo(23),ginfo(22)+p1,ginfo(23);上
+		line ginfo(22)+p1,ginfo(23),ginfo(22)+p1,ginfo(23)+p2
+	}
+
+	return
+
+#deffunc startqwebtn
+;startqwebtn命令 自作画像ボタンオブジェクト配置の準備を行う
+	qwebtndatabase=""
+
+	return
+
+#deffunc qwebtn array p1,array p2
+;qwebtn命令 自作画像ボタンオブジェクトを設置する
+;p1 array 位置サイズ等
+;	.0=ボタンに使用するウィンドウID
+;	.1=ボタンのXサイズ	.2=ボタンのYサイズ
+;	.3=ボタンのX位置	.4=ボタンのY位置
+;p2 array 画像先等
+;	.0=コピー元に使用するウィンドウID
+;	.1=参照X座標(通常時)							.2=参照Y座標(通常時)
+;	.3=参照X座標(押し下げ時・マウスクリック時)		.4=参照Y座標(押し下げ時・マウスクリック時)
+;	.5=参照X座標(マウスオーバー時・マウスポイント時).6=参照Y座標(マウスオーバー時・マウスポイント時)
+	modulenowginfosel=ginfo(3)
+	
+	bgscr (p1.0),ginfo(20),ginfo(21),2
+	hchild.(p1.0)=hwnd
+	getwindowlong hwnd,-16
+	setwindowlong hwnd,-16,stat|$CF0000
+	setparent hchild.(p1.0),@hclient
+	getwindowlong hwnd,-16
+	setwindowlong hwnd,-16,stat-$800000-$40000
+	width (p1.1),(p1.2),(p1.3),(p1.4)
+
+	pos 0,0
+	gmode 0,(p1.1),(p1.2),0
+	gcopy (p2.0),(p2.1),(p2.2),(p1.1),(p1.2);通常時
+	pos (p1.1)+20,0
+	gmode 0,(p1.1),(p1.2),0
+	gcopy (p2.0),(p2.3),(p2.4),(p1.1),(p1.2);押し下げ・マウスクリック時
+	pos ((p1.1)*2)+(20*2),0
+	gmode 0,(p1.1),(p1.2),0
+	gcopy (p2.0),(p2.5),(p2.6),(p1.1),(p1.2);マウスオーバー時・マウスポイント時
+
+	groll 0,0
+
+	notesel qwebtndatabase
+	;使用しているウィンドウID<database>Xサイズ<database>Yサイズ<database>MDI上X位置<database>MDI上Y位置<database>スクリーン上X位置<database>スクリーン上Y位置
+	databaseaddtext=""+(p1.0)+"<database>"+(p1.1)+"<database>"+(p1.2)+"<database>"+(p1.3)+"<database>"+(p1.4)+"<database>"+ginfo(4)+"<database>"+ginfo(5)+""
+	noteadd databaseaddtext,-1,0
+
+	gsel (p1.0),2
+	gsel modulenowginfosel,0
+
+	return
+
+#deffunc resizeqwebtn array p1
+;resizeqwebtn命令 自作画像ボタンオブジェクトを移動・リサイズする
+;p1 array 位置サイズ等
+;	.0=ボタンに使用するウィンドウID
+;	.1=ボタンのXサイズ	.2=ボタンのYサイズ
+;	.3=ボタンのX位置	.4=ボタンのY位置
+	modulenowginfosel=ginfo(3)
+
+	gsel (p1.0)
+	width (p1.1),(p1.2),(p1.3),(p1.4)
+
+	gsel (p1.0),2
+	gsel modulenowginfosel,0
+
+	return
+
+#deffunc checkqwebtn int p1,int p2
+;checkqwebtn関数 自作画像ボタンオブジェクトの動作をさせる
+;p1 int ボタンに使用しているウィンドウID
+;p2 int キーコード getkey系と共通
+;	1=左クリック 2=右クリック 4=マウスホイールクリック
+;戻り値:
+;	-1=失敗								0=通常時
+;	1=マウス押し下げ・マウスクリック時	2=マウスオーバー時・マウスポイント時
+	modulenowginfosel=ginfo(3)
+	getkey clicking,p2
+
+	databasegettext=""
+	notesel qwebtndatabase
+	if notefind(p1,1)=-1:{
+		checkresult=-1;失敗
+	}
+
+	if checkresult!-1:{
+		noteget databasegettext,notefind(p1,1)
+		split databasegettext,"<database>",datausewindowid,datawindowxsize,datawindowysize,datamdixpos,datamdiypos,datascreenxpos,datascreenypos
+	
+		if datascreenxpos<=mousex&mousex<=(datascreenxpos+datawindowxsize):{;マウスX座標はウィンドウ左上X座標より大きく、かつウィンドウ右下X座標より小さいとき
+			if datascreenpos<=mousey&mousey<=(datascreenypos+datawindowysize):{;マウスY座標はウィンドウ左上Y座標より大きく、かつウィンドウ右下Y座標より小さいとき
+				;総じて、自作画像ボタンの範囲内の時
+				if clicking=1:{;クリック押し下げ時
+					checkresult=1
+				}else{
+					checkresult=2
+				}
+			}else{
+				checkresult=0
+			}
+		}else{
+			checkresult=0
+		}
+	}
+
+	gsel p1
+	if checkresult=1:{
+		groll datawindowxsize+20,0;押し下げ・マウスクリック時
+	}else:if checkresult=2:{
+		groll (datawindowxsize*2)+(20*2);マウスオーバー時・マウスポイント時
+	}else{
+		groll 0,0
+	}
+	
+	gsel modulenowginfosel,0
+
+	return checkresult
+
+#deffunc deleteqwebtn int p1,int p2
+;deleteqwebtn命令 自作画像ボタンオブジェクトを破棄する
+;p1 int ボタンに使用しているウィンドウID
+;p2 int 破棄モード
+;	0=ボタン判定を破棄し非表示化する
+;	1=cls 0を実行し画面クリアを行ってからボタン判定を破棄し非表示化する
+	modulenowginfosel=ginfo(3)
+
+	notesel qwebtndatabase
+	if notefind(p1,1)=1:{
+		deleteresult=-1
+	}
+
+	if deleteresult!-1:{
+		if p2=1:{
+			gsel p1,0
+			cls 0
+		}
+
+		notedel notefind(p1,1)
+		gsel p1,-1
+	}
+
+	gsel modulenowginfosel,0
+
+	return
+
+#global
+
+#define DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2	-4
+#define HTLEFT						0x0000000A
+#define HTRIGHT						0x0000000B
+#define HTTOP						0x0000000C
+#define HTTOPLEFT					0x0000000D
+#define HTTOPRIGHT					0x0000000E
+#define HTBOTTOM					0x0000000F
+#define HTBOTTOMLEFT				0x00000010
+#define HTBOTTOMRIGHT				0x00000011
+#define HTCLIENT					0x00000001
+#define HTCAPTION					0x00000002
+#define SCREEN_WIDTH				xsiz(640)
+#define SCREEN_HEIGHT				ysiz(480)
+#define CAPTIONHEIGHT				ysiz(30)
+#define BORDERWIDTH					xsiz(4)
+#define LEFT						0x00000001
+#define RIGHT						0x00000002
+#define TOP							0x00000004
+#define BOTTOM						0x00000008
+
+#define ctype RGB(%1,%2,%3) (($FF & %1)|(($FF & %2) << 8)|(($FF & %3)<<16))
+
+#ifdef _debug
+//デバッグ時（F5実行）にもDPIを反映させる
+if okfullmode=2:{
+opt = DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2:SetProcessDpiAwarenessContext opt
+}
+//デバッグ時（F5実行）にマニフェストファイルを保存
+exist "DPI.manifest"
+if strsize <= 0{
+mani = {"
+<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>
+<assembly xmlns=\"urn:schemas-microsoft-com:asm.v1\" manifestVersion=\"1.0\" xmlns:asmv3=\"urn:schemas-microsoft-com:asm.v3\">
+<assemblyIdentity
+version=\"1.0.0.0\"
+processorArchitecture=\"*\"
+name=\"OnionSoftware.hsp3.exe\"
+type=\"win32\"
+/>
+
+<application xmlns=\"urn:schemas-microsoft-com:asm.v3\">
+<windowsSettings>
+<dpiAware xmlns=\"http://schemas.microsoft.com/SMI/2005/WindowsSettings\">true</dpiAware>
+<dpiAwareness xmlns=\"http://schemas.microsoft.com/SMI/2016/WindowsSettings\">PerMonitorV2</dpiAwareness>
+</windowsSettings>
+</application>
+
+<description>XPStyle</description>
+<dependency>
+<dependentAssembly>
+<assemblyIdentity
+type=\"win32\"
+name=\"Microsoft.Windows.Common-Controls\"
+version=\"6.0.0.0\"
+processorArchitecture=\"*\"
+publicKeyToken=\"6595b64144ccf1df\"
+language=\"*\"
+/>
+</dependentAssembly>
+</dependency>
+<compatibility xmlns=\"urn:schemas-microsoft-com:compatibility.v1\">
+  <application>
+    <supportedOS Id=\"{35138b9a-5d96-4fbd-8e2d-a2440225f93a}\" />
+    <supportedOS Id=\"{4a2f28e3-53b9-4441-ba9c-d69d4a4a6e38}\" />
+    <supportedOS Id=\"{1f676c76-80e1-4239-95bb-83d0f6d0da78}\" />
+    <supportedOS Id=\"{8e0f7a12-bfb3-4fe8-b9a5-48fd50a15a9a}\" />
+  </application>
+</compatibility>
+</assembly>
+"}
+notesel mani
+notesave "DPI.manifest"
+}
+#endif
