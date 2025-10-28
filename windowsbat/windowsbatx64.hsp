@@ -1,0 +1,37 @@
+#include "hsp3_64.as"
+
+#packopt name "windowsbatx64"
+#packopt hide 1
+#packopt lang "1041"
+
+//////////////////////////////////////////////////////////////////////
+//qwerty3x batファイル実行用アプリケーション(x64)
+//
+//最終行
+//0=通常起動 1=管理者権限で起動
+//////////////////////////////////////////////////////////////////////
+
+	appdir=dir_cur
+
+	chdir appdir
+	exist "windowsbatnote.txt"
+	if strsize=-1:{
+		end
+	}
+
+	notesel windowsbatnote
+	noteload "windowsbatnote.txt"
+
+	;notedel命令でインデックスがシフトする
+	noteget useadmin,(notemax-1)
+	notedel (notemax-1)
+	
+	notesave "windowsbat.bat"
+
+	if useadmin=1:{
+		exec "cmd /c powershell start-process windowsbat.bat -verb runas",2
+	}else{
+		exec "windowsbat.bat",2
+	}
+
+	end
