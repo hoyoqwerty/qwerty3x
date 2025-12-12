@@ -1,4 +1,11 @@
 *bufferallupdate
+
+gsel 0,0
+max=5
+if bufferallupdatestartupbuf=1:{
+	if bufferallupdatestartupbuf=1:{
+		title ""+langstr(1008)+" 1/"+max+" | qwerty3x ver."+qwertyver;1008=画面バッファ読み込み中
+	}
 //////////////////////////////////////////////////////////////////////
 //スタートメインメニューボタン描画
 //////////////////////////////////////////////////////////////////////
@@ -15,59 +22,67 @@
 	picload ""+qwertycur+"\\appicon.png",0
 	backx=ginfo(12)
 	backy=ginfo(13)
+	;ここで画面モードを背景にしたアイコンイメージを作成
 
 	buffer 1002,backx,backy,0
-	pos xsiz(0),ysiz(0)
+	pos xsiz(1),ysiz(1)
 	boxfofmes int(loadset("DISPCOLORMODE",settingdata)),xsiz(0),ysiz(0),backx,backy
 	gmode 2,backx,backy,0
 	gcopy 1001,xsiz(0),ysiz(0),backx,backy
 	
-	buffer 1003,xsiz(150),ysiz(30),0
-	font fontstr,fontsize,0,0
+	buffer 1003,xsiz(151),ysiz(31),0
+	font fontstr,fontsize,0
 	objmode 2,1
-	boxfofmes int(loadset("DISPCOLORMODE",settingdata)),xsiz(0),ysiz(0),xsiz(150),ysiz(30)
-	line xsiz(1),ysiz(1),xsiz(149),ysiz(1)
-	line xsiz(1),ysiz(1),xsiz(1),ysiz(29)
-	line xsiz(149),ysiz(1),xsiz(149),ysiz(29)
-	line xsiz(1),ysiz(29),xsiz(149),ysiz(29)
+	boxfofmes int(loadset("DISPCOLORMODE",settingdata)),xsiz(0),ysiz(0),xsiz(151),ysiz(31)
+	line xsiz(1),ysiz(1),xsiz(150),ysiz(1)
+	line xsiz(1),ysiz(1),xsiz(1),ysiz(30)
+	line xsiz(150),ysiz(1),xsiz(150),ysiz(30)
+	line xsiz(1),ysiz(30),xsiz(150),ysiz(30)
 	pos xsiz(3),ysiz(3)
-	gzoom xsiz(24),ysiz(24),1002,xsiz(0),ysiz(0),backx,backy,1
+	gzoom xsiz(24),ysiz(24),1002,xsiz(1),ysiz(1),backx,backy,1
 	pos xsiz(32),ysiz(5)
-	mes "スタート"
+	mes langstr(1004);スタート
 
-	buffer 1004,xsiz(150),ysiz(30),0
-	font fontstr,fontsize,0,0
+	buffer 1004,xsiz(151),ysiz(31),0
+	font fontstr,fontsize,0
 	objmode 2,1
-	boxfofmes int(loadset("DISPCOLORMODE",settingdata)),xsiz(0),ysiz(0),xsiz(150),ysiz(30)
-	color 0,141,181
-	line xsiz(1),ysiz(1),xsiz(149),ysiz(1)
-	line xsiz(1),ysiz(1),xsiz(1),ysiz(29)
-	line xsiz(149),ysiz(1),xsiz(149),ysiz(29)
-	line xsiz(1),ysiz(29),xsiz(149),ysiz(29)
+	boxfofmes int(loadset("DISPCOLORMODE",settingdata)),xsiz(0),ysiz(0),xsiz(151),ysiz(31)
+	colorsetting settingdata
+	line xsiz(1),ysiz(1),xsiz(150),ysiz(1)
+	line xsiz(1),ysiz(1),xsiz(1),ysiz(30)
+	line xsiz(150),ysiz(1),xsiz(150),ysiz(30)
+	line xsiz(1),ysiz(30),xsiz(150),ysiz(30)
 	pos xsiz(3),ysiz(3)
-	gzoom xsiz(24),ysiz(24),1002,xsiz(0),ysiz(0),backx,backy,1
+	gzoom xsiz(24),ysiz(24),1002,xsiz(1),ysiz(1),backx,backy,1
 	pos xsiz(32),ysiz(5)
-	mes "閉じる"
+	mes langstr(1005);閉じる
 
+}
+
+if bufferallupdatestartupbuf=1:{
+	gsel 0,0
+	if bufferallupdatestartupbuf=1:{
+		title ""+langstr(1008)+" 2/"+max+" | qwerty3x ver."+qwertyver;1008=画面バッファ読み込み中
+	}
 //////////////////////////////////////////////////////////////////////
 //通常ボタン描画
 //////////////////////////////////////////////////////////////////////
 	buttoncnt=100
 	buffer 1005,xsiz(600),(ysiz(30)*buttoncnt),0
-	font fontstr,fontsize,0,0
+	font fontstr,fontsize,0
 	objmode 2,1
 	boxfofmes int(loadset("DISPCOLORMODE",settingdata)),xsiz(0),ysiz(0),xsiz(600),(ysiz(30)*buttoncnt)
 
-	ysizbuf=ysiz(0)
+	ysizbuf=ysiz(1)
 	pos xsiz(0),ysizbuf;通常
 	boxfofmes int(loadset("DISPCOLORMODE",settingdata))
 	startline xsiz(300),ysiz(30)
 	pos xsiz(5),ysizbuf+ysiz(5)
 	mes langstr(3001);ランチャー
-	pos xsiz(300),ysizbuf;マウスオーバー
-	color 0,141,181
+	pos xsiz(301),ysizbuf;マウスオーバー
+	colorsetting settingdata
 	startline xsiz(300),ysiz(30)
-	pos xsiz(305),ysizbuf+ysiz(5)
+	pos xsiz(306),ysizbuf+ysiz(5)
 	mes langstr(3001);ランチャー
 
 	ysizbuf+=ysiz(30)
@@ -75,12 +90,12 @@
 	boxfofmes int(loadset("DISPCOLORMODE",settingdata))
 	startline xsiz(300),ysiz(30)
 	pos xsiz(5),ysizbuf+ysiz(5)
-	mes langstr(3005);qwerty3x 設定
-	pos xsiz(300),ysizbuf;マウスオーバー
-	color 0,141,181
+	mes langstr(3005);qwerty3xの設定
+	pos xsiz(301),ysizbuf;マウスオーバー
+	colorsetting settingdata
 	startline xsiz(300),ysiz(30)
-	pos xsiz(305),ysizbuf+ysiz(5)
-	mes langstr(3005);qwerty3x 設定
+	pos xsiz(306),ysizbuf+ysiz(5)
+	mes langstr(3005);qwerty3xの設定
 	
 	ysizbuf+=ysiz(30)
 	pos xsiz(0),ysizbuf;通常
@@ -88,14 +103,14 @@
 	startline xsiz(300),ysiz(30)
 	pos xsiz(5),ysizbuf+ysiz(5)
 	mes langstr(3501);タスクマネージャー
-	pos xsiz(300),ysizbuf;マウスオーバー
-	color 0,141,181
+	pos xsiz(301),ysizbuf;マウスオーバー
+	colorsetting settingdata
 	startline xsiz(300),ysiz(30)
-	pos xsiz(305),ysizbuf+ysiz(5)
+	pos xsiz(306),ysizbuf+ysiz(5)
 	mes langstr(3501);タスクマネージャー
 
 	winapp1cant=0
-	if okfullmode=0{winapp1cant=1}
+	if okfullmode=0|okfullmode=-1{winapp1cant=1}
 	if okfullmode=1&windowsver="NT6.1"{winapp1cant=1}
 	if winapp1cant!1:{
 		ysizbuf+=ysiz(30)
@@ -104,10 +119,10 @@
 		startline xsiz(300),ysiz(30)
 		pos xsiz(5),ysizbuf+ysiz(5)
 		mes langstr(3502);Windows 設定
-		pos xsiz(300),ysizbuf
-		color 0,141,181
+		pos xsiz(301),ysizbuf
+		colorsetting settingdata
 		startline xsiz(300),ysiz(30)
-		pos xsiz(305),ysizbuf+ysiz(5)
+		pos xsiz(306),ysizbuf+ysiz(5)
 		mes langstr(3502);Windows 設定
 	}
 
@@ -117,10 +132,10 @@
 	startline xsiz(300),ysiz(30)
 	pos xsiz(5),ysizbuf+ysiz(5)
 	mes langstr(3503);ファイル名を指定して実行
-	pos xsiz(300),ysizbuf
-	color 0,141,181
+	pos xsiz(301),ysizbuf
+	colorsetting settingdata
 	startline xsiz(300),ysiz(30)
-	pos xsiz(305),ysizbuf+ysiz(5)
+	pos xsiz(306),ysizbuf+ysiz(5)
 	mes langstr(3503);ファイル名を指定して実行
 
 	ysizbuf+=ysiz(30)
@@ -129,12 +144,19 @@
 	startline xsiz(300),ysiz(30)
 	pos xsiz(5),ysizbuf+ysiz(5)
 	mes langstr(3504);コントロールパネル
-	pos xsiz(300),ysizbuf
-	color 0,141,181
+	pos xsiz(301),ysizbuf
+	colorsetting settingdata
 	startline xsiz(300),ysiz(30)
-	pos xsiz(305),ysizbuf+ysiz(5)
+	pos xsiz(306),ysizbuf+ysiz(5)
 	mes langstr(3504);コントロールパネル
 
+}
+
+if bufferallupdatestartupbuf=1:{
+	gsel 0,0
+	if bufferallupdatestartupbuf=1:{
+		title ""+langstr(1008)+" 3/"+max+" | qwerty3x ver."+qwertyver;1008=画面バッファ読み込み中
+	}
 //////////////////////////////////////////////////////////////////////
 //文字サイズ測定
 //////////////////////////////////////////////////////////////////////
@@ -143,178 +165,150 @@
 	dim fontxsizedata,100
 	dim fontysizedata,100
 
-	font fontstr,fontsize,0,0
+	font fontstr,fontsize,0
 	objmode 2,1
-	;X
+	;X 4
 	mes "qwerty3x"
 	fontxsizedata.0=ginfo(14)
-	font fontstr,fontsize+ysiz(7),0,0;15px+7px=22px
+	font fontstr,fontsize+ysiz(7),0;15px+7px=22px
 	objmode 2,1
 	mes "qwerty3x"
 	fontxsizedata.1=ginfo(14)
-	font fontstr,fontsize,0,0
+	font fontstr,fontsize,0
 	objmode 2,1
 	mes langstr(3003)
 	fontxsizedata.2=ginfo(14)
-	mes langstr(5006)
+	mes langstr(5100)
 	fontxsizedata.3=ginfo(14)
+	mes langstr(1011)
+	fontxsizedata.4=ginfo(14)
 
-	;Y
+	;Y 3
 	mes "123"
 	fontysizedata.0=ginfo(15)
-	font fontstr,fontsize+ysiz(7),0,0;15px+7px=22px
+	font fontstr,fontsize+ysiz(7),0;15px+7px=22px
 	objmode 2,1
 	mes "123"
 	fontysizedata.1=ginfo(15)
-	font fontstr,fontsize,0,0
+	font fontstr,fontsize,0
 	objmode 2,1
 	mes langstr(3003)
 	fontysizedata.2=ginfo(15)
-	mes langstr(5006)
+	mes langstr(5100)
 	fontysizedata.3=ginfo(15)
 
+}
+
+gsel 0,0
+if bufferallupdatestartupbuf=1:{
+	title ""+langstr(1008)+" 4/"+max+" | qwerty3x ver."+qwertyver
+}
 //////////////////////////////////////////////////////////////////////
-//qwerty3x 設定
+//アプリバー描画
 //////////////////////////////////////////////////////////////////////
-	buttoncnt=100
-	buffer 1007,xsiz(300),(ysiz(30)*buttoncnt),0
-	font fontstr,fontsize-3,0,0
+	if bufferallupdatestartupbuf=1:{
+		buffer 2002,(ginfo(20)*5),(ginfo(21)*5),0
+	}else{
+		gsel 2002,0
+	}
+	font fontstr,fontsize-2,0
 	objmode 2,1
-	boxfofmes int(loadset("DISPCOLORMODE",settingdata)),xsiz(0),ysiz(0),xsiz(300),(ysiz(30)*buttoncnt)
+	boxfofmes int(loadset("DISPCOLORMODE",settingdata)),xsiz(0),ysiz(0),xsiz(600),(ysiz(30)*buttoncnt)
 
 	ysizbuf=ysiz(0)
-	pos xsiz(0),ysizbuf;通常
-	boxfofmes int(loadset("DISPCOLORMODE",settingdata))
-	startline xsiz(150),ysiz(30)
-	pos xsiz(5),ysizbuf+ysiz(5)
-	mes langstr(5001);ウィンドウ画面設定
-	pos xsiz(150),ysizbuf;マウスオーバー
-	color 0,141,181
-	startline xsiz(150),ysiz(30)
-	pos xsiz(155),ysizbuf+ysiz(5)
-	mes langstr(5001);ウィンドウ画面設定
+	if screenname=langstr(3001):{;ランチャー
 
-	ysizbuf+=ysiz(30)
-	pos xsiz(0),ysizbuf;通常
-	boxfofmes int(loadset("DISPCOLORMODE",settingdata))
-	startline xsiz(150),ysiz(30)
-	pos xsiz(5),ysizbuf+ysiz(5)
-	mes langstr(5002);ウィンドウ画面設定
-	pos xsiz(150),ysizbuf;マウスオーバー
-	color 0,141,181
-	startline xsiz(150),ysiz(30)
-	pos xsiz(155),ysizbuf+ysiz(5)
-	mes langstr(5002);ウィンドウ画面設定
+	}else:if screenname=langstr(3005):{;qwerty3xの設定
+		if loadset("controlpage",settingdata)="WINDOWSCREEN":{;ウィンドウ&画面設定
+		}else:if loadset("controlpage",settingdata)="BACKGROUNDCOLOR":{;背景&色設定
+		}else:if loadset("controlpage",settingdata)="APPACT":{;動作設定
+		}else:if loadset("controlpage",settingdata)="PASSWORD":{;パスワード設定
+		}else:if loadset("controlpage",settingdata)="APPINFO":{;qwerty3xの詳細
+			ysizbuf+=ysiz(0)
+			pos xsiz(0),ysizbuf;通常
+			boxfofmes int(loadset("DISPCOLORMODE",settingdata))
+			pos xsiz(5),ysizbuf+ysiz(5)
+			mes ">"+langstr(5605);詳細表示
+			pos xsiz(300),ysizbuf;マウスオーバー
+			colorsetting settingdata
+			pos xsiz(305),ysizbuf+ysiz(5)
+			mes ">"+langstr(5605);詳細表示
+			appbarxsiz.0=ginfo(14)
+		}else:if loadset("controlpage",settingdata)="APPUPDATE":{;qwerty3x update
+		}
+	}else:if screenname=langstr(3002):{;スタートメインメニュー
+		ysizbuf+=ysiz(0)
+		pos xsiz(0),ysizbuf;通常
+		boxfofmes int(loadset("DISPCOLORMODE",settingdata))
+		pos xsiz(5),ysizbuf+ysiz(5)
+		mes ">"+langstr(3701);Windowsの電源
+		pos xsiz(300),ysizbuf;マウスオーバー
+		colorsetting settingdata
+		pos xsiz(305),ysizbuf+ysiz(5)
+		mes ">"+langstr(3701);Windowsの電源
+		appbarxsiz.0=ginfo(14)
 
-	ysizbuf+=ysiz(30)
-	pos xsiz(0),ysizbuf;通常
-	boxfofmes int(loadset("DISPCOLORMODE",settingdata))
-	startline xsiz(150),ysiz(30)
-	pos xsiz(5),ysizbuf+ysiz(5)
-	mes langstr(5003);動作設定
-	pos xsiz(150),ysizbuf;マウスオーバー
-	color 0,141,181
-	startline xsiz(150),ysiz(30)
-	pos xsiz(155),ysizbuf+ysiz(5)
-	mes langstr(5003);動作設定
+		ysizbuf+=ysiz(30)
+		pos xsiz(0),ysizbuf;通常
+		boxfofmes int(loadset("DISPCOLORMODE",settingdata))
+		pos xsiz(5),ysizbuf+ysiz(5)
+		mes ">"+langstr(3702);qwerty3xの操作
+		pos xsiz(300),ysizbuf;マウスオーバー
+		colorsetting settingdata
+		pos xsiz(305),ysizbuf+ysiz(5)
+		mes ">"+langstr(3702);qwerty3xの操作
+		appbarxsiz.1=ginfo(14)
+	}
 
-	ysizbuf+=ysiz(30)
-	pos xsiz(0),ysizbuf;通常
-	boxfofmes int(loadset("DISPCOLORMODE",settingdata))
-	startline xsiz(150),ysiz(30)
-	pos xsiz(5),ysizbuf+ysiz(5)
-	mes langstr(5004);qwerty3xの詳細
-	pos xsiz(150),ysizbuf;マウスオーバー
-	color 0,141,181
-	startline xsiz(150),ysiz(30)
-	pos xsiz(155),ysizbuf+ysiz(5)
-	mes langstr(5004);qwerty3xの詳細
-
-	ysizbuf+=ysiz(30)
-	pos xsiz(0),ysizbuf;通常
-	boxfofmes int(loadset("DISPCOLORMODE",settingdata))
-	startline xsiz(150),ysiz(30)
-	pos xsiz(5),ysizbuf+ysiz(5)
-	mes langstr(5005);wqerty3x update
-	pos xsiz(150),ysizbuf;マウスオーバー
-	color 0,141,181
-	startline xsiz(150),ysiz(30)
-	pos xsiz(155),ysizbuf+ysiz(5)
-	mes langstr(5005);qwerty3x update
-	
+if bufferallupdatestartupbuf=1:{
+	gsel 0,0
+	if bufferallupdatestartupbuf=1:{
+		title ""+langstr(1008)+" "+max+"/"+max+" | qwerty3x ver."+qwertyver;1008=画面バッファ読み込み中
+	}
 //////////////////////////////////////////////////////////////////////
 //ウィンドウボタン描画
 //////////////////////////////////////////////////////////////////////
 
 	buffer 1008,xsiz(240),ysiz(90),0;一個60px
-	boxfofmes int(loadset("DISPCOLORMODE",settingdata)),xsiz(0),ysiz(0),xsiz(240),ysiz(60)
+	boxfofmes int(loadset("DISPCOLORMODE",settingdata)),0,0,xsiz(240),ysiz(60)
 	pos xsiz(0),ysiz(0);最小化
-	line xsiz(10),ysiz(50),xsiz(50),ysiz(50)
-	line xsiz(10),ysiz(49),xsiz(50),ysiz(49)
-	line xsiz(10),ysiz(48),xsiz(50),ysiz(48)
-	line xsiz(10),ysiz(47),xsiz(50),ysiz(47)
+	boxf 10,47,50,50
 
-	pos xsiz(60),ysiz(0);最大化前
-	line xsiz(10+60),ysiz(10),xsiz(50+60),ysiz(10);上
-	line xsiz(10+60),ysiz(11),xsiz(50+60),ysiz(11)
-	line xsiz(10+60),ysiz(12),xsiz(50+60),ysiz(12)
-	line xsiz(10+60),ysiz(13),xsiz(50+60),ysiz(13)
-	line xsiz(10+60),ysiz(10),xsiz(10+60),ysiz(50);左
-	line xsiz(11+60),ysiz(10),xsiz(11+60),ysiz(50)
-	line xsiz(12+60),ysiz(10),xsiz(12+60),ysiz(50)
-	line xsiz(13+60),ysiz(10),xsiz(13+60),ysiz(50)
-	line xsiz(50+60),ysiz(10),xsiz(50+60),ysiz(50);右
-	line xsiz(49+60),ysiz(10),xsiz(49+60),ysiz(50)
-	line xsiz(48+60),ysiz(10),xsiz(48+60),ysiz(50)
-	line xsiz(47+60),ysiz(10),xsiz(47+60),ysiz(50)
-	line xsiz(10+60),ysiz(50),xsiz(50+60),ysiz(50);下
-	line xsiz(10+60),ysiz(49),xsiz(50+60),ysiz(49)
-	line xsiz(10+60),ysiz(48),xsiz(50+60),ysiz(48)
-	line xsiz(10+60),ysiz(47),xsiz(50+60),ysiz(47)
+	pos 60,0;最大化前
+	boxf 10+60,10,50+60,13;上
+	boxf 10+60,10,13+60,50;左
+	boxf 47+60,10,50+60,50;右
+	boxf 10+60,50,50+60,47;下
 
-	pos xsiz(120),ysiz(0);最大化後
-	line xsiz(10+120),ysiz(10),xsiz(50+120),ysiz(10);上
-	line xsiz(10+120),ysiz(11),xsiz(50+120),ysiz(11)
-	line xsiz(10+120),ysiz(12),xsiz(50+120),ysiz(12)
-	line xsiz(10+120),ysiz(13),xsiz(50+120),ysiz(13)
-	line xsiz(10+120),ysiz(10),xsiz(10+120),ysiz(50);左
-	line xsiz(11+120),ysiz(10),xsiz(11+120),ysiz(50)
-	line xsiz(12+120),ysiz(10),xsiz(12+120),ysiz(50)
-	line xsiz(13+120),ysiz(10),xsiz(13+120),ysiz(50)
-	line xsiz(50+120),ysiz(10),xsiz(50+120),ysiz(50);右
-	line xsiz(49+120),ysiz(10),xsiz(49+120),ysiz(50)
-	line xsiz(48+120),ysiz(10),xsiz(48+120),ysiz(50)
-	line xsiz(47+120),ysiz(10),xsiz(47+120),ysiz(50)
-	line xsiz(10+120),ysiz(50),xsiz(50+120),ysiz(50);下
-	line xsiz(10+120),ysiz(49),xsiz(50+120),ysiz(49)
-	line xsiz(10+120),ysiz(48),xsiz(50+120),ysiz(48)
-	line xsiz(10+120),ysiz(47),xsiz(50+120),ysiz(47)
-	line xsiz(10+120),ysiz(25),xsiz(40+120),ysiz(25);二つ目上
-	line xsiz(10+120),ysiz(26),xsiz(40+120),ysiz(26)
-	line xsiz(10+120),ysiz(27),xsiz(40+120),ysiz(27)
-	line xsiz(10+120),ysiz(28),xsiz(40+120),ysiz(28)
-	line xsiz(40+120),ysiz(25),xsiz(40+120),ysiz(50);二つ目右
-	line xsiz(39+120),ysiz(25),xsiz(39+120),ysiz(50)
-	line xsiz(38+120),ysiz(25),xsiz(38+120),ysiz(50)
-	line xsiz(37+120),ysiz(25),xsiz(37+120),ysiz(50)
+	pos 120,0;最大化後
+	boxf 10+120,10,50+120,13;上
+	boxf 10+120,10,13+120,50;左
+	boxf 47+120,10,50+120,50;右
+	boxf 10+120,50,50+120,47;下
+	boxf 10+120,25,40+120,28;二つ目上
+	boxf 37+120,25,40+120,50;二つ目右(ずれるから少し大き目)
 
-	pos xsiz(180),ysiz(0);終了
-	line xsiz(10+180),ysiz(10),xsiz(50+180),ysiz(47);左上から右下
-	line xsiz(10+180),ysiz(11),xsiz(50+180),ysiz(48)
-	line xsiz(10+180),ysiz(12),xsiz(50+180),ysiz(49)
-	line xsiz(10+180),ysiz(13),xsiz(50+180),ysiz(50)
-	line xsiz(10+180),ysiz(47),xsiz(50+180),ysiz(10);左下から右上
-	line xsiz(10+180),ysiz(48),xsiz(50+180),ysiz(11)
-	line xsiz(10+180),ysiz(49),xsiz(50+180),ysiz(12)
-	line xsiz(10+180),ysiz(50),xsiz(50+180),ysiz(13)
+	pos 180,0;終了
+	line 10+180,10,50+180,47;左上から右下
+	line 10+180,11,50+180,48
+	line 10+180,12,50+180,49
+	line 10+180,13,50+180,50
+	line 10+180,47,50+180,10;左下から右上
+	line 10+180,48,50+180,11
+	line 10+180,49,50+180,12
+	line 10+180,50,50+180,13
 
 	pos xsiz(0),ysiz(60)
-	gzoom xsiz(30),ysiz(30),1008,xsiz(0),ysiz(0),xsiz(60),ysiz(60),1;最小化
+	gzoom xsiz(30),ysiz(30),1008,0,0,60,60,1;最小化
 	pos xsiz(30),ysiz(60)
-	gzoom xsiz(30),ysiz(30),1008,xsiz(60),ysiz(0),xsiz(60),ysiz(60),1;最大化前
+	gzoom xsiz(30),ysiz(30),1008,60,0,60,60,1;最大化前
 	pos xsiz(60),ysiz(60)
-	gzoom xsiz(30),ysiz(30),1008,xsiz(120),ysiz(0),xsiz(60),ysiz(60),1;最大化後
+	gzoom xsiz(30),ysiz(30),1008,120,0,60,60,1;最大化後
 	pos xsiz(90),ysiz(60)
-	gzoom xsiz(30),ysiz(30),1008,xsiz(180),ysiz(0),xsiz(60),ysiz(60),1;終了
-	
+	gzoom xsiz(30),ysiz(30),1008,180,0,60,60,1;終了
+
+	gsel 0,0
+}
+	title ""+langstr(1002)+" | qwerty3x ver."+qwertyver
+
 	return

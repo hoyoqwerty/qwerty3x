@@ -1,424 +1,3504 @@
-#module qwerty3x
+*controlmakelist	
+;WINDOWSCREEN===ウィンドウ&画面設定
+;BACKGROUNDCOLOR===背景&色設定
+;APPACT===動作設定
+;PASSWORD===パスワード設定
+;APPINFO===qwerty3xの詳細
+;APPUPDATE===qwerty3x update
 
-#include "hspmath.as"
+	objimage -1
 
-#define ctype xsiz(%1) int(round(double(%1)*xdpi@/96))
-#define ctype ysiz(%1) int(round(double(%1)*ydpi@/96))
-#define ctype sizx(%1) int(%1*96/xdpi@)
-#define ctype sizy(%1) int(%1*96/ydpi@)
+	font fontstr,fontsize-2,0
+	objmode 2,1
 
-#deffunc testmodule
+	nowcontrollistposY=ysiz(10)
+	pos xsiz(2),nowcontrollistposY
+	boxfofmes onezero(loadset("DISPCOLORMODE",settingdata)),xsiz(0),nowcontrollistposY,xsiz(0)+fontxsizedata.3+xsiz(10),nowcontrollistposY+fontysizedata.3
+	pos xsiz(2),nowcontrollistposY
+	mes langstr(5100);・qwerty3x 設定リスト
 
-	dialog defaultsettingdata@
+	objsize xsiz(170),ysiz(30)
+	nowcontrollistposY+=ysiz(40)	
+	bufferbuttonY=ysiz(0)
+	pos xsiz(1),nowcontrollistposY
+	button gosub langstr(5001),*controlchangelist
+	controllistadr.0=stat;ウィンドウ画面設定
+
+	nowcontrollistposY+=ysiz(30)
+	bufferbuttonY+=ysiz(30)
+	pos xsiz(1),nowcontrollistposY
+	button gosub langstr(5002),*controlchangelist
+	controllistadr.1=stat;背景色設定
+
+	nowcontrollistposY+=ysiz(30)
+	bufferbuttonY+=ysiz(30)
+	pos xsiz(1),nowcontrollistposY
+	button gosub langstr(5003),*controlchangelist
+	controllistadr.2=stat;動作設定
+
+	nowcontrollistposY+=ysiz(30)
+	bufferbuttonY+=ysiz(30)
+	pos xsiz(1),nowcontrollistposY
+	button gosub langstr(5006),*controlchangelist
+	controllistadr.3=stat;パスワード設定
+
+	nowcontrollistposY+=ysiz(30)
+	bufferbuttonY+=ysiz(30)
+	pos xsiz(1),nowcontrollistposY
+	button gosub langstr(5004),*controlchangelist
+	controllistadr.4=stat;qwerty3xの詳細
+
+	nowcontrollistposY+=ysiz(30)
+	bufferbuttonY+=ysiz(30)
+	pos xsiz(1),nowcontrollistposY
+	button gosub langstr(5005),*controlchangelist
+	controllistadr.5=stat;qwerty3x update
+
+	if loadset("controlpage",settingdata)="WINDOWSCREEN":{;ウィンドウ画面設定
+		objprm controllistadr.0,">"+langstr(5001)+""
+		sendmsg objinfo(controllistadr.0,2),$F4,$1
+	}else:if loadset("controlpage",settingdata)="BACKGROUNDCOLOR":{;背景色設定
+		objprm controllistadr.1,">"+langstr(5002)+""
+		sendmsg objinfo(controllistadr.1,2),$F4,$1
+	}else:if loadset("controlpage",settingdata)="APPACT":{;動作設定
+		objprm controllistadr.2,">"+langstr(5003)+""
+		sendmsg objinfo(controllistadr.2,2),$F4,$1
+	}else:if loadset("controlpage",settingdata)="PASSWORD":{;パスワード設定
+		objprm controllistadr.3,">"+langstr(5006)+""
+		sendmsg objinfo(controllistadr.3,2),$F4,$1
+	}else:if loadset("controlpage",settingdata)="APPINFO":{;qwerty3xの詳細
+		objprm controllistadr.4,">"+langstr(5004)+""
+		sendmsg objinfo(controllistadr.4,2),$F4,$1
+	}else:if loadset("controlpage",settingdata)="APPUPDATE":{;qwerty3x update
+		objprm controllistadr.5,">"+langstr(5005)+""
+		sendmsg objinfo(controllistadr.5,2),$F4,$1
+	}
+
+	foreach controllistadr
+		getwindowlong objinfo(controllistadr.cnt,2),-16
+		setwindowlong objinfo(controllistadr.cnt,2),-16,stat|$100
+	loop
 
 	return
 
-#deffunc encword int p1,var p2,var p3
-; encword命令 文字列を暗号化する
-;p1 int 暗号化強度bit
-;p2 var 暗号化前文字列
-;p3 var 暗号化後文字列
-	passwordkey=p1
-	nagasa=strlen(p2)
-	sdim password,(nagasa*2)
-	repeat nagasa
-		buf=peek(p2,cnt)
-		buf2=buf+passwordkey
+*controlchangelist
+	statbuf=stat
+	if controllistadr.0=statbuf:{
+		saveset "controlpage",settingdata,"WINDOWSCREEN"
+	}else:if controllistadr.1=statbuf:{
+		saveset "controlpage",settingdata,"BACKGROUNDCOLOR"
+	}else:if controllistadr.2=statbuf:{
+		saveset "controlpage",settingdata,"APPACT"
+	}else:if controllistadr.3=statbuf:{
+		saveset "controlpage",settingdata,"PASSWORD"
+	}else:if controllistadr.4=statbuf:{
+		saveset "controlpage",settingdata,"APPINFO"
+	}else:if controllistadr.5=statbuf:{
+		saveset "controlpage",settingdata,"APPUPDATE"
+	}
 
-		poke password,cnt,buf2
-	loop
-	p3=password
+	gosub *makescreen
 
 	return
 
-#deffunc decword int p1,var p2,var p3
-; decword命令 文字列の暗号化を解除する
-;p1 int 暗号化強度bit
-;p2 var 暗号化解除前文字列
-;p3 var 暗号化解除後文字列
-	passwordkey=p1
-	nagasa=strlen(p2)
-	sdim password,(nagasa*2)
-	sdim p3,(nagasa*2)
-	repeat nagasa
-		buf=(peek(p2,cnt)-passwordkey)
+*controlmakescreen;最初からgsel 0002,0されてる前提
+	width clientwindowx-xsiz(180),clientwindowy-ysiz(30),xsiz(180),ysiz(30)
+	clrobj
+	color 0,0,0
+	boxf 
+	font fontstr,fontsize,0
+	objmode 2,1
 
-		poke password,cnt,buf
-	loop
-	p3=password
-
-	return
-
-
-#defcfunc loadset str p1,var p2
-; loadset関数 設定を読み込む
-;p1 str 参照設定名文字列
-;p2 var 参照文字列変数
-;戻り値:refstr=設定内容
-	notesel p2
-	if notefind(p1,1)=-1:{
-		notesel defaultsettingdata@
-		if notefind(p1,1)=-1:{
-			dialog "qwerty3x Critical error\n\nerror code: LOADSET_IN_SAVESET_DEFAULT_NOT_FOUND\n\nloadset関数内のsaveset命令から参照したデフォルト設定データに、指定された内容がありませんでした。\n指定内容が間違っている可能性があります。\n\nerror function infomation:\ndefaultsettingdata="+defaultsettingdata+"\np1:"+p1,1,"qwerty3x 内部モジュールエラー"
-			end
+	if loadset("backgroundmode",settingdata)="COLOR":{
+		backgroundcolorrgbdata=loadset("backgroundcolor",settingdata)
+		split backgroundcolorrgbdata,",",backgroundcolorrdata,backgroundcolorgdata,backgroundcolorbdata
+		color int(backgroundcolorrdata),int(backgroundcolorgdata),int(backgroundcolorbdata)
+		boxf xsiz(0),ysiz(0),ginfo(12),ginfo(13)
+	}else:if loadset("backgroundmode",settingdata)="IMAGE":{
+		gsel 1007,0
+		backpicx=ginfo(12)
+		backpicy=ginfo(13)
+		gsel 0002,0
+		if ((backpicy*ginfo(12))/backpicx)<=ginfo(13):{
+			posbuf3=(backpicy*ginfo(12))/backpicx
+			posbuf4=(ginfo(13)-posbuf3)/2
+			pos xsiz(0),ysiz(0)+posbuf4
+			gzoom ginfo(12),posbuf3,1007,0,0,backpicx,backpicy,1
+		}else{
+			posbuf3=(backpicx*ginfo(13))/backpicy
+			posbuf4=(ginfo(12)-posbuf3)/2
+			pos xsiz(0)+posbuf4,ysiz(0)
+			gzoom posbuf3,ginfo(13),1007,0,0,backpicx,backpicy,1
 		}
-		noteget buf,notefind(p1,1)
-		notesel p2
-		noteadd buf,-1,0
+	}else:if loadset("backgroundmode",settingdata)="SLIDESHOW":{
+		gsel 1007,0
+		backpicx=ginfo(12)
+		backpicy=ginfo(13)
+		gsel 0002,0
+		if ((backpicy*ginfo(12))/backpicx)<=ginfo(13):{
+			posbuf3=(backpicy*ginfo(12))/backpicx
+			posbuf4=(ginfo(13)-posbuf3)/2
+			pos xsiz(0),ysiz(0)+posbuf4
+			gzoom ginfo(12),posbuf3,1007,0,0,backpicx,backpicy,1
+		}else{
+			posbuf3=(backpicx*ginfo(13))/backpicy
+			posbuf4=(ginfo(12)-posbuf3)/2
+			pos xsiz(0)+posbuf4,ysiz(0)
+			gzoom posbuf3,ginfo(13),1007,0,0,backpicx,backpicy,1
+		}
 	}
-	modulesettingtype=""
-	modulesettingdata=""
-	moduleok=0
-	repeat notemax
-		noteget buf,cnt
-	
-		split buf,"===",modulesettingtype,modulesettingdata
 
-		if getpath(modulesettingtype,16)=getpath(p1,16):{
-			moduleok=1
-			break
+	nowcontrolscreenposY=0
+	if loadset("CONTROLPAGE",settingdata)="WINDOWSCREEN":{;ウィンドウ&画面設定
+		nowcontrolscreenposY+=ysiz(10)
+		pos xsiz(10),nowcontrolscreenposY
+		boxfofmes onezero(loadset("DISPCOLORMODE",settingdata)),xsiz(10),nowcontrolscreenposY,ginfo(12)-xsiz(30),nowcontrolscreenposY+fontysizedata.3
+		pos xsiz(12),nowcontrolscreenposY
+		mes langstr(52011);ウィンドウ動作
+		
+		nowcontrolscreenposY+=ysiz(25)
+		pos xsiz(10),nowcontrolscreenposY
+		objsize ginfo(12)-xsiz(40),ysiz(30)
+		controlalwaysfront=int(loadset("alwaysfront",settingdata))
+		chkbox langstr(5201),controlalwaysfront
+		controlalwaysfrontadr=stat;常に最前面に表示する
+
+		nowcontrolscreenposY+=ysiz(40)
+		pos xsiz(10),nowcontrolscreenposY
+		controlautomini=int(loadset("automini",settingdata))
+		chkbox langstr(5202),controlautomini
+		controlautominiadr=stat;ランチャーや外部ウィンドウを開く操作をした時、自動でqwerty3xが最小化されるようにする
+
+		nowcontrolscreenposY+=ysiz(40)
+		pos xsiz(10),nowcontrolscreenposY
+		controluseanimation=int(loadset("useanimation",settingdata))
+		chkbox langstr(5206),controluseanimation
+		controluseanimationadr=stat;表示アニメーションを使用する
+
+		nowcontrolscreenposY+=ysiz(40)
+		pos xsiz(10),nowcontrolscreenposY
+		boxfofmes onezero(loadset("DISPCOLORMODE",settingdata)),xsiz(10),nowcontrolscreenposY,ginfo(12)-xsiz(30),nowcontrolscreenposY+fontysizedata.3
+		pos xsiz(12),nowcontrolscreenposY
+		mes langstr(5203);フォント設定
+
+		nowcontrolscreenposY+=ysiz(25)
+		pos xsiz(10),nowcontrolscreenposY
+		if loadset("fontname",settingdata)="AUTO":{
+			controlfontname=0
+		}else:if loadset("fontname",settingdata)="Yu Gothic UI":{
+			controlfontname=1
+		}else:if loadset("fontname",settingdata)="Meiryo UI":{
+			controlfontname=2
+		}else:if loadset("fontname",settingdata)="MS UI Gothic":{
+			controlfontname=3
 		}
-	loop
-	if moduleok!1:{
-		dialog "qwerty3x Critical error\n\nerror code: LOADSET_NOT_FOUND\n\nloadset関数の指定内容が間違っている可能性があります。\n\nerror function infomation:\nmoduleok="+moduleok+"\nmodulesettingtype="+modulesettingtype+"\nmodulesettingdata="+modulesettingdata+"\np1="+p1,1,"qwerty3x 内部モジュールエラー"
-		end
-	}
-	noteunsel
-	
-	return modulesettingdata
+		combox controlfontname,ysiz(100),""+langstr(52031)+"\n"+langstr(52032)+"\n"+langstr(52033)+"\n"+langstr(52034)
+		controlfontnameadr=stat
 
-#deffunc saveset str p1,var p2,str p3
-; saveset命令 設定を保存する
-;p1 str 参照設定名文字列
-;p2 var 参照文字列変数
-;p3 str 変更後設定内容
-;戻り値:stat=参照設定の行数
-	notesel p2
-	if notefind(p1,1)=-1:{
-		notesel defaultsettingdata@
-		if notefind(p1,1)=-1:{
-			dialog "qwerty3x Critical error\n\nerror code: SAVESET_DEFAULT_NOT_FOUND\n\nsaveset命令から参照したデフォルト設定データに、指定された内容がありませんでした。\n指定内容が間違っている可能性があります。\n\nerror function infomation:\ndefaultsettingdata="+defaultsettingdata+"\np1:"+p1,1,"qwerty3x 内部モジュールエラー"
-			end
-		}
-		noteget buf,notefind(p1,1)
-		notesel p2
-		noteadd buf,-1,0
-	}
-	modulesettingtype=""
-	modulesettingdata=""
-	repeat notemax
-		noteget buf,cnt
-		split buf,"===",modulesettingtype,modulesettingdata
+		nowcontrolscreenposY+=ysiz(40)
+		pos xsiz(10),nowcontrolscreenposY
+		boxfofmes onezero(loadset("DISPCOLORMODE",settingdata)),xsiz(10),nowcontrolscreenposY,ginfo(12)-xsiz(30),nowcontrolscreenposY+fontysizedata.3
+		pos xsiz(12),nowcontrolscreenposY
+		mes langstr(5204);画面モード
 
-		if getpath(modulesettingtype,16)=getpath(p1,16):{
-			buf2=""+modulesettingtype+"==="+p3
-			buf3=cnt
-			noteadd buf2,buf3,1
-			break
-		}
-	loop
-	noteunsel
+		nowcontrolscreenposY+=ysiz(25)
+		pos xsiz(10),nowcontrolscreenposY
+		controldispcolormode=int(loadset("dispcolormode",settingdata))
+		combox controldispcolormode,ysiz(100),""+langstr(52041)+"\n"+langstr(52042)
+		controldispcolormodeadr=stat
 
-	return p2
+		nowcontrolscreenposY+=ysiz(40)
+		pos xsiz(10),nowcontrolscreenposY
+		boxfofmes onezero(loadset("DISPCOLORMODE",settingdata)),xsiz(10),nowcontrolscreenposY,ginfo(12)-xsiz(30),nowcontrolscreenposY+fontysizedata.3
+		pos xsiz(12),nowcontrolscreenposY
+		mes langstr(5205);言語設定
 
-#defcfunc langstr int p1
-; langstr関数 言語ファイル変換を行う
-;p1 int 言語データの参照設定名文字列
-;戻り値:refstr=変換後の文字列
-	titlestrdata=loadset(strf("%04d",p1),languagedata@)
-	notesel langstrrep@
-	repeat notemax
-		noteget buf,cnt
-		split buf,"===",modulelangstrback,modulelangstrnext
+		nowcontrolscreenposY+=ysiz(25)
+		pos xsiz(10),nowcontrolscreenposY
+		chdir languagefile
+		languagedatalist="";dirlistで取得先に指定する変数
+		languagedatacomlist="";comboxで実際に表示する変数(languagedata)
+		languagedatacomset="";設定に使用する変数(languagesetting)
+		languagedatacomtest="";読み込む変数
+		dirlist languagedatalist,"*.q3lf",1
+		notesel languagedatalist
+		repeat notemax
+			notesel languagedatalist
+			noteget buf,cnt
+			notesel languagedatacomtest
+			noteload languagefile+"\\"+buf
 
-		strrep titlestrdata,modulelangstrback,modulelangstrnext
-	loop
-	titlestrdata2=""
-	notesel titlestrdata
-	if notefind("\\n",2)!-1:{
-		split titlestrdata,"\\n",modulelangstrsplit
-		repeat stat
-			notesel titlestrdata2
-			noteadd modulelangstrsplit.cnt,-1,0
+			if loadset("languagesetting",languagedatacomtest)=loadset("language",settingdata):{
+				controllanguage=cnt
+			};現在の設定を判定
+
+			notesel languagedatacomlist
+			noteadd loadset("languagedata",languagedatacomtest),-1,0
+
+			notesel languagedatacomset
+			noteadd loadset("languagesetting",languagedatacomtest),-1,0
 		loop
-	}else{
-		titlestrdata2=titlestrdata
-	}
+		combox controllanguage,ysiz(100),languagedatacomlist
+		controllanguageadr=stat
+		
+		controlalwaysfrontbuf=controlalwaysfront
+		controlfontnamebuf=controlfontname
+		controldispcolormodebuf=controldispcolormode
+		controllanguagebuf=controllanguage
+	}else:if loadset("CONTROLPAGE",settingdata)="BACKGROUNDCOLOR":{;背景&色設定
+		nowcontrolscreenposY+=ysiz(10)
+		pos xsiz(10),nowcontrolscreenposY
+		boxfofmes onezero(loadset("DISPCOLORMODE",settingdata)),xsiz(10),nowcontrolscreenposY,ginfo(12)-xsiz(30),nowcontrolscreenposY+fontysizedata.3
+		pos xsiz(12),nowcontrolscreenposY
+		mes langstr(5301);qwerty3x スタイルカラー
 
-	return titlestrdata2
+		nowcontrolscreenposY+=ysiz(25)
+		boxfofmes onezero(loadset("DISPCOLORMODE",settingdata)),xsiz(10),nowcontrolscreenposY,ginfo(12)-xsiz(30),nowcontrolscreenposY+ysiz(50)
+		pos xsiz(20),nowcontrolscreenposY+ysiz(30)
+		systemrgbdata=loadset("systemrgb",settingdata)
+		split systemrgbdata,",",systemrdata,systemgdata,systembdata
+		mes "R: "+strf("%03d",systemrdata)+"  G: "+strf("%03d",systemgdata)+"  B: "+strf("%03d",systembdata)
+		colorsetting settingdata
+		boxf xsiz(20),nowcontrolscreenposY+ysiz(5),xsiz(20)+ginfo(14),nowcontrolscreenposY+ysiz(25)
+		pos ginfo(12)-xsiz(140),nowcontrolscreenposY+ysiz(10)
+		objsize xsiz(100),ysiz(30)
+		button gosub langstr(53011),*controlchangesystemrgb
+		controlsystemrgbadr=stat
 
-	return
+		nowcontrolscreenposY+=ysiz(60)
+		pos xsiz(10),nowcontrolscreenposY
+		boxfofmes onezero(loadset("DISPCOLORMODE",settingdata)),xsiz(10),nowcontrolscreenposY,ginfo(12)-xsiz(30),nowcontrolscreenposY+fontysizedata.3
+		pos xsiz(12),nowcontrolscreenposY
+		mes langstr(5302);背景
 
-#deffunc boxfofmes int p1,int p2,int p3,int p4,int p5
-;boxfofmes命令 画面モードに合わせてboxf命令を動かす
-;p1 int 0or1 (ダークモードorライトモード)
-;p2 int boxf命令の1p (四角形描画の左上x座標)
-;p3 int boxf命令の2p (四角形描画の左上y座標)
-;p4 int boxf命令の3p (四角形描画の右下x座標)
-;p5 int boxf命令の4p (四角形描画の右下y座標)
+		nowcontrolscreenposY+=ysiz(25)
+		if loadset("backgroundmode",settingdata)="COLOR":{
+			controlbackgroundmode=0
+		}else:if loadset("backgroundmode",settingdata)="IMAGE":{
+			controlbackgroundmode=1
+		}else:if loadset("backgroundmode",settingdata)="SLIDESHOW":{
+			controlbackgroundmode=2
+		}
+		pos xsiz(10),nowcontrolscreenposY
+		objsize ginfo(12)-xsiz(40),ysiz(30)
+		combox controlbackgroundmode,ysiz(100),""+langstr(53021)+langstr(53022)+"\n"+langstr(53021)+langstr(53023)+"\n"+langstr(53021)+langstr(53024)
+		controlbackgroundmodeadr=stat
+		
+		nowcontrolscreenposY+=ysiz(40)
+		pos xsiz(10),nowcontrolscreenposY
+		;枠   xsiz(280),ysiz(280)
+		;内容 xsiz(270),ysiz(270) 枠の幅5px
+		boxfofmes onezero(loadset("DISPCOLORMODE",settingdata)),xsiz(10),nowcontrolscreenposY,xsiz(290),nowcontrolscreenposY+ysiz(280)
+		if loadset("backgroundmode",settingdata)="COLOR":{
+			backgroundcolorrgbdata=loadset("backgroundcolor",settingdata)
+			split backgroundcolorrgbdata,",",backgroundcolorrdata,backgroundcolorgdata,backgroundcolorbdata
+			color int(backgroundcolorrdata),int(backgroundcolorgdata),int(backgroundcolorbdata)
+			if ((ginfo(13)*xsiz(270))/ginfo(12))<=ysiz(270):{
+				posbuf=(ginfo(13)*xsiz(270))/ginfo(12)
+				posbuf2=(ysiz(270)-posbuf)/2
+				pos xsiz(15),nowcontrolscreenposY+ysiz(5)+posbuf2
+				boxf xsiz(15),nowcontrolscreenposY+ysiz(5)+posbuf2,xsiz(285),nowcontrolscreenposY+ysiz(5)+posbuf2+posbuf
+			}else{
+				posbuf=(ginfo(12)*ysiz(270))/ginfo(13)
+				posbuf2=(xsiz(270)-posbuf)/2
+				pos xsiz(15)+posbuf2,nowcontrolscreenposY+ysiz(5)
+				boxf xsiz(15)+posbuf2,nowcontrolscreenposY+ysiz(5),xsiz(15)+posbuf2+posbuf,nowcontrolscreenposY+ysiz(275)
+			}
 
-	if p1=0:{
-		color 32,32,32
-	}else{
-		color 255,255,255
-	}
-
-	boxf p2,p3,p4,p5
-
-	if p1=0:{
-		color 255,255,255
-	}else{
-		color 0,0,0
-	}
-
-	return
-
-#defcfunc onezero str p1
-;onezero関数 1を0に、0を1に変える
-;p1 str 内容
-
-	if p1="0":{
-		result=1
-	}else:p1="1":{
-		result=0
-	}else{
-		result=-1
-	}
-
-	return result
-
-#deffunc startline int p1,int p2,int p3
-;startline命令 スタートメインメニューのボタンの線を引く
-;p1 int サイズのX方向の大きさ
-;p2 int サイズのY方向の大きさ	
-;p3 int 描画モード
-
-	if p3=0:{
-		line ginfo(22),ginfo(23),ginfo(22)+p1,ginfo(23);上
-		line ginfo(22),ginfo(23),ginfo(22),ginfo(23)+p2;左
-	}else:if p3=1:{
-		line ginfo(22),ginfo(23),ginfo(22)+p1,ginfo(23);上
-		line ginfo(22)+p1,ginfo(23),ginfo(22)+p1,ginfo(23)+p2
-	}
-
-	return
-
-#deffunc startqwebtn
-;startqwebtn命令 自作画像ボタンオブジェクト配置の準備を行う
-	qwebtndatabase=""
-
-	return
-
-#deffunc qwebtn array p1,array p2
-;qwebtn命令 自作画像ボタンオブジェクトを設置する
-;p1 array 位置サイズ等
-;	.0=ボタンに使用するウィンドウID
-;	.1=ボタンのXサイズ	.2=ボタンのYサイズ
-;	.3=ボタンのX位置	.4=ボタンのY位置
-;p2 array 画像先等
-;	.0=コピー元に使用するウィンドウID
-;	.1=参照X座標(通常時)							.2=参照Y座標(通常時)
-;	.3=参照X座標(押し下げ時・マウスクリック時)		.4=参照Y座標(押し下げ時・マウスクリック時)
-;	.5=参照X座標(マウスオーバー時・マウスポイント時).6=参照Y座標(マウスオーバー時・マウスポイント時)
-	modulenowginfosel=ginfo(3)
-	
-	bgscr (p1.0),ginfo(20),ginfo(21),2
-	hchild.(p1.0)=hwnd
-	getwindowlong hwnd,-16
-	setwindowlong hwnd,-16,stat|$CF0000
-	setparent hchild.(p1.0),@hclient
-	getwindowlong hwnd,-16
-	setwindowlong hwnd,-16,stat-$800000-$40000
-	width (p1.1),(p1.2),(p1.3),(p1.4)
-
-	pos 0,0
-	gmode 0,(p1.1),(p1.2),0
-	gcopy (p2.0),(p2.1),(p2.2),(p1.1),(p1.2);通常時
-	pos (p1.1)+20,0
-	gmode 0,(p1.1),(p1.2),0
-	gcopy (p2.0),(p2.3),(p2.4),(p1.1),(p1.2);押し下げ・マウスクリック時
-	pos ((p1.1)*2)+(20*2),0
-	gmode 0,(p1.1),(p1.2),0
-	gcopy (p2.0),(p2.5),(p2.6),(p1.1),(p1.2);マウスオーバー時・マウスポイント時
-
-	groll 0,0
-
-	notesel qwebtndatabase
-	;使用しているウィンドウID<database>Xサイズ<database>Yサイズ<database>MDI上X位置<database>MDI上Y位置<database>スクリーン上X位置<database>スクリーン上Y位置
-	databaseaddtext=""+(p1.0)+"<database>"+(p1.1)+"<database>"+(p1.2)+"<database>"+(p1.3)+"<database>"+(p1.4)+"<database>"+ginfo(4)+"<database>"+ginfo(5)+""
-	noteadd databaseaddtext,-1,0
-
-	gsel (p1.0),2
-	gsel modulenowginfosel,0
-
-	return
-
-#deffunc resizeqwebtn array p1
-;resizeqwebtn命令 自作画像ボタンオブジェクトを移動・リサイズする
-;p1 array 位置サイズ等
-;	.0=ボタンに使用するウィンドウID
-;	.1=ボタンのXサイズ	.2=ボタンのYサイズ
-;	.3=ボタンのX位置	.4=ボタンのY位置
-	modulenowginfosel=ginfo(3)
-
-	gsel (p1.0)
-	width (p1.1),(p1.2),(p1.3),(p1.4)
-
-	gsel (p1.0),2
-	gsel modulenowginfosel,0
-
-	return
-
-#deffunc checkqwebtn int p1,int p2
-;checkqwebtn関数 自作画像ボタンオブジェクトの動作をさせる
-;p1 int ボタンに使用しているウィンドウID
-;p2 int キーコード getkey系と共通
-;	1=左クリック 2=右クリック 4=マウスホイールクリック
-;戻り値:
-;	-1=失敗								0=通常時
-;	1=マウス押し下げ・マウスクリック時	2=マウスオーバー時・マウスポイント時
-	modulenowginfosel=ginfo(3)
-	getkey clicking,p2
-
-	databasegettext=""
-	notesel qwebtndatabase
-	if notefind(p1,1)=-1:{
-		checkresult=-1;失敗
-	}
-
-	if checkresult!-1:{
-		noteget databasegettext,notefind(p1,1)
-		split databasegettext,"<database>",datausewindowid,datawindowxsize,datawindowysize,datamdixpos,datamdiypos,datascreenxpos,datascreenypos
-	
-		if datascreenxpos<=mousex&mousex<=(datascreenxpos+datawindowxsize):{;マウスX座標はウィンドウ左上X座標より大きく、かつウィンドウ右下X座標より小さいとき
-			if datascreenpos<=mousey&mousey<=(datascreenypos+datawindowysize):{;マウスY座標はウィンドウ左上Y座標より大きく、かつウィンドウ右下Y座標より小さいとき
-				;総じて、自作画像ボタンの範囲内の時
-				if clicking=1:{;クリック押し下げ時
-					checkresult=1
+			nowcontrolscreenposY+=ysiz(300)
+			boxfofmes onezero(loadset("DISPCOLORMODE",settingdata)),xsiz(10),nowcontrolscreenposY,ginfo(12)-xsiz(30),nowcontrolscreenposY+ysiz(50)
+			pos xsiz(20),nowcontrolscreenposY+ysiz(30)
+			mes "R: "+strf("%03d",backgroundcolorrdata)+"  G: "+strf("%03d",backgroundcolorgdata)+"  B: "+strf("%03d",backgroundcolorbdata)
+			color int(backgroundcolorrdata),int(backgroundcolorgdata),int(backgroundcolorbdata)
+			boxf xsiz(20),nowcontrolscreenposY+ysiz(5),xsiz(20)+ginfo(14),nowcontrolscreenposY+ysiz(25)
+			pos ginfo(12)-xsiz(140),nowcontrolscreenposY+ysiz(10)
+			objsize xsiz(100),ysiz(30)
+			button gosub langstr(53025),*controlchangebackgroundcolor
+			controlchangebackgroundcoloradr=stat
+		}else:if loadset("backgroundmode",settingdata)="IMAGE":{
+			gsel 1007,0
+			backpicx=ginfo(12)
+			backpicy=ginfo(13)
+			gsel 0002,0
+			if ((ginfo(13)*xsiz(270))/ginfo(12))<=ysiz(270):{
+				posbuf=(ginfo(13)*xsiz(270))/ginfo(12)
+				posbuf2=(ysiz(270)-posbuf)/2
+				pos xsiz(15),nowcontrolscreenposY+ysiz(5)+posbuf2
+				boxf xsiz(15),nowcontrolscreenposY+ysiz(5)+posbuf2,xsiz(285),nowcontrolscreenposY+ysiz(5)+posbuf2+posbuf
+				sizebufx=xsiz(270)
+				sizebufy=posbuf
+			}else{
+				posbuf=(ginfo(12)*ysiz(270))/ginfo(13)
+				posbuf2=(xsiz(270)-posbuf)/2
+				pos xsiz(15)+posbuf2,nowcontrolscreenposY+ysiz(5)
+				boxf xsiz(15)+posbuf2,nowcontrolscreenposY+ysiz(5),xsiz(15)+posbuf2+posbuf,nowcontrolscreenposY+ysiz(275)
+				sizebufx=posbuf
+				sizebufy=ysiz(270)
+			}
+			if ((backpicy*sizebufx)/backpicx)<=sizebufy:{
+				posbuf3=(backpicy*sizebufx)/backpicx
+				posbuf4=(sizebufy-posbuf3)/2
+				if ((ginfo(13)*xsiz(270))/ginfo(12))<=ysiz(270):{
+					posbuf5=(ysiz(270)-posbuf3)/2
+					pos xsiz(15),nowcontrolscreenposY+posbuf5
 				}else{
-					checkresult=2
+					pos xsiz(15)+posbuf2,nowcontrolscreenposY+ysiz(5)+posbuf4
+				}
+				gzoom sizebufx,posbuf3,1007,0,0,backpicx,backpicy,1
+			}else{
+				posbuf3=(backpicx*sizebufy)/backpicy
+				posbuf4=(sizebufx-posbuf3)/2
+				if ((ginfo(13)*xsiz(270))/ginfo(12))>ysiz(270):{
+					posbuf5=(xsiz(270)-posbuf3)/2
+					pos xsiz(15)+posbuf5,nowcontrolscreenposY+ysiz(5)
+				}else{
+					pos xsiz(15)+posbuf4,nowcontrolscreenposY+ysiz(5)+posbuf2
+				}
+				gzoom posbuf3,sizebufy,1007,0,0,backpicx,backpicy,1
+			}
+
+			nowcontrolscreenposY+=ysiz(300)
+			pos xsiz(10),nowcontrolscreenposY
+			objsize ginfo(12)-xsiz(140),ysiz(30)
+			controlbackgroundfile=loadset("backgroundfile",settingdata)
+			input controlbackgroundfile,ginfo(12)-xsiz(140),ysiz(30),0
+			controlbackgroundfileadr=stat
+			pos ginfo(12)-xsiz(130),nowcontrolscreenposY
+			objsize xsiz(100),ysiz(30)
+			button gosub langstr(53026),*controldialogbackgroundfile;参照
+			controldialogbackgroundfileadr=stat
+
+			nowcontrolscreenposY+=ysiz(30)
+			pos xsiz(10),nowcontrolscreenposY
+			objsize xsiz(200),ysiz(30)
+			button gosub langstr(53027),*controlrunbackgroundfile;別アプリで開く
+			controlrunbackgroundfileadr=stat
+
+			nowcontrolscreenposY+=ysiz(30)
+			pos xsiz(10),nowcontrolscreenposY
+			objsize xsiz(200),ysiz(30)
+			button gosub langstr(53028),*controlapplybackgroundfile
+			controlapplybackgroundfileadr=stat
+		}else:if loadset("backgroundmode",settingdata)="SLIDESHOW":{
+			gsel 1007,0
+			backpicx=ginfo(12)
+			backpicy=ginfo(13)
+			gsel 0002,0
+			if ((ginfo(13)*xsiz(270))/ginfo(12))<=ysiz(270):{
+				posbuf=(ginfo(13)*xsiz(270))/ginfo(12)
+				posbuf2=(ysiz(270)-posbuf)/2
+				pos xsiz(15),nowcontrolscreenposY+ysiz(5)+posbuf2
+				boxf xsiz(15),nowcontrolscreenposY+ysiz(5)+posbuf2,xsiz(285),nowcontrolscreenposY+ysiz(5)+posbuf2+posbuf
+				sizebufx=xsiz(270)
+				sizebufy=posbuf
+			}else{
+				posbuf=(ginfo(12)*ysiz(270))/ginfo(13)
+				posbuf2=(xsiz(270)-posbuf)/2
+				pos xsiz(15)+posbuf2,nowcontrolscreenposY+ysiz(5)
+				boxf xsiz(15)+posbuf2,nowcontrolscreenposY+ysiz(5),xsiz(15)+posbuf2+posbuf,nowcontrolscreenposY+ysiz(275)
+				sizebufx=posbuf
+				sizebufy=ysiz(270)
+			}
+			if ((backpicy*sizebufx)/backpicx)<=sizebufy:{
+				posbuf3=(backpicy*sizebufx)/backpicx
+				posbuf4=(sizebufy-posbuf3)/2
+				if ((ginfo(13)*xsiz(270))/ginfo(12))<=ysiz(270):{
+					posbuf5=(ysiz(270)-posbuf3)/2
+					pos xsiz(15),nowcontrolscreenposY+posbuf5
+				}else{
+					pos xsiz(15)+posbuf2,nowcontrolscreenposY+ysiz(5)+posbuf4
+				}
+				gzoom sizebufx,posbuf3,1007,0,0,backpicx,backpicy,1
+			}else{
+				posbuf3=(backpicx*sizebufy)/backpicy
+				posbuf4=(sizebufx-posbuf3)/2
+				if ((ginfo(13)*xsiz(270))/ginfo(12))>ysiz(270):{
+					posbuf5=(xsiz(270)-posbuf3)/2
+					pos xsiz(15)+posbuf5,nowcontrolscreenposY+ysiz(5)
+				}else{
+					pos xsiz(15)+posbuf4,nowcontrolscreenposY+ysiz(5)+posbuf2
+				}
+				gzoom posbuf3,sizebufy,1007,0,0,backpicx,backpicy,1
+			}
+
+			nowcontrolscreenposY+=ysiz(300)
+			pos xsiz(10),nowcontrolscreenposY
+			objsize ginfo(12)-xsiz(140),ysiz(30)
+			controlbackgroundfolder=loadset("backgroundfolder",settingdata)
+			input controlbackgroundfolder,ginfo(12)-xsiz(140),ysiz(30),0
+			controlbackgroundfolderadr=stat
+			pos ginfo(12)-xsiz(130),nowcontrolscreenposY
+			objsize xsiz(100),ysiz(30)
+			button gosub langstr(53026),*controldialogbackgroundfolder;参照
+			controldialogbackgroundfolderadr=stat
+
+			nowcontrolscreenposY+=ysiz(30)
+			pos xsiz(10),nowcontrolscreenposY
+			objsize xsiz(200),ysiz(30)
+			button gosub langstr(53029),*controlrunbackgroundfolder;エクスプローラーで開く
+			controlrunbackgroundfolderadr=stat
+
+			nowcontrolscreenposY+=ysiz(30)
+			pos xsiz(10),nowcontrolscreenposY
+			objsize xsiz(200),ysiz(30)
+			button gosub langstr(53030),*controlapplybackgroundfolder;適用/今すぐ画像を切り替える
+			controlapplybackgroundfolderadr=stat
+
+			nowcontrolscreenposY+=ysiz(40)
+			pos xsiz(10),nowcontrolscreenposY
+			objsize ginfo(12)-xsiz(40),ysiz(30)
+			controlbackgroundrandom=int(loadset("backgroundrandom",settingdata))
+			chkbox langstr(53032),controlbackgroundrandom
+			controlbackgroundrandomadr=stat
+		}
+
+		controlbackgroundmodebuf=controlbackgroundmode
+	}else:if loadset("CONTROLPAGE",settingdata)="APPACT":{;動作設定
+		nowcontrolscreenposY+=ysiz(10)
+		pos xsiz(10),nowcontrolscreenposY
+		boxfofmes onezero(loadset("dispcolormode",settingdata)),xsiz(10),nowcontrolscreenposY,ginfo(12)-xsiz(30),nowcontrolscreenposY+fontysizedata.3
+		pos xsiz(12),nowcontrolscreenposY
+		mes langstr(54011);起動時の動作
+
+		nowcontrolscreenposY+=ysiz(25)
+		pos xsiz(10),nowcontrolscreenposY
+		objsize ginfo(12)-xsiz(40),ysiz(30)
+		controlstartupdate=int(loadset("startupdate",settingdata))
+		chkbox langstr(5401),controlstartupdate
+		controlstartupdateadr=stat;qwerty3x起動時にアップデートの確認を行うようにする
+
+		nowcontrolscreenposY+=ysiz(40)
+		pos xsiz(10),nowcontrolscreenposY
+		objsize ginfo(12)-xsiz(40),ysiz(30)
+		controlwindowsversiondialog=int(loadset("windowsversiondialog",settingdata))
+		chkbox langstr(5402),controlwindowsversiondialog
+		controlwindowsversiondialogadr=stat;Windowsの未サポートバージョンを検出した時、ダイアログで通知する
+	}else:if loadset("CONTROLPAGE",settingdata)="PASSWORD":{;パスワード設定
+		nowcontrolscreenposY+=ysiz(10)
+		pos xsiz(10),nowcontrolscreenposY
+		boxfofmes onezero(loadset("dispcolormode",settingdata)),xsiz(10),nowcontrolscreenposY,ginfo(12)-xsiz(30),nowcontrolscreenposY+fontysizedata.3
+		pos xsiz(12),nowcontrolscreenposY
+		mes langstr(55011);パスワード
+
+		if loadset("passwordstring",settingdata)="":{;パスワードが設定されていないとき
+			nowcontrolscreenposY+=ysiz(25)
+			pos xsiz(10),nowcontrolscreenposY
+			objsize xsiz(200),ysiz(30)
+			button goto langstr(5501),*createpassword
+			createpasswordadr=stat
+		}else{;パスワードが設定されているとき
+			nowcontrolscreenposY+=ysiz(25)
+			pos xsiz(10),nowcontrolscreenposY
+			objsize xsiz(200),ysiz(30)
+			button goto langstr(5502),*changepassword
+			changepasswordadr=stat
+
+			nowcontrolscreenposY+=ysiz(40)
+			pos xsiz(10),nowcontrolscreenposY
+			button goto langstr(5503),*deletepassword
+			deletepasswordadr=stat
+		}
+	}else:if loadset("CONTROLPAGE",settingdata)="APPINFO":{;qwerty3xの詳細
+		chdir qwertycur
+		exist "Release Note.txt"
+		if strsize=-1:{
+			releasenote=langstr(5604)
+		}else{
+			notesel releasenote
+			noteload "Release Note.txt"
+		}
+		
+		nowcontrolscreenposY+=ysiz(10)
+		pos xsiz(10),nowcontrolscreenposY
+		boxfofmes onezero(loadset("dispcolormode",settingdata)),xsiz(10),nowcontrolscreenposY,ginfo(12)-xsiz(30),nowcontrolscreenposY+fontysizedata.1
+		font fontstr,fontsize+ysiz(7),1+2;15px+7px=22px
+		objmode 2,1
+		pos xsiz(12),nowcontrolscreenposY
+		mes langstr(0001)
+		font fontstr,fontsize,0;15px+7px=22px
+		objmode 2,1
+
+		nowcontrolscreenposY+=ysiz(40)
+		pos xsiz(10),nowcontrolscreenposY
+		boxfofmes onezero(loadset("dispcolormode",settingdata)),xsiz(10),nowcontrolscreenposY,ginfo(12)-xsiz(30),nowcontrolscreenposY+fontysizedata.3
+		pos xsiz(12),nowcontrolscreenposY
+		mes ""+langstr(5601)+qwertydate
+
+		nowcontrolscreenposY+=ysiz(25)
+		pos xsiz(10),nowcontrolscreenposY
+		boxfofmes onezero(loadset("dispcolormode",settingdata)),xsiz(10),nowcontrolscreenposY,ginfo(12)-xsiz(30),nowcontrolscreenposY+fontysizedata.3
+		pos xsiz(12),nowcontrolscreenposY
+		mes ""+langstr(5602)+__date__+" "+__time__
+
+		nowcontrolscreenposY+=ysiz(25)
+		pos xsiz(10),nowcontrolscreenposY
+		boxfofmes onezero(loadset("dispcolormode",settingdata)),xsiz(10),nowcontrolscreenposY,ginfo(12)-xsiz(30),nowcontrolscreenposY+fontysizedata.3
+		pos xsiz(12),nowcontrolscreenposY
+		mes ""+langstr(5603)+qwertybuild
+
+		nowcontrolscreenposY+=ysiz(25)
+		pos xsiz(10),nowcontrolscreenposY
+		objsize ginfo(12)-xsiz(40),ysiz(500)
+		mesbox releasenote,ginfo(12)-xsiz(40),ysiz(500),0,0
+		releasenoteadr=stat
+
+		nowcontrolscreenposY+=ysiz(530)
+		pos xsiz(10),nowcontrolscreenposY
+		boxfofmes onezero(loadset("dispcolormode",settingdata)),xsiz(10),nowcontrolscreenposY,ginfo(12)-xsiz(30),nowcontrolscreenposY+(fontysizedata.3*4)
+		pos xsiz(12),nowcontrolscreenposY
+		mes "Copyright (C) 2024-2025 hoyoqwerty All Rights Reserved.\nqwerty3x is created in \"Hot Soup Processor.\"\n\n__hspver__ : "+strf("%4x",__hspver__)+""
+	
+		gsel 0,0
+		bufferbuttonY=ysiz(0)
+		bufferbuttonX=xsiz(160)
+		pos bufferbuttonX,ysiz(1)
+		objsize appbarxsiz.0+xsiz(10),ysiz(29)
+		objimage 2002,xsiz(0),bufferbuttonY,xsiz(0),bufferbuttonY,xsiz(300),bufferbuttonY
+		button gosub "",*settingutility
+		settingutilityadr=stat
+
+		gsel 0002,2
+	}else:if loadset("CONTROLPAGE",settingdata)="APPUPDATE":{;qwerty3x update
+		nowcontrolscreenposY+=ysiz(10)
+		pos xsiz(10),nowcontrolscreenposY
+		boxfofmes onezero(loadset("DISPCOLORMODE",settingdata)),xsiz(10),nowcontrolscreenposY,ginfo(12)-xsiz(30),nowcontrolscreenposY+fontysizedata.3
+		pos xsiz(12),nowcontrolscreenposY
+		mes langstr(5701)
+
+		nowcontrolscreenposY+=ysiz(30)
+		pos xsiz(10),nowcontrolscreenposY
+		objsize ginfo(12)-xsiz(40),ysiz(80)
+		if updatecheckmestimebuf=0:{
+			button gosub ">>> "+langstr(5702)+" <<<\n"+langstr(5712)+" "+langstr(5715),*updatecheckstart
+		}else{
+			button gosub ">>> "+langstr(5702)+" <<<\n"+langstr(5712)+" "+updatecheckmestimebuf,*updatecheckstart
+		}
+		updatecheckstartadr=stat
+		getwindowlong objinfo(updatecheckstartadr,2),-16
+		setwindowlong objinfo(updatecheckstartadr,2),-16,stat|$2000
+
+		if okfullmode=-1:{
+			objprm updatecheckstartadr,langstr(5737)
+			objenable updatecheckstartadr,0
+		}
+
+		nowcontrolscreenposY+=ysiz(90)
+		pos xsiz(10),nowcontrolscreenposY
+		boxfofmes onezero(loadset("DISPCOLORMODE",settingdata)),xsiz(10),nowcontrolscreenposY,ginfo(12)-xsiz(30),nowcontrolscreenposY+fontysizedata.3
+		pos xsiz(12),nowcontrolscreenposY
+		mes langstr(5705)
+
+		nowcontrolscreenposY+=ysiz(30)
+		pos xsiz(10),nowcontrolscreenposY
+		objsize ginfo(12)-xsiz(40),ysiz(50)
+		mesbox updatecheckmes,ginfo(12)-xsiz(40),ysiz(50),4+8,0
+		updatecheckmesadr=stat
+		if updatecheckmes!"":{
+			size=ginfo(12)-xsiz(40),ysiz(350),xsiz(10),nowcontrolscreenposY
+			resizeobj updatecheckmesadr,size,0
+		}
+		;中身がない時は縦50px、中身があるときは縦350px
+
+		if updatecheckmes!"":{
+			nowcontrolscreenposY+=ysiz(360)
+		}else{
+			nowcontrolscreenposY+=ysiz(60)
+		}
+		pos xsiz(10),nowcontrolscreenposY
+		objsize (ginfo(12)-xsiz(40))/2,ysiz(30)
+		button langstr(5703),*updatedoyes
+		updatedoyesadr=stat
+		if updatecheckmes="":{
+			objenable updatedoyesadr,0
+		}
+
+		pos xsiz(10)+(ginfo(12)-xsiz(40))/2,nowcontrolscreenposY
+		button langstr(5704),*updatedono
+		updatedonoadr=stat
+		if updatecheckmes="":{
+			objenable updatedonoadr,0
+		}
+
+		nowcontrolscreenposY+=ysiz(70)
+		pos xsiz(10),nowcontrolscreenposY
+		boxfofmes onezero(loadset("DISPCOLORMODE",settingdata)),xsiz(10),nowcontrolscreenposY,ginfo(12)-xsiz(30),nowcontrolscreenposY+fontysizedata.3
+		pos xsiz(12),nowcontrolscreenposY
+		mes langstr(5750)
+
+		nowcontrolscreenposY+=ysiz(25)
+		pos xsiz(10),nowcontrolscreenposY
+		objsize ginfo(12)-xsiz(40),ysiz(30)
+		controlgetbetaupdate=int(loadset("getbetaupdate",settingdata))
+		chkbox langstr(5751),controlgetbetaupdate
+		controlgetbetaupdateadr=stat
+
+		nowcontrolscreenposY+=ysiz(40)
+		pos xsiz(10),nowcontrolscreenposY
+		objsize ginfo(12)-xsiz(40),ysiz(30)
+		controlstartupdate=int(loadset("startupdate",settingdata))
+		chkbox langstr(5401),controlstartupdate
+		controlstartupdateadr=stat;qwerty3x起動時にアップデートの確認を行うようにする
+
+		nowcontrolscreenposY+=ysiz(70)
+		pos xsiz(10),nowcontrolscreenposY
+		boxfofmes onezero(loadset("DISPCOLORMODE",settingdata)),xsiz(10),nowcontrolscreenposY,ginfo(12)-xsiz(30),nowcontrolscreenposY+fontysizedata.3
+		pos xsiz(12),nowcontrolscreenposY
+		mes langstr(5770)
+
+		nowcontrolscreenposY+=ysiz(25)
+		pos xsiz(10),nowcontrolscreenposY
+		objsize ginfo(12)-xsiz(40),ysiz(50)
+		button langstr(5771),*versionchange
+		versionchangeadr=stat
+
+		controlgetbetaupdatebuf=controlgetbetaupdate
+	}
+
+	return
+
+//////////////////////////////////////////////////////////////////////
+//UI動作
+//////////////////////////////////////////////////////////////////////
+
+*versionchange
+	gsel 0000
+	redraw 0
+	onkey 0
+	onclick 0
+	beforex=ginfo(4)
+	beforey=ginfo(5)
+	enablewindow hclient,0
+	screen 201,xsiz(640),ysiz(450),4+8
+	gsel 201,2
+	GetWindowLong hwnd, -16
+	SetWindowLong hwnd, -16, stat - $80000
+	width xsiz(640),ysiz(450),beforex,beforey
+	boxfofmes int(loadset("dispcolormode",settingdata)),xsiz(0),ysiz(0),xsiz(640),ysiz(450)
+	font fontstr,fontsize,0
+	objmode 2,1
+	redraw 1
+
+	title langstr(5773)
+
+	netinit
+	if stat!0:{
+		dialog langstr(5774),1,langstr(5770)
+		goto *versionchangeno
+	}
+	neturl "https://hoyoqwerty.github.io/qwerty3xupdate/updatechecker/"
+	netrequest_get "changever.txt"
+	dim res
+	loadingcnt=0
+	loadingtime=0
+	loadingok=0
+	repeat
+		title langstr(5773)+" ("+(cnt+1)+"/200)"
+		netexec res
+		if res!0:{
+			if res=1:{
+				sdim buf,netgetv_size()
+				netgetv_data buf
+				loadingok=1
+				break
+			}else:if res<0:{
+				neterror errorstr
+				dialog langstr(5775)+"\n\n"+errorstr+"\n\n"+langstr(5709),1,langstr(5770)
+				break
+			}
+		}
+
+		await 10
+		if cnt=200:{
+			dialog langstr(5776),1,langstr(5770)
+			break
+		}
+	loop
+	if loadingok=0:{
+		goto *versionchangeno
+	}
+	versionchangeliststr=""
+	versionchangelist=buf
+	notesel versionchangelist
+	repeat notemax
+		notesel versionchangelist
+		noteget buf2,cnt
+
+		title langstr(5779)+" ("+(cnt+1)+"/"+notemax+")"
+
+		buf3=""
+		buf4=""
+		split buf2,"<develop>",buf3,buf4
+		if buf3!"":{
+			if buf4="beta":{
+				if loadset("getbetaupdate",settingdata)="1":{
+					notesel versionchangeliststr
+					noteadd "ver."+buf3+" ("+langstr(5777)+")",-1
+				}else{
+					notesel versionchangelist
+					notedel cnt
 				}
 			}else{
-				checkresult=0
+				notesel versionchangeliststr
+				noteadd "ver."+buf3+"",-1
 			}
-		}else{
-			checkresult=0
 		}
+		wait 10
+	loop
+
+	title langstr(5770)
+
+	pos xsiz(10),ysiz(10)
+	boxfofmes onezero(loadset("dispcolormode",settingdata)),xsiz(10),ysiz(10),xsiz(630),ysiz(10)+(fontysizedata.3*1)
+	pos xsiz(12),ysiz(10)
+	mes ""+langstr(5770)
+
+	pos xsiz(10),ysiz(50)
+	boxfofmes onezero(loadset("dispcolormode",settingdata)),xsiz(10),ysiz(50),xsiz(630),ysiz(50)+(fontysizedata.3*1)
+	pos xsiz(12),ysiz(50)
+	mes ""+langstr(5778)
+
+	pos xsiz(10),ysiz(80)
+	objsize xsiz(620),ysiz(30)
+	notesel versionchangeliststr
+	versionchangeinfo=0
+	combox versionchangeinfo,ysiz(100),versionchangeliststr
+	versionchangeinfoadr=stat
+
+	pos xsiz(10),ysiz(210)
+	boxfofmes onezero(loadset("dispcolormode",settingdata)),xsiz(10),ysiz(210),xsiz(630),ysiz(210)+(fontysizedata.3*6)
+	pos xsiz(12),ysiz(210)
+	mes ""+langstr(5780)
+
+	pos xsiz(320),ysiz(420)
+	objsize xsiz(200),ysiz(30)
+	button goto langstr(5781),*versionchangeyes
+
+	pos xsiz(530),ysiz(420)
+	objsize xsiz(100),ysiz(30)
+	button goto langstr(5772),*versionchangeno
+
+	stop
+
+*versionchangeyes
+	notesel versionchangelist
+	noteget buf2,versionchangeinfo
+	buf3=""
+	buf4=""
+	split buf2,"<develop>",buf3,buf4
+	verbuf2=buf3
+	gosub *langstrrepupdate
+	
+	dialog langstr(5782),3,langstr(5770)
+	if stat!6:{
+		stop
 	}
 
-	gsel p1
-	if checkresult=1:{
-		groll datawindowxsize+20,0;押し下げ・マウスクリック時
-	}else:if checkresult=2:{
-		groll (datawindowxsize*2)+(20*2);マウスオーバー時・マウスポイント時
+	gsel 201,-1
+	gsel 0000,int(loadset("ALWAYSFRONT",settingdata))+1
+	enablewindow hclient,1
+
+	gsel 2,0
+	objprm updatecheckmesadr,""
+	gsel 0,0
+	title langstr(5735)
+
+	netinit
+	if stat!0:{
+		dialog langstr(5731),1,langstr(5701)
+		stop
+	}
+	neturl "https://hoyoqwerty.github.io/qwerty3xupdate/installerdatas/"
+	netrequest_get "qwerty3x installer ver."+verbuf2+".exe"
+	dim res
+	loadingcnt=0
+	loadingtime=0
+	loadingok=0
+	repeat
+		netexec res
+		if res!0:{
+			if res=1:{
+				sdim buf,netgetv_size()
+				netgetv_data buf
+				loadingok=1
+				break
+			}else:if res<0:{
+				neterror errorstr
+				dialog langstr(5732)+"\n\n"+errorstr+"\n\n"+langstr(5709),1,langstr(5701)
+				break
+			}
+		}
+
+		gsel 2,0
+		objprm updatecheckmesadr,langstr(5735)+" ("+(cnt+1)+"/200)"
+		gsel 0,0
+
+		await 10
+		if cnt=200:{
+			dialog langstr(5710),1,langstr(5701)
+			break
+		}
+	loop
+	gsel 2,0
+	objprm updatecheckmesadr,""
+	gsel 0,0
+	if loadingok=0:{
+		goto *systemrepeat
+	}
+
+	gosub *langstrrepupdate
+	
+	chdir qwertycur
+	bsave "qwerty3x installer ver."+verbuf2+".exe",buf
+
+	dialog langstr(5734),0,langstr(5701)
+
+	title langstr(5736)
+	gsel 2,0
+	objprm updatecheckmesadr,langstr(5736)
+	gsel 0,0
+
+	if instr(windowsver,0,"NT")!-1:{
+		exec "cmd /c start \"\" \""+qwertycur+"\\qwerty3x installer ver."+verbuf2+".exe\" \"autoupdate\"",2
 	}else{
-		groll 0,0
+		exec "command.com /c start \"\" \""+qwertycur+"\\qwerty3x installer ver."+verbuf2+".exe\" \"autoupdate\"",2
+	}
+
+	shutdownmode=0
+	restartmode=0
+	shutdowntorestartsign=0
+	goto *systemshutdown
+
+	stop
+
+*versionchangeno
+	gsel 201,-1
+	gsel 0000,int(loadset("ALWAYSFRONT",settingdata))+1
+
+	enablewindow hclient,1
+
+	goto *systemrepeat
+
+*updatedoyes
+	if updatecheckresult=-1:{
+		dialog langstr(5711),1,langstr(5701)
+		goto *systemrepeat
+	}
+	if qwerty3xupdatemode=1:{;ベータ
+		testbuf=testbetabuf
+		verbuf=betaverbuf
+		verbuf2=betaverbuf2
 	}
 	
-	gsel modulenowginfosel,0
-
-	return checkresult
-
-#deffunc deleteqwebtn int p1,int p2
-;deleteqwebtn命令 自作画像ボタンオブジェクトを破棄する
-;p1 int ボタンに使用しているウィンドウID
-;p2 int 破棄モード
-;	0=ボタン判定を破棄し非表示化する
-;	1=cls 0を実行し画面クリアを行ってからボタン判定を破棄し非表示化する
-	modulenowginfosel=ginfo(3)
-
-	notesel qwebtndatabase
-	if notefind(p1,1)=1:{
-		deleteresult=-1
+	if testbuf<=qwertybuild:{
+		dialog langstr(5716),1,langstr(5701)
+		goto *systemrepeat
 	}
 
-	if deleteresult!-1:{
-		if p2=1:{
-			gsel p1,0
-			cls 0
+	dialog langstr(5730),3,langstr(5701)
+	if stat!6:{
+		goto *systemrepeat
+	}
+
+	gsel 2,0
+	objprm updatecheckmesadr,""
+	gsel 0,0
+	title langstr(5735)
+
+	netinit
+	if stat!0:{
+		dialog langstr(5731),1,langstr(5701)
+		goto *systemrepeat
+	}
+	neturl "https://hoyoqwerty.github.io/qwerty3xupdate/installerdatas/"
+	netrequest_get "qwerty3x installer ver."+verbuf2+".exe"
+	dim res
+	loadingcnt=0
+	loadingtime=0
+	loadingok=0
+	repeat
+		netexec res
+		if res!0:{
+			if res=1:{
+				sdim buf,netgetv_size()
+				netgetv_data buf
+				loadingok=1
+				break
+			}else:if res<0:{
+				neterror errorstr
+				dialog langstr(5732)+"\n\n"+errorstr+"\n\n"+langstr(5709),1,langstr(5701)
+				break
+			}
 		}
 
-		notedel notefind(p1,1)
-		gsel p1,-1
+		gsel 2,0
+		objprm updatecheckmesadr,langstr(5735)+" ("+(cnt+1)+"/200)"
+		gsel 0,0
+
+		await 10
+		if cnt=200:{
+			dialog langstr(5710),1,langstr(5701)
+			break
+		}
+	loop
+	gsel 2,0
+	objprm updatecheckmesadr,""
+	gsel 0,0
+	if loadingok=0:{
+		goto *systemrepeat
 	}
 
-	gsel modulenowginfosel,0
+	gosub *langstrrepupdate
+	
+	chdir qwertycur
+	bsave "qwerty3x installer ver."+verbuf2+".exe",buf
+
+	dialog langstr(5734),0,langstr(5701)
+
+	title langstr(5736)
+	gsel 2,0
+	objprm updatecheckmesadr,langstr(5736)
+	gsel 0,0
+
+	if instr(windowsver,0,"NT")!-1:{
+		exec "cmd /c start \"\" \""+qwertycur+"\\qwerty3x installer ver."+verbuf2+".exe\" \"autoupdate\"",2
+	}else{
+		exec "command.com /c start \"\" \""+qwertycur+"\\qwerty3x installer ver."+verbuf2+".exe\" \"autoupdate\"",2
+	}
+
+	shutdownmode=0
+	restartmode=0
+	shutdowntorestartsign=0
+	goto *systemshutdown
+
+*updatedono
+	gsel 2,0
+	objprm updatecheckmesadr,""
+	gsel 0,0
+	gosub *controlui
+
+	goto *systemrepeat
+
+*updatecheckstart
+	title langstr(5706)
+	gsel 2,0
+	oncmd 0
+	onkey 0
+	onclick 0
+	objprm updatecheckstartadr,langstr(5706)
+	objenable updatecheckstartadr,0
+
+	objprm updatecheckmesadr,""
+	updatecheckresult=0
+
+	netinit
+	if stat!0:{
+		dialog langstr(5707),1,langstr(5701)
+
+		oncmd 1
+		onkey 1
+		onclick 1
+		if updatecheckmestimebuf=0:{
+			objprm updatecheckstartadr,">>> "+langstr(5702)+" <<<\n"+langstr(5712)+" "+langstr(5715)
+		}else{
+			objprm updatecheckstartadr,">>> "+langstr(5702)+" <<<\n"+langstr(5712)+" "+updatecheckmestimebuf
+		}
+		objenable updatecheckstartadr,1
+		gsel 0,0
+		gosub *controlui
+		return
+	}
+	neturl "https://hoyoqwerty.github.io/qwerty3xupdate/updatechecker/"
+	netrequest_get "verinfo.txt"
+	dim res
+	loadingcnt=0
+	loadingtime=0
+	loadingok=0
+	repeat
+		gsel 0,0
+		title langstr(5706)+" ("+(cnt+1)+"/200)"
+		gsel 2,0
+		netexec res
+		if res!0:{
+			if res=1:{
+				sdim buf,netgetv_size()
+				netgetv_data buf
+				loadingok=1
+				break
+			}else:if res<0:{
+				neterror errorstr
+				dialog langstr(5708)+"\n\n"+errorstr+"\n\n"+langstr(5709),1,langstr(5701)
+				break
+			}
+		}
+
+		await 10
+		if cnt=200:{
+			dialog langstr(5710),1,langstr(5701)
+			break
+		}
+	loop
+	if loadingok=0:{
+		oncmd 1
+		onkey 1
+		onclick 1
+		if updatecheckmestimebuf=0:{
+			objprm updatecheckstartadr,">>> "+langstr(5702)+" <<<\n"+langstr(5712)+" "+langstr(5715)
+		}else{
+			objprm updatecheckstartadr,">>> "+langstr(5702)+" <<<\n"+langstr(5712)+" "+updatecheckmestimebuf
+		}
+		objenable updatecheckstartadr,1
+		gsel 0,0
+		gosub *controlui
+		return
+	}
+	notesel buf
+	noteget verbuf,0
+	noteget verbuf2,1
+	noteget betaverbuf,2
+	noteget betaverbuf2,3
+	testbuf=int(verbuf)
+	testbetabuf=int(betaverbuf)
+	if testbuf=-1:{
+		oncmd 1
+		onkey 1
+		onclick 1
+		updatecheckmestimebuf=""+gettime(0)+"/"+strf("%02d",gettime(1))+"/"+strf("%02d",gettime(3))+" "+strf("%02d",gettime(4))+":"+strf("%02d",gettime(5))+":"+strf("%02d",gettime(6))
+		if updatecheckmestimebuf=0:{
+			objprm updatecheckstartadr,">>> "+langstr(5702)+" <<<\n"+langstr(5712)+" "+langstr(5715)
+		}else{
+			objprm updatecheckstartadr,">>> "+langstr(5702)+" <<<\n"+langstr(5712)+" "+updatecheckmestimebuf
+		}
+		objenable updatecheckstartadr,1
+		objprm updatecheckmesadr,langstr(5711)
+		updatecheckresult=-1
+		gsel 0,0
+		gosub *controlui
+		return
+	}
+	
+	if testbuf>qwertybuild:{
+		qwerty3xupdatemode=0
+		gsel 0,0;通常アップデート
+		title langstr(57061)
+		gsel 2,0
+		netrequest_get "newvernote.txt"
+		dim res
+		loadingcnt=0
+		loadingtime=0
+		loadingok=0
+		repeat
+			gsel 0,0
+			title langstr(57061)+" ("+(cnt+1)+"/200)"
+			gsel 2,0
+			netexec res
+			if res!0:{
+				if res=1:{
+					sdim buf,netgetv_size()
+					netgetv_data buf
+					loadingok=1
+					break
+				}else:if res<0:{
+					neterror errorstr
+					dialog langstr(5708)+"\n\n"+errorstr+"\n\n"+langstr(5709),1,langstr(5701)
+					break
+				}
+			}
+	
+			await 10
+			if cnt=200:{
+				dialog langstr(5710),1,langstr(5701)
+				break
+			}
+		loop
+		if loadingok=0:{
+			oncmd 1
+			onkey 1
+			onclick 1
+			if updatecheckmestimebuf=0:{
+				objprm updatecheckstartadr,">>> "+langstr(5702)+" <<<\n"+langstr(5712)+" "+langstr(5715)
+			}else{
+				objprm updatecheckstartadr,">>> "+langstr(5702)+" <<<\n"+langstr(5712)+" "+updatecheckmestimebuf
+			}
+			objenable updatecheckstartadr,1
+			gsel 0,0
+			gosub *controlui
+			return
+		}
+		newvernote=buf
+		notesel newvernote
+		chdir textcodefile
+		exist "ansisave.txt"
+		if strsize!-1:{
+			delete "ansisave.txt"
+		}
+		notesave "utf8load.txt"
+		exec "textcodechange.exe cutcmd-1"
+		repeat
+			exist "ansisave.txt"
+			if strsize!-1:{
+				notesel newvernote
+				noteload "ansisave.txt"
+				if newvernote!"":{
+					break
+				}
+			}
+			await 10
+		loop
+		updatecheckmestimebuf=""+gettime(0)+"/"+strf("%02d",gettime(1))+"/"+strf("%02d",gettime(3))+" "+strf("%02d",gettime(4))+":"+strf("%02d",gettime(5))+":"+strf("%02d",gettime(6))
+		updatecheckmesscreen={""}+langstr(5713)+{"
+		\nver."}+verbuf2+{"
+		\n\n"}+langstr(5714)+{"
+		\n"}+newvernote
+		objprm updatecheckmesadr,updatecheckmesscreen
+	}else{
+		if loadset("getbetaupdate",settingdata)="1"&testbetabuf>qwertybuild:{
+			qwerty3xupdatemode=1
+			gsel 0,0;開発版アップデート
+			title langstr(57062)
+			gsel 2,0
+			netrequest_get "betavernote.txt"
+			dim res
+			loadingcnt=0
+			loadingtime=0
+			loadingok=0
+			repeat
+				gsel 0,0
+				title langstr(57062)+" ("+(cnt+1)+"/200)"
+				gsel 2,0
+				netexec res
+				if res!0:{
+					if res=1:{
+						sdim buf,netgetv_size()
+						netgetv_data buf
+						loadingok=1
+						break
+					}else:if res<0:{
+						neterror errorstr
+						dialog langstr(5708)+"\n\n"+errorstr+"\n\n"+langstr(5709),1,langstr(5701)
+						break
+					}
+				}
+		
+				await 10
+				if cnt=200:{
+					dialog langstr(5710),1,langstr(5701)
+					break
+				}
+			loop
+			if loadingok=0:{
+				oncmd 1
+				onkey 1
+				onclick 1
+				if updatecheckmestimebuf=0:{
+					objprm updatecheckstartadr,">>> "+langstr(5702)+" <<<\n"+langstr(5712)+" "+langstr(5715)
+				}else{
+					objprm updatecheckstartadr,">>> "+langstr(5702)+" <<<\n"+langstr(5712)+" "+updatecheckmestimebuf
+				}
+				objenable updatecheckstartadr,1
+				gsel 0,0
+				gosub *controlui
+				return
+			}
+			newvernote=buf
+			notesel newvernote
+			chdir textcodefile
+			exist "ansisave.txt"
+			if strsize!-1:{
+				delete "ansisave.txt"
+			}
+			notesave "utf8load.txt"
+			exec "textcodechange.exe cutcmd-1"
+			repeat
+				exist "ansisave.txt"
+				if strsize!-1:{
+					notesel newvernote
+					noteload "ansisave.txt"
+					if newvernote!"":{
+						break
+					}
+				}
+				await 10
+			loop
+			updatecheckmestimebuf=""+gettime(0)+"/"+strf("%02d",gettime(1))+"/"+strf("%02d",gettime(3))+" "+strf("%02d",gettime(4))+":"+strf("%02d",gettime(5))+":"+strf("%02d",gettime(6))
+			updatecheckmesscreen={""}+langstr(57131)+{"
+			\nver."}+betaverbuf2+{"
+			\n\n"}+langstr(5714)+{"
+			\n"}+newvernote
+			objprm updatecheckmesadr,updatecheckmesscreen
+		}else{
+			updatecheckmestimebuf=""+gettime(0)+"/"+strf("%02d",gettime(1))+"/"+strf("%02d",gettime(3))+" "+strf("%02d",gettime(4))+":"+strf("%02d",gettime(5))+":"+strf("%02d",gettime(6))
+			objprm updatecheckmesadr,langstr(5716)
+		}
+	}
+	netterm
+
+	oncmd 1
+	onkey 1
+	onclick 1
+	if updatecheckmestimebuf=0:{
+		objprm updatecheckstartadr,">>> "+langstr(5702)+" <<<\n"+langstr(5712)+" "+langstr(5715)
+	}else{
+		objprm updatecheckstartadr,">>> "+langstr(5702)+" <<<\n"+langstr(5712)+" "+updatecheckmestimebuf
+	}
+	objenable updatecheckstartadr,1
+	gsel 0,0
+	gosub *controlui
+	return
+
+*settingutility
+	dim rect,4
+	hsettingutility=objinfo(settingutilityadr,2)
+
+	getwindowrect hsettingutility,varptr(rect)
+	trackpopupmenu hmenu.3,$100,rect.0,rect.3,0,hwnd,0
+	if stat=$100:{
+		goto *benchmarkstart
+	}else:if stat=$101:{
+		goto *showdetail
+	}else:if stat=$102:{
+		exec "https://x.com/hoyoqwerty",16
+		if loadset("automini",settingdata)="1":{
+			sendmsg hwnd,$112,$F020;SC_MINIMIZE
+		}
+	}else:if stat=$103:{
+		exist ""+qwertycur+"\\Release Note.txt"
+		if strsize=-1:{
+			dialog langstr(0005),1,langstr(0001)
+			goto *systemrepeat
+		}
+		exec ""+qwertycur+"\\Release Note.txt",16
+		if loadset("automini",settingdata)="1":{
+			sendmsg hwnd,$112,$F020;SC_MINIMIZE
+		}
+	}else:if stat=$104:{
+		goto *takeoverstart
+	}else:if stat=$105:{
+		goto *launchertakeoverstart
+	}else{
+		goto *systemrepeat
+	}
+
+	goto *systemrepeat
+
+*controlchangesystemrgb
+	changecolorlist=RGB(000,141,181),RGB(000,192,254),RGB(254,102,064),RGB(204,133,255),RGB(116,228,226),RGB(054,214,160),RGB(243,172,017),RGB(141,204,006),RGB(0,0,0),RGB(255,255,255)
+	;デフォルト,水元素,炎元素,雷元素,氷元素,風元素,岩元素,草元素,黒,白
+	dialog_color $2,RGB(systemrdata,systemgdata,systembdata),varptr(changecolorlist)
+	if stat!1:{
+		return
+	}
+
+	saveset "systemrgb",settingdata,""+ginfo(16)+","+ginfo(17)+","+ginfo(18)
+
+	bufferallupdatestartupbuf=1
+	gosub *makescreen
+	bufferallupdatestartupbuf=0
 
 	return
 
-#global
+*controlchangebackgroundcolor
+	changecolorlist=RGB(000,141,181),RGB(000,192,254),RGB(254,102,064),RGB(204,133,255),RGB(116,228,226),RGB(054,214,160),RGB(243,172,017),RGB(141,204,006),RGB(0,0,0),RGB(255,255,255)
+	;デフォルト,水元素,炎元素,雷元素,氷元素,風元素,岩元素,草元素,黒,白
+	dialog_color $2,RGB(backgroundcolorrdata,backgroundcolorgdata,backgroundcolorbdata),varptr(changecolorlist)
+	if stat!1:{
+		return
+	}
 
-#define DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2	-4
-#define HTLEFT						0x0000000A
-#define HTRIGHT						0x0000000B
-#define HTTOP						0x0000000C
-#define HTTOPLEFT					0x0000000D
-#define HTTOPRIGHT					0x0000000E
-#define HTBOTTOM					0x0000000F
-#define HTBOTTOMLEFT				0x00000010
-#define HTBOTTOMRIGHT				0x00000011
-#define HTCLIENT					0x00000001
-#define HTCAPTION					0x00000002
-#define SCREEN_WIDTH				xsiz(640)
-#define SCREEN_HEIGHT				ysiz(480)
-#define CAPTIONHEIGHT				ysiz(30)
-#define BORDERWIDTH					xsiz(4)
-#define LEFT						0x00000001
-#define RIGHT						0x00000002
-#define TOP							0x00000004
-#define BOTTOM						0x00000008
+	saveset "backgroundcolor",settingdata,""+ginfo(16)+","+ginfo(17)+","+ginfo(18)
 
-#define ctype RGB(%1,%2,%3) (($FF & %1)|(($FF & %2) << 8)|(($FF & %3)<<16))
+	gosub *makescreen
 
-#ifdef _debug
-//デバッグ時（F5実行）にもDPIを反映させる
-if okfullmode=2:{
-opt = DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2:SetProcessDpiAwarenessContext opt
-}
-//デバッグ時（F5実行）にマニフェストファイルを保存
-exist "DPI.manifest"
-if strsize <= 0{
-mani = {"
-<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>
-<assembly xmlns=\"urn:schemas-microsoft-com:asm.v1\" manifestVersion=\"1.0\" xmlns:asmv3=\"urn:schemas-microsoft-com:asm.v3\">
-<assemblyIdentity
-version=\"1.0.0.0\"
-processorArchitecture=\"*\"
-name=\"OnionSoftware.hsp3.exe\"
-type=\"win32\"
-/>
+	return
 
-<application xmlns=\"urn:schemas-microsoft-com:asm.v3\">
-<windowsSettings>
-<dpiAware xmlns=\"http://schemas.microsoft.com/SMI/2005/WindowsSettings\">true</dpiAware>
-<dpiAwareness xmlns=\"http://schemas.microsoft.com/SMI/2016/WindowsSettings\">PerMonitorV2</dpiAwareness>
-</windowsSettings>
-</application>
+*controldialogbackgroundfile
+	dialog "bmp;*.jpg;*.jpeg;*.png",16,"画像ファイル"
+	if stat!1:{
+		return
+	}
+	gsel 0002,0
 
-<description>XPStyle</description>
-<dependency>
-<dependentAssembly>
-<assemblyIdentity
-type=\"win32\"
-name=\"Microsoft.Windows.Common-Controls\"
-version=\"6.0.0.0\"
-processorArchitecture=\"*\"
-publicKeyToken=\"6595b64144ccf1df\"
-language=\"*\"
-/>
-</dependentAssembly>
-</dependency>
-<compatibility xmlns=\"urn:schemas-microsoft-com:compatibility.v1\">
-  <application>
-    <supportedOS Id=\"{35138b9a-5d96-4fbd-8e2d-a2440225f93a}\" />
-    <supportedOS Id=\"{4a2f28e3-53b9-4441-ba9c-d69d4a4a6e38}\" />
-    <supportedOS Id=\"{1f676c76-80e1-4239-95bb-83d0f6d0da78}\" />
-    <supportedOS Id=\"{8e0f7a12-bfb3-4fe8-b9a5-48fd50a15a9a}\" />
-  </application>
-</compatibility>
-</assembly>
-"}
-notesel mani
-notesave "DPI.manifest"
-}
-#endif
+	objprm controlbackgroundfileadr,refstr
+
+	gsel 0000,0
+
+	gosub *controlchangebackgroundfile
+
+	return
+
+*controldialogbackgroundfolder
+	buf=folderdialog(langstr(53031))
+	if buf="":{
+		return
+	}
+	gsel 0002,0
+
+	objprm controlbackgroundfolderadr,buf
+
+	gsel 0000,0
+
+	gosub *controlchangebackgroundfolder
+
+	return
+
+*controlchangebackgroundfile
+	saveset "backgroundfile",settingdata,controlbackgroundfile
+
+	gosub *makescreen
+
+	return
+
+*controlchangebackgroundfolder
+	saveset "backgroundfolder",settingdata,controlbackgroundfolder
+
+	gosub *makescreen
+
+	return
+
+*controlrunbackgroundfile
+	exist controlbackgroundfile
+	if strsize=-1:{
+		dialog langstr(0005),1,langstr(0001)
+		return
+	}
+	exec controlbackgroundfile,16
+
+	if loadset("automini",settingdata)="1":{
+		sendmsg hwnd,$112,$F020;SC_MINIMIZE
+	}
+	return
+
+*controlrunbackgroundfolder
+	dirlist dummy,""+controlbackgroundfolder+"",5
+	if stat=0:{
+		dialog langstr(0006),1,langstr(0001)
+		return
+	}
+	exec "explorer.exe "+controlbackgroundfolder,0
+
+	if loadset("automini",settingdata)="1":{
+		sendmsg hwnd,$112,$F020;SC_MINIMIZE
+	}
+	return
+
+*controlapplybackgroundfile
+	gosub *controlchangebackgroundfile
+
+	return
+
+*controlapplybackgroundfolder
+	gosub *controlchangebackgroundfolder
+
+	return
+
+*createpassword
+	gsel 0000
+	redraw 0
+	onkey 0
+	onclick 0
+	beforex=ginfo(4)
+	beforey=ginfo(5)
+	enablewindow hclient,0
+	screen 201,xsiz(640),ysiz(450),4+8
+	gsel 201,2
+	GetWindowLong hwnd, -16
+	SetWindowLong hwnd, -16, stat - $80000
+	width xsiz(640),ysiz(450),beforex,beforey
+	boxfofmes int(loadset("dispcolormode",settingdata)),xsiz(0),ysiz(0),xsiz(640),ysiz(450)
+	font fontstr,fontsize,0
+	objmode 2,1
+	redraw 1
+
+	title ""+langstr(5501)+""
+
+	pos xsiz(10),ysiz(10)
+	boxfofmes onezero(loadset("dispcolormode",settingdata)),xsiz(10),ysiz(10),xsiz(630),ysiz(10)+fontysizedata.3
+	pos xsiz(12),ysiz(10)
+	mes ""+langstr(55021)
+
+	pos xsiz(10),ysiz(35)
+	objsize xsiz(520),ysiz(30)
+	newpassword=""
+	input newpassword,xsiz(520),ysiz(30),0
+	newpasswordadr=stat
+	sendmsg objinfo(newpasswordadr,2),$CC,'*'
+	pos xsiz(530),ysiz(35)
+	objsize xsiz(100),ysiz(30)
+	button gosub langstr(55035),*newpasswordenable
+	newpasswordenableadr=stat
+	newpasswordenablebuf=0
+
+	pos xsiz(10),ysiz(75)
+	boxfofmes onezero(loadset("dispcolormode",settingdata)),xsiz(10),ysiz(75),xsiz(630),ysiz(75)+fontysizedata.3
+	pos xsiz(12),ysiz(75)
+	mes ""+langstr(55022)
+
+	pos xsiz(10),ysiz(100)
+	objsize xsiz(520),ysiz(30)
+	newpassword2=""
+	input newpassword2,xsiz(520),ysiz(30),0
+	newpassword2adr=stat
+	sendmsg objinfo(newpassword2adr,2),$CC,'*'
+	pos xsiz(530),ysiz(100)
+	objsize xsiz(100),ysiz(30)
+	button gosub langstr(55035),*newpassword2enable
+	newpassword2enableadr=stat
+	newpassword2enablebuf=0
+
+	pos xsiz(10),ysiz(300)
+	boxfofmes onezero(loadset("dispcolormode",settingdata)),xsiz(10),ysiz(300),xsiz(630),ysiz(300)+fontysizedata.3
+	pos xsiz(12),ysiz(300)
+	mes ""+langstr(55024)
+
+	pos xsiz(420),ysiz(420)
+	objsize xsiz(100),ysiz(30)
+	button goto langstr(55031),*createpasswordyes
+
+	pos xsiz(530),ysiz(420)
+	button goto langstr(55034),*createpasswordno
+
+	stop
+
+*newpasswordenable
+	if newpasswordenablebuf=0:{;非表示時
+		sendmsg objinfo(newpasswordadr,2),$CC
+		objprm newpasswordenableadr,langstr(55036)
+		newpasswordenablebuf=1
+	}else{
+		sendmsg objinfo(newpasswordadr,2),$CC,'*'
+		objprm newpasswordenableadr,langstr(55035)
+		newpasswordenablebuf=0
+	}
+
+	objprm newpasswordadr,newpassword
+
+	return
+
+*newpassword2enable
+	if newpassword2enablebuf=0:{;非表示時
+		sendmsg objinfo(newpassword2adr,2),$CC
+		objprm newpassword2enableadr,langstr(55036)
+		newpassword2enablebuf=1
+	}else{
+		sendmsg objinfo(newpassword2adr,2),$CC,'*'
+		objprm newpassword2enableadr,langstr(55035)
+		newpassword2enablebuf=0
+	}
+
+	objprm newpassword2adr,newpassword2
+
+	return
+
+*createpasswordyes
+	if newpassword!newpassword2:{
+		dialog ""+langstr(55012),1,""+langstr(5501)
+		stop
+	}
+	if strlen(newpassword)<5:{
+		dialog ""+langstr(55014),1,""+langstr(5501)
+		stop
+	}
+
+	saveset "passwordstring",settingdata,newpassword
+
+	dialog ""+langstr(55015),0,""+langstr(5501)
+
+	gsel 201,-1
+	gsel 0000,int(loadset("ALWAYSFRONT",settingdata))+1
+
+	enablewindow hclient,1
+
+	gosub *makescreen
+
+	goto *systemrepeat
+
+*createpasswordno
+	gsel 201,-1
+	gsel 0000,int(loadset("ALWAYSFRONT",settingdata))+1
+
+	enablewindow hclient,1
+
+	goto *systemrepeat
+
+*changepassword
+	gsel 0000
+	redraw 0
+	onkey 0
+	onclick 0
+	beforex=ginfo(4)
+	beforey=ginfo(5)
+	enablewindow hclient,0
+	screen 201,xsiz(640),ysiz(450),4+8
+	gsel 201,2
+	GetWindowLong hwnd, -16
+	SetWindowLong hwnd, -16, stat - $80000
+	width xsiz(640),ysiz(450),beforex,beforey
+	boxfofmes int(loadset("dispcolormode",settingdata)),xsiz(0),ysiz(0),xsiz(640),ysiz(450)
+	font fontstr,fontsize,0
+	objmode 2,1
+	redraw 1
+
+	title ""+langstr(5502)+""
+
+	pos xsiz(10),ysiz(10)
+	boxfofmes onezero(loadset("dispcolormode",settingdata)),xsiz(10),ysiz(10),xsiz(630),ysiz(10)+fontysizedata.3
+	pos xsiz(12),ysiz(10)
+	mes ""+langstr(55023)
+
+	pos xsiz(10),ysiz(35)
+	objsize xsiz(520),ysiz(30)
+	nowpassword=""
+	input nowpassword,xsiz(520),ysiz(30),0
+	nowpasswordadr=stat
+	sendmsg objinfo(nowpasswordadr,2),$CC,'*'
+	pos xsiz(530),ysiz(35)
+	objsize xsiz(100),ysiz(30)
+	button gosub langstr(55035),*nowpasswordenable
+	nowpasswordenableadr=stat
+	nowpasswordenablebuf=0
+
+	pos xsiz(10),ysiz(75)
+	boxfofmes onezero(loadset("dispcolormode",settingdata)),xsiz(10),ysiz(75),xsiz(630),ysiz(75)+fontysizedata.3
+	pos xsiz(12),ysiz(75)
+	mes ""+langstr(55021)
+
+	pos xsiz(10),ysiz(100)
+	objsize xsiz(520),ysiz(30)
+	newpassword=""
+	input newpassword,xsiz(520),ysiz(30),0
+	newpasswordadr=stat
+	sendmsg objinfo(newpasswordadr,2),$CC,'*'
+	pos xsiz(530),ysiz(100)
+	objsize xsiz(100),ysiz(30)
+	button gosub langstr(55035),*newpasswordenable
+	newpasswordenableadr=stat
+	newpasswordenablebuf=0
+
+	pos xsiz(10),ysiz(140)
+	boxfofmes onezero(loadset("dispcolormode",settingdata)),xsiz(10),ysiz(140),xsiz(630),ysiz(140)+fontysizedata.3
+	pos xsiz(12),ysiz(140)
+	mes ""+langstr(55022)
+
+	pos xsiz(10),ysiz(165)
+	objsize xsiz(520),ysiz(30)
+	newpassword2=""
+	input newpassword2,xsiz(520),ysiz(30),0
+	newpassword2adr=stat
+	sendmsg objinfo(newpassword2adr,2),$CC,'*'
+	pos xsiz(530),ysiz(165)
+	objsize xsiz(100),ysiz(30)
+	button gosub langstr(55035),*newpassword2enable
+	newpassword2enableadr=stat
+	newpassword2enablebuf=0
+
+	pos xsiz(10),ysiz(300)
+	boxfofmes onezero(loadset("dispcolormode",settingdata)),xsiz(10),ysiz(300),xsiz(630),ysiz(300)+fontysizedata.3
+	pos xsiz(12),ysiz(300)
+	mes ""+langstr(55024)
+
+	pos xsiz(420),ysiz(420)
+	objsize xsiz(100),ysiz(30)
+	button goto langstr(55032),*changepasswordyes
+
+	pos xsiz(530),ysiz(420)
+	button goto langstr(55034),*changepasswordno
+
+	stop
+
+*changepasswordyes
+	if nowpassword!loadset("passwordstring",settingdata):{
+		dialog ""+langstr(55013),1,""+langstr(5502)
+		stop
+	}
+	if newpassword!newpassword2:{
+		dialog ""+langstr(55012),1,""+langstr(5502)
+		stop
+	}
+	if strlen(newpassword)<5:{
+		dialog ""+langstr(55014),1,""+langstr(5502)
+		stop
+	}
+
+	saveset "passwordstring",settingdata,newpassword
+
+	dialog ""+langstr(55016),0,""+langstr(5502)
+
+	gsel 201,-1
+	gsel 0000,int(loadset("ALWAYSFRONT",settingdata))+1
+
+	enablewindow hclient,1
+
+	gosub *makescreen
+
+	goto *systemrepeat
+
+*changepasswordno
+	gsel 201,-1
+	gsel 0000,int(loadset("ALWAYSFRONT",settingdata))+1
+
+	enablewindow hclient,1
+
+	goto *systemrepeat
+
+*deletepassword
+	gsel 0000
+	redraw 0
+	onkey 0
+	onclick 0
+	beforex=ginfo(4)
+	beforey=ginfo(5)
+	enablewindow hclient,0
+	screen 201,xsiz(640),ysiz(450),4+8
+	gsel 201,2
+	GetWindowLong hwnd, -16
+	SetWindowLong hwnd, -16, stat - $80000
+	width xsiz(640),ysiz(450),beforex,beforey
+	boxfofmes int(loadset("dispcolormode",settingdata)),xsiz(0),ysiz(0),xsiz(640),ysiz(450)
+	font fontstr,fontsize,0
+	objmode 2,1
+	redraw 1
+
+	title ""+langstr(5503)+""
+
+	pos xsiz(10),ysiz(10)
+	boxfofmes onezero(loadset("dispcolormode",settingdata)),xsiz(10),ysiz(10),xsiz(630),ysiz(10)+fontysizedata.3
+	pos xsiz(12),ysiz(10)
+	mes ""+langstr(55023)
+
+	pos xsiz(10),ysiz(35)
+	objsize xsiz(520),ysiz(30)
+	nowpassword=""
+	input nowpassword,xsiz(520),ysiz(30),0
+	nowpasswordadr=stat
+	sendmsg objinfo(nowpasswordadr,2),$CC,'*'
+	pos xsiz(530),ysiz(35)
+	objsize xsiz(100),ysiz(30)
+	button gosub langstr(55035),*nowpasswordenable
+	nowpasswordenableadr=stat
+	nowpasswordenablebuf=0
+
+	pos xsiz(420),ysiz(420)
+	objsize xsiz(100),ysiz(30)
+	button goto langstr(55033),*deletepasswordyes
+
+	pos xsiz(530),ysiz(420)
+	button goto langstr(55034),*deletepasswordno
+
+	stop
+
+*nowpasswordenable
+	if nowpasswordenablebuf=0:{;非表示時
+		sendmsg objinfo(nowpasswordadr,2),$CC
+		objprm nowpasswordenableadr,langstr(55036)
+		nowpasswordenablebuf=1
+	}else{
+		sendmsg objinfo(nowpasswordadr,2),$CC,'*'
+		objprm nowpasswordenableadr,langstr(55035)
+		nowpasswordenablebuf=0
+	}
+
+	objprm nowpasswordadr,nowpassword
+
+	return
+
+*deletepasswordyes
+	if nowpassword!loadset("passwordstring",settingdata):{
+		dialog ""+langstr(55013),1,""+langstr(5503)
+		stop
+	}
+
+	saveset "passwordstring",settingdata,""
+
+	dialog ""+langstr(55017),0,""+langstr(5503)
+	
+	gsel 201,-1
+	gsel 0000,int(loadset("ALWAYSFRONT",settingdata))+1
+
+	enablewindow hclient,1
+
+	gosub *makescreen
+
+	goto *systemrepeat
+
+*deletepasswordno
+	gsel 201,-1
+	gsel 0000,int(loadset("ALWAYSFRONT",settingdata))+1
+
+	enablewindow hclient,1
+
+	goto *systemrepeat
+
+*controlload
+	gsel 0002
+	mousewheelbuf=mousew
+	mousewheelbuttonbuf=0
+	movecontrolbuf=0
+	if mousewheelbuf>0:{
+		mousewheelbuttonbuf=1
+		;groll xsiz(0),ginfo(9)-(ginfo(13)/15)
+		;ScrollBar_SetPos scrollbar2adr,ginfo(9)
+		movecontrolbuf=1
+	}else:if mousewheelbuf<0:{
+		if ginfo(9)<(nowcontrolscreenposY+ysiz(30)):{
+			mousewheelbuttonbuf=2
+			;groll xsiz(0),ginfo(9)+(ginfo(13)/15)
+			;ScrollBar_SetPos scrollbar2adr,ginfo(9)
+			movecontrolbuf=1
+		}
+	}
+	if ScrollBar_GetPos(scrollbar2adr)!scrollbar2getposbuf:{
+		mousewheelbuttonbuf=3
+		scrollbar2getposbuf=ScrollBar_GetPos(scrollbar2adr)
+		movecontrolbuf=1
+	}
+	if movecontrolbuf=1:{
+		gosub *controlui
+	}
+	gsel 0000
+	
+	if loadset("CONTROLPAGE",settingdata)="WINDOWSCREEN":{;ウィンドウ&画面設定
+		saveset "alwaysfront",settingdata,str(controlalwaysfront)
+		if controlalwaysfrontbuf!controlalwaysfront:{
+			controlalwaysfrontbuf=controlalwaysfront
+			gsel 0,controlalwaysfront+1
+		}
+		
+		saveset "automini",settingdata,str(controlautomini)
+
+		saveset "useanimation",settingdata,str(controluseanimation)
+
+		if controlfontname=0:{
+			saveset "fontname",settingdata,"AUTO"
+		}else:if controlfontname=1:{
+			saveset "fontname",settingdata,"Yu Gothic UI"
+		}else:if controlfontname=2:{
+			saveset "fontname",settingdata,"Meiryo UI"
+		}else:if controlfontname=3:{
+			saveset "fontname",settingdata,"MS UI Gothic"
+		}
+		if controlfontnamebuf!controlfontname:{
+			controlfontnamebuf=controlfontname
+			bufferallupdatestartupbuf=1
+			gosub *makescreen
+			bufferallupdatestartupbuf=0
+		}
+
+		saveset "dispcolormode",settingdata,str(controldispcolormode)
+		if controldispcolormodebuf!controldispcolormode:{
+			controldispcolormodebuf=controldispcolormode
+			bufferallupdatestartupbuf=1
+			gosub *makescreen
+			bufferallupdatestartupbuf=0
+		}
+
+		notesel languagedatacomset
+		noteget buf,controllanguage
+		saveset "language",settingdata,buf
+		if controllanguagebuf!controllanguage:{
+			controllanguagebuf=controllanguage
+			gosub *langstrrepupdate
+			screenname=langstr(3005)
+			bufferallupdatestartupbuf=1
+			gosub *makescreen
+			bufferallupdatestartupbuf=0
+		}
+	}else:if loadset("CONTROLPAGE",settingdata)="BACKGROUNDCOLOR":{;背景&色設定
+		if controlbackgroundmode=0:{
+			saveset "backgroundmode",settingdata,"COLOR"
+		}else:if controlbackgroundmode=1:{
+			saveset "backgroundmode",settingdata,"IMAGE"
+		}else:if controlbackgroundmode=2:{
+			saveset "backgroundmode",settingdata,"SLIDESHOW"
+		}
+		if controlbackgroundmodebuf!controlbackgroundmode:{
+			controlbackgroundmodebuf=conotrolbackground
+			gosub *makescreen
+		}
+
+		if loadset("backgroundmode",settingdata)="COLOR":{
+			
+		}else:if loadset("backgroundmode",settingdata)="IMAGE":{
+			saveset "backgroundfile",settingdata,controlbackgroundfile
+		}else:if loadset("backgroundmode",settingdata)="SLIDESHOW":{
+			saveset "backgroundfolder",settingdata,controlbackgroundfolder
+
+			saveset "backgroundrandom",settingdata,str(controlbackgroundrandom)
+		}
+	}else:if loadset("CONTROLPAGE",settingdata)="APPACT":{;動作設定
+		saveset "startupdate",settingdata,str(controlstartupdate)
+
+		saveset "windowsversiondialog",settingdata,str(controlwindowsversiondialog)
+	}else:if loadset("CONTROLPAGE",settingdata)="PASSWORD":{;パスワード設定
+
+	}else:if loadset("CONTROLPAGE",settingdata)="APPINFO":{;qwerty3xの詳細
+
+	}else:if loadset("CONTROLPAGE",settingdata)="APPUPDATE":{;qwerty3x update
+		saveset "startupdate",settingdata,str(controlstartupdate)
+
+		if controlgetbetaupdatebuf!controlgetbetaupdate:{
+			if controlgetbetaupdatebuf=0:{
+				dialog langstr(57511),3,langstr(3005)
+				if stat=6:{
+					saveset "getbetaupdate",settingdata,"1"
+				}else{
+					gsel 2,0
+					objprm controlgetbetaupdateadr,0
+					gsel 0,0
+				}
+			}else{
+				saveset "getbetaupdate",settingdata,"0"
+			}
+			controlgetbetaupdatebuf=controlgetbetaupdate
+		}
+	}
+
+	return
+
+*controlui
+	gsel 0000
+	clientwindowx=ginfo(12)
+	clientwindowy=ginfo(13)
+	gsel 0002
+	redraw 0
+
+	if mousewheelbuttonbuf=1:{
+		groll xsiz(0),ginfo(9)-(ginfo(13)/15)
+		ScrollBar_SetPos scrollbar2adr,ginfo(9)
+	}else:if mousewheelbuttonbuf=2:{
+		groll xsiz(0),ginfo(9)+(ginfo(13)/15)
+		ScrollBar_SetPos scrollbar2adr,ginfo(9)
+	}else:if mousewheelbuttonbuf=3:{
+		groll xsiz(0),ScrollBar_GetPos(scrollbar2adr)
+	}
+
+	width clientwindowx-xsiz(180),clientwindowy-ysiz(30),xsiz(180),ysiz(30)
+
+	color 0,0,0
+	boxf
+
+	if loadset("backgroundmode",settingdata)="COLOR":{
+		backgroundcolorrgbdata=loadset("backgroundcolor",settingdata)
+		split backgroundcolorrgbdata,",",backgroundcolorrdata,backgroundcolorgdata,backgroundcolorbdata
+		color int(backgroundcolorrdata),int(backgroundcolorgdata),int(backgroundcolorbdata)
+		boxf xsiz(0),ysiz(0),ginfo(12),ginfo(13)
+	}else:if loadset("backgroundmode",settingdata)="IMAGE":{
+		gsel 1007,0
+		backpicx=ginfo(12)
+		backpicy=ginfo(13)
+		gsel 0002,0
+		if ((backpicy*ginfo(12))/backpicx)<=ginfo(13):{
+			posbuf3=(backpicy*ginfo(12))/backpicx
+			posbuf4=(ginfo(13)-posbuf3)/2
+			pos xsiz(0),ysiz(0)+posbuf4
+			gzoom ginfo(12),posbuf3,1007,0,0,backpicx,backpicy,1
+		}else{
+			posbuf3=(backpicx*ginfo(13))/backpicy
+			posbuf4=(ginfo(12)-posbuf3)/2
+			pos xsiz(0)+posbuf4,ysiz(0)
+			gzoom posbuf3,ginfo(13),1007,0,0,backpicx,backpicy,1
+		}
+	}else:if loadset("backgroundmode",settingdata)="SLIDESHOW":{
+		gsel 1007,0
+		backpicx=ginfo(12)
+		backpicy=ginfo(13)
+		gsel 0002,0
+		if ((backpicy*ginfo(12))/backpicx)<=ginfo(13):{
+			posbuf3=(backpicy*ginfo(12))/backpicx
+			posbuf4=(ginfo(13)-posbuf3)/2
+			pos xsiz(0),ysiz(0)+posbuf4
+			gzoom ginfo(12),posbuf3,1007,0,0,backpicx,backpicy,1
+		}else{
+			posbuf3=(backpicx*ginfo(13))/backpicy
+			posbuf4=(ginfo(12)-posbuf3)/2
+			pos xsiz(0)+posbuf4,ysiz(0)
+			gzoom posbuf3,ginfo(13),1007,0,0,backpicx,backpicy,1
+		}
+	}
+
+	nowcontrolscreenposY=0
+	if loadset("CONTROLPAGE",settingdata)="WINDOWSCREEN":{;ウィンドウ&画面設定
+		nowcontrolscreenposY+=ysiz(10)
+		pos xsiz(10),nowcontrolscreenposY
+		boxfofmes onezero(loadset("DISPCOLORMODE",settingdata)),xsiz(10),nowcontrolscreenposY,ginfo(12)-xsiz(30),nowcontrolscreenposY+fontysizedata.3
+		pos xsiz(12),nowcontrolscreenposY
+		mes langstr(52011)
+		
+		nowcontrolscreenposY+=ysiz(25)
+		size=ginfo(12)-xsiz(40),ysiz(30),xsiz(10),nowcontrolscreenposY-ginfo(9)
+		resizeobj controlalwaysfrontadr,size
+
+		nowcontrolscreenposY+=ysiz(40)
+		size=ginfo(12)-xsiz(40),ysiz(30),xsiz(10),nowcontrolscreenposY-ginfo(9)
+		resizeobj controlautominiadr,size
+
+		nowcontrolscreenposY+=ysiz(40)
+		size=ginfo(12)-xsiz(40),ysiz(30),xsiz(10),nowcontrolscreenposY-ginfo(9)
+		resizeobj controluseanimationadr,size
+
+		nowcontrolscreenposY+=ysiz(40)
+		pos xsiz(10),nowcontrolscreenposY
+		boxfofmes onezero(loadset("DISPCOLORMODE",settingdata)),xsiz(10),nowcontrolscreenposY,ginfo(12)-xsiz(30),nowcontrolscreenposY+fontysizedata.3
+		pos xsiz(12),nowcontrolscreenposY
+		mes langstr(5203)
+
+		nowcontrolscreenposY+=ysiz(25)
+		size=ginfo(12)-xsiz(40),ysiz(30),xsiz(10),nowcontrolscreenposY-ginfo(9)
+		resizeobj controlfontnameadr,size
+
+		nowcontrolscreenposY+=ysiz(40)
+		pos xsiz(10),nowcontrolscreenposY
+		boxfofmes onezero(loadset("DISPCOLORMODE",settingdata)),xsiz(10),nowcontrolscreenposY,ginfo(12)-xsiz(30),nowcontrolscreenposY+fontysizedata.3
+		pos xsiz(12),nowcontrolscreenposY
+		mes langstr(5204)
+
+		nowcontrolscreenposY+=ysiz(25)
+		size=ginfo(12)-xsiz(40),ysiz(30),xsiz(10),nowcontrolscreenposY-ginfo(9)
+		resizeobj controldispcolormodeadr,size
+
+		nowcontrolscreenposY+=ysiz(40)
+		pos xsiz(10),nowcontrolscreenposY
+		boxfofmes onezero(loadset("DISPCOLORMODE",settingdata)),xsiz(10),nowcontrolscreenposY,ginfo(12)-xsiz(30),nowcontrolscreenposY+fontysizedata.3
+		pos xsiz(12),nowcontrolscreenposY
+		mes langstr(5205)
+
+		nowcontrolscreenposY+=ysiz(25)
+		size=ginfo(12)-xsiz(40),ysiz(30),xsiz(10),nowcontrolscreenposY-ginfo(9)
+		resizeobj controllanguageadr,size
+	}else:if loadset("CONTROLPAGE",settingdata)="BACKGROUNDCOLOR":{;背景&色設定
+		nowcontrolscreenposY+=ysiz(10)
+		pos xsiz(10),nowcontrolscreenposY
+		boxfofmes onezero(loadset("DISPCOLORMODE",settingdata)),xsiz(10),nowcontrolscreenposY,ginfo(12)-xsiz(30),nowcontrolscreenposY+fontysizedata.3
+		pos xsiz(12),nowcontrolscreenposY
+		mes langstr(5301);qwerty3x スタイルカラー
+
+		nowcontrolscreenposY+=ysiz(25)
+		boxfofmes onezero(loadset("DISPCOLORMODE",settingdata)),xsiz(10),nowcontrolscreenposY,ginfo(12)-xsiz(30),nowcontrolscreenposY+ysiz(50)
+		pos xsiz(20),nowcontrolscreenposY+ysiz(30)
+		systemrgbdata=loadset("systemrgb",settingdata)
+		split systemrgbdata,",",systemrdata,systemgdata,systembdata
+		mes "R: "+strf("%03d",systemrdata)+"  G: "+strf("%03d",systemgdata)+"  B: "+strf("%03d",systembdata)
+		colorsetting settingdata
+		boxf xsiz(20),nowcontrolscreenposY+ysiz(5),xsiz(20)+ginfo(14),nowcontrolscreenposY+ysiz(25)
+		size=xsiz(100),ysiz(30),ginfo(12)-xsiz(140),nowcontrolscreenposY+ysiz(10)-ginfo(9)
+		resizeobj controlsystemrgbadr,size,2
+		
+		nowcontrolscreenposY+=ysiz(60)
+		pos xsiz(10),nowcontrolscreenposY
+		boxfofmes onezero(loadset("DISPCOLORMODE",settingdata)),xsiz(10),nowcontrolscreenposY,ginfo(12)-xsiz(30),nowcontrolscreenposY+fontysizedata.3
+		pos xsiz(12),nowcontrolscreenposY
+		mes langstr(5302);背景
+
+		nowcontrolscreenposY+=ysiz(25)
+		if loadset("backgroundmode",settingdata)="COLOR":{
+			controlbackgroundmode=0
+		}else:if loadset("backgroundmode",settingdata)="IMAGE":{
+			controlbackgroundmode=1
+		}else:if loadset("backgroundmode",settingdata)="SLIDESHOW":{
+			controlbackgroundmode=2
+		}
+		size=ginfo(12)-xsiz(40),ysiz(30),xsiz(10),nowcontrolscreenposY-ginfo(9)
+		resizeobj controlbackgroundmodeadr,size
+		
+		nowcontrolscreenposY+=ysiz(40)
+		pos xsiz(10),nowcontrolscreenposY
+		;枠   xsiz(280),ysiz(280)
+		;内容 xsiz(270),ysiz(270) 枠の幅5px
+		boxfofmes onezero(loadset("DISPCOLORMODE",settingdata)),xsiz(10),nowcontrolscreenposY,xsiz(290),nowcontrolscreenposY+ysiz(280)
+		if loadset("backgroundmode",settingdata)="COLOR":{
+			backgroundcolorrgbdata=loadset("backgroundcolor",settingdata)
+			split backgroundcolorrgbdata,",",backgroundcolorrdata,backgroundcolorgdata,backgroundcolorbdata
+			color int(backgroundcolorrdata),int(backgroundcolorgdata),int(backgroundcolorbdata)
+			if ((ginfo(13)*xsiz(270))/ginfo(12))<=ysiz(270):{
+				posbuf=(ginfo(13)*xsiz(270))/ginfo(12)
+				posbuf2=(ysiz(270)-posbuf)/2
+				pos xsiz(15),nowcontrolscreenposY+ysiz(5)+posbuf2
+				boxf xsiz(15),nowcontrolscreenposY+ysiz(5)+posbuf2,xsiz(285),nowcontrolscreenposY+ysiz(5)+posbuf2+posbuf
+			}else{
+				posbuf=(ginfo(12)*ysiz(270))/ginfo(13)
+				posbuf2=(xsiz(270)-posbuf)/2
+				pos xsiz(15)+posbuf2,nowcontrolscreenposY+ysiz(5)
+				boxf xsiz(15)+posbuf2,nowcontrolscreenposY+ysiz(5),xsiz(15)+posbuf2+posbuf,nowcontrolscreenposY+ysiz(275)
+			}
+
+			nowcontrolscreenposY+=ysiz(300)
+			boxfofmes onezero(loadset("DISPCOLORMODE",settingdata)),xsiz(10),nowcontrolscreenposY,ginfo(12)-xsiz(30),nowcontrolscreenposY+ysiz(50)
+			pos xsiz(20),nowcontrolscreenposY+ysiz(30)
+			mes "R: "+strf("%03d",backgroundcolorrdata)+"  G: "+strf("%03d",backgroundcolorgdata)+"  B: "+strf("%03d",backgroundcolorbdata)
+			color int(backgroundcolorrdata),int(backgroundcolorgdata),int(backgroundcolorbdata)
+			boxf xsiz(20),nowcontrolscreenposY+ysiz(5),xsiz(20)+ginfo(14),nowcontrolscreenposY+ysiz(25)
+			size=xsiz(100),ysiz(30),ginfo(12)-xsiz(140),nowcontrolscreenposY+ysiz(10)-ginfo(9)
+			resizeobj controlchangebackgroundcoloradr,size,2
+		}else:if loadset("backgroundmode",settingdata)="IMAGE":{
+			color 0,0,0
+			controlbackgroundfile=loadset("backgroundfile",settingdata)
+			exist controlbackgroundfile
+			if strsize!-1:{
+				gsel 1007,0
+				backpicx=ginfo(12)
+				backpicy=ginfo(13)
+				gsel 0002,0
+				if ((ginfo(13)*xsiz(270))/ginfo(12))<=ysiz(270):{
+					posbuf=(ginfo(13)*xsiz(270))/ginfo(12)
+					posbuf2=(ysiz(270)-posbuf)/2
+					pos xsiz(15),nowcontrolscreenposY+ysiz(5)+posbuf2
+					boxf xsiz(15),nowcontrolscreenposY+ysiz(5)+posbuf2,xsiz(285),nowcontrolscreenposY+ysiz(5)+posbuf2+posbuf
+					sizebufx=xsiz(270)
+					sizebufy=posbuf
+				}else{
+					posbuf=(ginfo(12)*ysiz(270))/ginfo(13)
+					posbuf2=(xsiz(270)-posbuf)/2
+					pos xsiz(15)+posbuf2,nowcontrolscreenposY+ysiz(5)
+					boxf xsiz(15)+posbuf2,nowcontrolscreenposY+ysiz(5),xsiz(15)+posbuf2+posbuf,nowcontrolscreenposY+ysiz(275)
+					sizebufx=posbuf
+					sizebufy=ysiz(270)
+				}
+				if ((backpicy*sizebufx)/backpicx)<=sizebufy:{
+					posbuf3=(backpicy*sizebufx)/backpicx
+					posbuf4=(sizebufy-posbuf3)/2
+					if ((ginfo(13)*xsiz(270))/ginfo(12))<=ysiz(270):{
+						posbuf5=(ysiz(270)-posbuf3)/2
+						pos xsiz(15),nowcontrolscreenposY+posbuf5
+					}else{
+						pos xsiz(15)+posbuf2,nowcontrolscreenposY+ysiz(5)+posbuf4
+					}
+					gzoom sizebufx,posbuf3,1007,0,0,backpicx,backpicy,1
+				}else{
+					posbuf3=(backpicx*sizebufy)/backpicy
+					posbuf4=(sizebufx-posbuf3)/2
+					if ((ginfo(13)*xsiz(270))/ginfo(12))>ysiz(270):{
+						posbuf5=(xsiz(270)-posbuf3)/2
+						pos xsiz(15)+posbuf5,nowcontrolscreenposY+ysiz(5)
+					}else{
+						pos xsiz(15)+posbuf4,nowcontrolscreenposY+ysiz(5)+posbuf2
+					}
+					gzoom posbuf3,sizebufy,1007,0,0,backpicx,backpicy,1
+				}
+			}
+
+			nowcontrolscreenposY+=ysiz(300)
+			size=ginfo(12)-xsiz(140),ysiz(30),xsiz(10),nowcontrolscreenposY-ginfo(9)
+			resizeobj controlbackgroundfileadr,size
+			size=xsiz(100),ysiz(30),ginfo(12)-xsiz(130),nowcontrolscreenposY-ginfo(9)
+			resizeobj controldialogbackgroundfileadr,size,2
+
+			nowcontrolscreenposY+=ysiz(30)
+			size=xsiz(200),ysiz(30),xsiz(10),nowcontrolscreenposY-ginfo(9)
+			resizeobj controlrunbackgroundfileadr,size,2
+
+			nowcontrolscreenposY+=ysiz(30)
+			size=xsiz(200),ysiz(30),xsiz(10),nowcontrolscreenposY-ginfo(9)
+			resizeobj controlapplybackgroundfileadr,size,2
+		}else:if loadset("backgroundmode",settingdata)="SLIDESHOW":{
+			color 0,0,0
+			exist ""+controlbackgroundfolder+"\\"+slideshowpath
+			if strsize!-1:{
+				gsel 1007,0
+				backpicx=ginfo(12)
+				backpicy=ginfo(13)
+				gsel 0002,0
+				if ((ginfo(13)*xsiz(270))/ginfo(12))<=ysiz(270):{
+					posbuf=(ginfo(13)*xsiz(270))/ginfo(12)
+					posbuf2=(ysiz(270)-posbuf)/2
+					pos xsiz(15),nowcontrolscreenposY+ysiz(5)+posbuf2
+					boxf xsiz(15),nowcontrolscreenposY+ysiz(5)+posbuf2,xsiz(285),nowcontrolscreenposY+ysiz(5)+posbuf2+posbuf
+					sizebufx=xsiz(270)
+					sizebufy=posbuf
+				}else{
+					posbuf=(ginfo(12)*ysiz(270))/ginfo(13)
+					posbuf2=(xsiz(270)-posbuf)/2
+					pos xsiz(15)+posbuf2,nowcontrolscreenposY+ysiz(5)
+					boxf xsiz(15)+posbuf2,nowcontrolscreenposY+ysiz(5),xsiz(15)+posbuf2+posbuf,nowcontrolscreenposY+ysiz(275)
+					sizebufx=posbuf
+					sizebufy=ysiz(270)
+				}
+				if ((backpicy*sizebufx)/backpicx)<=sizebufy:{
+					posbuf3=(backpicy*sizebufx)/backpicx
+					posbuf4=(sizebufy-posbuf3)/2
+					if ((ginfo(13)*xsiz(270))/ginfo(12))<=ysiz(270):{
+						posbuf5=(ysiz(270)-posbuf3)/2
+						pos xsiz(15),nowcontrolscreenposY+posbuf5
+					}else{
+						pos xsiz(15)+posbuf2,nowcontrolscreenposY+ysiz(5)+posbuf4
+					}
+					gzoom sizebufx,posbuf3,1007,0,0,backpicx,backpicy,1
+				}else{
+					posbuf3=(backpicx*sizebufy)/backpicy
+					posbuf4=(sizebufx-posbuf3)/2
+					if ((ginfo(13)*xsiz(270))/ginfo(12))>ysiz(270):{
+						posbuf5=(xsiz(270)-posbuf3)/2
+						pos xsiz(15)+posbuf5,nowcontrolscreenposY+ysiz(5)
+					}else{
+						pos xsiz(15)+posbuf4,nowcontrolscreenposY+ysiz(5)+posbuf2
+					}
+					gzoom posbuf3,sizebufy,1007,0,0,backpicx,backpicy,1
+				}
+			}
+
+			nowcontrolscreenposY+=ysiz(300)
+			size=ginfo(12)-xsiz(140),ysiz(30),xsiz(10),nowcontrolscreenposY-ginfo(9)
+			resizeobj controlbackgroundfolderadr,size
+			size=xsiz(100),ysiz(30),ginfo(12)-xsiz(130),nowcontrolscreenposY-ginfo(9)
+			resizeobj controldialogbackgroundfolderadr,size,2
+
+			nowcontrolscreenposY+=ysiz(30)
+			size=xsiz(200),ysiz(30),xsiz(10),nowcontrolscreenposY-ginfo(9)
+			resizeobj controlrunbackgroundfolderadr,size,2
+
+			nowcontrolscreenposY+=ysiz(30)
+			size=xsiz(200),ysiz(30),xsiz(10),nowcontrolscreenposY-ginfo(9)
+			resizeobj controlapplybackgroundfolderadr,size,2
+
+			nowcontrolscreenposY+=ysiz(40)
+			size=ginfo(12)-xsiz(40),ysiz(30),xsiz(10),nowcontrolscreenposY-ginfo(9)
+			resizeobj controlbackgroundrandomadr,size
+		}
+	}else:if loadset("CONTROLPAGE",settingdata)="APPACT":{;動作設定
+		nowcontrolscreenposY+=ysiz(10)
+		pos xsiz(10),nowcontrolscreenposY
+		boxfofmes onezero(loadset("DISPCOLORMODE",settingdata)),xsiz(10),nowcontrolscreenposY,ginfo(12)-xsiz(30),nowcontrolscreenposY+fontysizedata.3
+		pos xsiz(12),nowcontrolscreenposY
+		mes langstr(54011)
+
+		nowcontrolscreenposY+=ysiz(25)
+		size=ginfo(12)-xsiz(40),ysiz(30),xsiz(10),nowcontrolscreenposY-ginfo(9)
+		resizeobj controlstartupdateadr,size
+
+		nowcontrolscreenposY+=ysiz(40)
+		size=ginfo(12)-xsiz(40),ysiz(30),xsiz(10),nowcontrolscreenposY-ginfo(9)
+		resizeobj controlwindowsversiondialogadr,size
+	}else:if loadset("CONTROLPAGE",settingdata)="PASSWORD":{;パスワード設定
+		nowcontrolscreenposY+=ysiz(10)
+		pos xsiz(10),nowcontrolscreenposY
+		boxfofmes onezero(loadset("DISPCOLORMODE",settingdata)),xsiz(10),nowcontrolscreenposY,ginfo(12)-xsiz(30),nowcontrolscreenposY+fontysizedata.3
+		pos xsiz(12),nowcontrolscreenposY
+		mes langstr(55011)
+
+		if loadset("passwordstring",settingdata)="":{
+			nowcontrolscreenposY+=ysiz(25)
+			size=xsiz(200),ysiz(30),xsiz(10),nowcontrolscreenposY-ginfo(9)
+			resizeobj createpasswordadr,size,2
+		}else{
+			nowcontrolscreenposY+=ysiz(25)
+			size=xsiz(200),ysiz(30),xsiz(10),nowcontrolscreenposY-ginfo(9)
+			resizeobj changepasswordadr,size,2
+
+			nowcontrolscreenposY+=ysiz(40)
+			size=xsiz(200),ysiz(30),xsiz(10),nowcontrolscreenposY-ginfo(9)
+			resizeobj deletepasswordadr,size,2
+		}
+	}else:if loadset("CONTROLPAGE",settingdata)="APPINFO":{;qwerty3xの詳細
+		nowcontrolscreenposY+=ysiz(10)
+		pos xsiz(10),nowcontrolscreenposY
+		boxfofmes onezero(loadset("dispcolormode",settingdata)),xsiz(10),nowcontrolscreenposY,ginfo(12)-xsiz(30),nowcontrolscreenposY+fontysizedata.1
+		font fontstr,fontsize+ysiz(7),1+2;15px+7px=22px
+		objmode 2,1
+		pos xsiz(12),nowcontrolscreenposY
+		mes langstr(0001)
+		font fontstr,fontsize,0;15px+7px=22px
+		objmode 2,1
+
+		nowcontrolscreenposY+=ysiz(40)
+		pos xsiz(10),nowcontrolscreenposY
+		boxfofmes onezero(loadset("dispcolormode",settingdata)),xsiz(10),nowcontrolscreenposY,ginfo(12)-xsiz(30),nowcontrolscreenposY+fontysizedata.3
+		pos xsiz(12),nowcontrolscreenposY
+		mes ""+langstr(5601)+qwertydate
+
+		nowcontrolscreenposY+=ysiz(25)
+		pos xsiz(10),nowcontrolscreenposY
+		boxfofmes onezero(loadset("dispcolormode",settingdata)),xsiz(10),nowcontrolscreenposY,ginfo(12)-xsiz(30),nowcontrolscreenposY+fontysizedata.3
+		pos xsiz(12),nowcontrolscreenposY
+		mes ""+langstr(5602)+__date__+" "+__time__
+
+		nowcontrolscreenposY+=ysiz(25)
+		pos xsiz(10),nowcontrolscreenposY
+		boxfofmes onezero(loadset("dispcolormode",settingdata)),xsiz(10),nowcontrolscreenposY,ginfo(12)-xsiz(30),nowcontrolscreenposY+fontysizedata.3
+		pos xsiz(12),nowcontrolscreenposY
+		mes ""+langstr(5603)+qwertybuild
+	
+		nowcontrolscreenposY+=ysiz(25)
+		size=ginfo(12)-xsiz(40),ysiz(500),xsiz(10),nowcontrolscreenposY-ginfo(9)
+		resizeobj releasenoteadr,size,0
+
+		nowcontrolscreenposY+=ysiz(530)
+		pos xsiz(10),nowcontrolscreenposY
+		boxfofmes onezero(loadset("dispcolormode",settingdata)),xsiz(10),nowcontrolscreenposY,ginfo(12)-xsiz(30),nowcontrolscreenposY+(fontysizedata.3*4)
+		pos xsiz(12),nowcontrolscreenposY
+		mes "Copyright (C) 2024-2025 hoyoqwerty All Rights Reserved.\nqwerty3x is created in \"Hot Soup Processor.\"\n\n__hspver__ : "+strf("%4x",__hspver__)+""
+	}else:if loadset("CONTROLPAGE",settingdata)="APPUPDATE":{;qwerty3x update
+		nowcontrolscreenposY+=ysiz(10)
+		pos xsiz(10),nowcontrolscreenposY
+		boxfofmes onezero(loadset("DISPCOLORMODE",settingdata)),xsiz(10),nowcontrolscreenposY,ginfo(12)-xsiz(30),nowcontrolscreenposY+fontysizedata.3
+		pos xsiz(12),nowcontrolscreenposY
+		mes langstr(5701);qwerty3x スタイルカラー
+
+		nowcontrolscreenposY+=ysiz(30)
+		size=ginfo(12)-xsiz(40),ysiz(80),xsiz(10),nowcontrolscreenposY-ginfo(9)
+		resizeobj updatecheckstartadr,size,0
+
+		nowcontrolscreenposY+=ysiz(90)
+		pos xsiz(10),nowcontrolscreenposY
+		boxfofmes onezero(loadset("DISPCOLORMODE",settingdata)),xsiz(10),nowcontrolscreenposY,ginfo(12)-xsiz(30),nowcontrolscreenposY+fontysizedata.3
+		pos xsiz(12),nowcontrolscreenposY
+		mes langstr(5705);qwerty3x スタイルカラー
+
+		nowcontrolscreenposY+=ysiz(30)
+		if updatecheckmes!"":{
+			size=ginfo(12)-xsiz(40),ysiz(350),xsiz(10),nowcontrolscreenposY-ginfo(9)
+		}else{
+			size=ginfo(12)-xsiz(40),ysiz(50),xsiz(10),nowcontrolscreenposY-ginfo(9)
+		}
+		resizeobj updatecheckmesadr,size,0
+
+		if updatecheckmes!"":{
+			nowcontrolscreenposY+=ysiz(360)
+		}else{
+			nowcontrolscreenposY+=ysiz(60)
+		}
+		size=(ginfo(12)-xsiz(40))/2,ysiz(30),xsiz(10),nowcontrolscreenposY-ginfo(9)
+		resizeobj updatedoyesadr,size,0
+		if updatecheckmes="":{
+			objenable updatedoyesadr,0
+		}else{
+			objenable updatedoyesadr,1
+		}
+
+		size=(ginfo(12)-xsiz(40))/2,ysiz(30),xsiz(10)+(ginfo(12)-xsiz(40))/2,nowcontrolscreenposY-ginfo(9)
+		resizeobj updatedonoadr,size,0
+		if updatecheckmes="":{
+			objenable updatedonoadr,0
+		}else{
+			objenable updatedonoadr,1
+		}
+
+		nowcontrolscreenposY+=ysiz(70)
+		pos xsiz(10),nowcontrolscreenposY
+		boxfofmes onezero(loadset("DISPCOLORMODE",settingdata)),xsiz(10),nowcontrolscreenposY,ginfo(12)-xsiz(30),nowcontrolscreenposY+fontysizedata.3
+		pos xsiz(12),nowcontrolscreenposY
+		mes langstr(5750)
+
+		nowcontrolscreenposY+=ysiz(25)
+		size=(ginfo(12)-xsiz(40)),ysiz(30),xsiz(10),nowcontrolscreenposY-ginfo(9)
+		resizeobj controlgetbetaupdateadr,size,0
+
+		nowcontrolscreenposY+=ysiz(40)
+		size=(ginfo(12)-xsiz(40)),ysiz(30),xsiz(10),nowcontrolscreenposY-ginfo(9)
+		resizeobj controlstartupdateadr,size,0
+
+		nowcontrolscreenposY+=ysiz(70)
+		pos xsiz(10),nowcontrolscreenposY
+		boxfofmes onezero(loadset("DISPCOLORMODE",settingdata)),xsiz(10),nowcontrolscreenposY,ginfo(12)-xsiz(30),nowcontrolscreenposY+fontysizedata.3
+		pos xsiz(12),nowcontrolscreenposY
+		mes langstr(5770)
+
+		nowcontrolscreenposY+=ysiz(25)
+		size=(ginfo(12)-xsiz(40)),ysiz(50),xsiz(10),nowcontrolscreenposY-ginfo(9)
+		resizeobj versionchangeadr,size,0
+	}
+
+	ScrollBar_SetRange scrollbar2adr,0,(nowcontrolscreenposY+ysiz(30)),(ginfo(13)/15)
+	size=xsiz(20),ginfo(13),ginfo(12)-xsiz(20),ysiz(0)
+	resizeobj scrollbar2adr,size
+
+	redraw 1
+	gsel 0003
+	width xsiz(180),clientwindowy-ysiz(30),xsiz(0),ysiz(30)
+	gsel 0000
+
+	return
+
+//////////////////////////////////////////////////////////////////////
+//便利機能
+//////////////////////////////////////////////////////////////////////
+
+*launchertakeoverstart
+	gsel 0000
+	bufx=ginfo(12)
+	bufy=ginfo(13)
+	redraw 0
+	onkey 0
+	onclick 0
+	beforex=ginfo(4)
+	beforey=ginfo(5)
+	enablewindow hclient,0
+	screen 201,xsiz(640),ysiz(450),4+8
+	gsel 201,2
+	GetWindowLong hwnd, -16
+	SetWindowLong hwnd, -16, stat - $80000
+	width xsiz(640),ysiz(450),beforex,beforey
+	boxfofmes int(loadset("dispcolormode",settingdata)),xsiz(0),ysiz(0),xsiz(640),ysiz(450)
+	font fontstr,fontsize,0
+	objmode 2,1
+	redraw 1
+
+	defaultpathlist={"C:\\qwerty-XX
+	"}+dir_mydoc+{"\\qwerty-XX
+	"}+dir_desktop+{"\\qwerty-XX"}
+
+	title ""+langstr(56057)+""
+
+	pos xsiz(10),ysiz(10)
+	boxfofmes onezero(loadset("dispcolormode",settingdata)),xsiz(10),ysiz(10),xsiz(630),ysiz(10)+fontysizedata.3
+	pos xsiz(12),ysiz(10)
+	mes ""+langstr(560561)
+
+	errorbuf=1
+	notesel defaultpathlist
+	repeat notemax
+		notesel defaultpathlist
+		noteget defaultpathlistbuf,cnt
+
+		dirlist dummy,defaultpathlistbuf,5
+		if stat!0:{
+			dirlist dummy,defaultpathlistbuf+"\\data",5
+			if stat!0:{
+				dialog ""+defaultpathlistbuf+"\n\n"+langstr(560572),2,langstr(56057)
+				if stat=6:{
+					errorbuf=0
+					qwertyxxcur=defaultpathlistbuf
+					break
+				}
+			}
+		}
+		wait 10
+	loop
+	if errorbuf=1:{
+		repeat
+			dialog langstr(560562),3,langstr(56057)
+			if stat!6:{
+				gsel 201,-1
+				gsel 0000,int(loadset("ALWAYSFRONT",settingdata))+1
+				
+				enablewindow hclient,1
+				
+				goto *systemrepeat
+			}
+	
+			testqwertyxxcur=folderdialog(langstr(560563))
+			dirlist dummy,testqwertyxxcur+"\\data",5
+			if stat=0:{
+				dirlist dummy,testqwertyxxcur+"\\qwerty-XX\\data",5
+				if stat=0:{
+					continue
+				}else{
+					dialog ""+testqwertyxxcur+"\\qwerty-XX\n\n"+langstr(560572),2,langstr(56057)
+					if stat=6:{
+						errorbuf=0
+						qwertyxxcur=testqwertyxxcur+"\\qwerty-XX"
+						break
+					}
+				}
+			}else{
+				dialog ""+testqwertyxxcur+"\n\n"+langstr(560572),2,langstr(56057)
+				if stat=6:{
+					errorbuf=0
+					qwertyxxcur=testqwertyxxcur
+					break
+				}
+			}
+		loop
+	}
+	//ここまででqwerty-XXフォルダの選択は確定
+	redraw 0
+	onkey 0
+	onclick 0
+	screen 201,xsiz(640),ysiz(450),4+8
+	gsel 201,2
+	GetWindowLong hwnd, -16
+	SetWindowLong hwnd, -16, stat - $80000
+	width xsiz(640),ysiz(450)
+	boxfofmes int(loadset("dispcolormode",settingdata)),xsiz(0),ysiz(0),xsiz(640),ysiz(450)
+	font fontstr,fontsize,0
+	objmode 2,1
+	redraw 1
+
+	title ""+langstr(56057)+""
+
+	pos xsiz(10),ysiz(10)
+	boxfofmes onezero(loadset("dispcolormode",settingdata)),xsiz(10),ysiz(10),xsiz(630),ysiz(10)+fontysizedata.3
+	pos xsiz(12),ysiz(10)
+	mes ""+langstr(560565)
+
+	chdir qwertyxxcur+"\\data"
+	exist "setting.ini"
+	if strsize=-1:{
+		dialog langstr(560566),1,langstr(56057)
+		gsel 201,-1
+		gsel 0000,int(loadset("ALWAYSFRONT",settingdata))+1
+				
+		enablewindow hclient,1
+				
+		goto *systemrepeat
+	}
+
+	qwertyxxsetting=""
+	notesel qwertyxxsetting
+	noteload "setting.ini"
+	noteget qwertyxxusepassword,23
+	noteget qwertyxxpassword,24
+	noteget qwertyxxpasswordkey,25
+	qwertyxxusepassword=int(qwertyxxusepassword)
+	qwertyxxpasswordkey=int(qwertyxxpasswordkey)
+	if qwertyxxusepassword=1:{
+		//ここからパスワード入力
+		redraw 0
+		onkey 0
+		onclick 0
+		screen 201,xsiz(640),ysiz(450),4+8
+		gsel 201,2
+		GetWindowLong hwnd, -16
+		SetWindowLong hwnd, -16, stat - $80000
+		width xsiz(640),ysiz(450)
+		boxfofmes int(loadset("dispcolormode",settingdata)),xsiz(0),ysiz(0),xsiz(640),ysiz(450)
+		font fontstr,fontsize,0
+		objmode 2,1
+		redraw 1
+
+		pos xsiz(10),ysiz(10)
+		boxfofmes onezero(loadset("dispcolormode",settingdata)),xsiz(10),ysiz(10),xsiz(630),ysiz(10)+fontysizedata.3
+		pos xsiz(12),ysiz(10)
+		mes ""+langstr(560567)
+
+		pos xsiz(10),ysiz(35)
+		objsize xsiz(520),ysiz(30)
+		nowpassword=""
+		input nowpassword,xsiz(520),ysiz(30),0
+		nowpasswordadr=stat
+		sendmsg objinfo(nowpasswordadr,2),$CC,'*'
+		pos xsiz(530),ysiz(35)
+		objsize xsiz(100),ysiz(30)
+		button gosub langstr(55035),*nowpasswordenable
+		nowpasswordenableadr=stat
+		nowpasswordenablebuf=0
+
+		pos xsiz(420),ysiz(420)
+		objsize xsiz(100),ysiz(30)
+		button goto langstr(560568),*launchertakeoverstartyes
+	
+		pos xsiz(530),ysiz(420)
+		button goto langstr(560569),*launchertakeoverstartno
+
+		stop
+	}
+
+	goto *launchertakeoverstart2
+
+*launchertakeoverstartyes
+	sdim bufpassword,32000
+	nagasa=strlen(qwertyxxpassword)
+	bufpassword=""
+	repeat nagasa
+		buf=(peek(qwertyxxpassword,cnt)-qwertyxxpasswordkey)
+	
+		poke bufpassword,cnt,buf
+	loop
+
+	if bufpassword!nowpassword:{
+		bufpassword=""
+		dialog langstr(55013),1,langstr(56057)
+		stop
+	}
+
+	goto *launchertakeoverstart2
+
+*launchertakeoverstartno
+	dialog langstr(560571),3,langstr(56057)
+	if stat=6:{
+		gsel 201,-1
+		gsel 0000,int(loadset("ALWAYSFRONT",settingdata))+1
+				
+		enablewindow hclient,1
+				
+		goto *systemrepeat
+	}
+	
+	stop
+
+*launchertakeoverstart2
+	//ここまででパスワード入力までOK
+	redraw 0
+	onkey 0
+	onclick 0
+	screen 201,xsiz(640),ysiz(450),4+8
+	gsel 201,2
+	GetWindowLong hwnd, -16
+	SetWindowLong hwnd, -16, stat - $80000
+	width xsiz(640),ysiz(450)
+	boxfofmes int(loadset("dispcolormode",settingdata)),xsiz(0),ysiz(0),xsiz(640),ysiz(450)
+	font fontstr,fontsize,0
+	objmode 2,1
+	redraw 1
+
+	title ""+langstr(560574)+""
+	
+	chdir qwertyxxcur+"\\data"
+	exist "lanfile.ini"
+	if strsize=-1:{
+		dialog langstr(560575),1,langstr(56057)
+		gsel 201,-1
+		gsel 0000,int(loadset("ALWAYSFRONT",settingdata))+1
+				
+		enablewindow hclient,1
+				
+		goto *systemrepeat
+	}
+	qwertyxxlanfile=""
+	notesel qwertyxxlanfile
+	noteload "lanfile.ini"
+
+	exist "lanname.ini"
+	if strsize=-1:{
+		dialog langstr(560575),1,langstr(56057)
+		gsel 201,-1
+		gsel 0000,int(loadset("ALWAYSFRONT",settingdata))+1
+				
+		enablewindow hclient,1
+				
+		goto *systemrepeat
+	}
+	qwertyxxlanname=""
+	notesel qwertyxxlanname
+	noteload "lanname.ini"
+
+	exist "lanonadmin.ini"
+	if strsize=-1:{
+		dialog langstr(560575),1,langstr(56057)
+		gsel 201,-1
+		gsel 0000,int(loadset("ALWAYSFRONT",settingdata))+1
+				
+		enablewindow hclient,1
+				
+		goto *systemrepeat
+	}
+	qwertyxxlanonadmin=""
+	notesel qwertyxxlanonadmin
+	noteload "lanonadmin.ini"
+
+	exist "lanicon.ini"
+	if strsize=-1:{
+		dialog langstr(560575),1,langstr(56057)
+		gsel 201,-1
+		gsel 0000,int(loadset("ALWAYSFRONT",settingdata))+1
+				
+		enablewindow hclient,1
+				
+		goto *systemrepeat
+	}
+	qwertyxxlanicon=""
+	notesel qwertyxxlanicon
+	noteload "lanicon.ini"
+
+	exist "lanmode.ini"
+	if strsize=-1:{
+		dialog langstr(560575),1,langstr(56057)
+		gsel 201,-1
+		gsel 0000,int(loadset("ALWAYSFRONT",settingdata))+1
+				
+		enablewindow hclient,1
+				
+		goto *systemrepeat
+	}
+	qwertyxxlanmode=""
+	notesel qwertyxxlanmode
+	noteload "lanmode.ini"
+
+	qwertyxxlanfileblank=1
+	notesel qwertyxxlanfile
+	repeat notemax
+		notesel qwertyxxlanfile
+		noteget buf,cnt
+
+		if buf!"":{
+			qwertyxxlanfileblank=0
+			break
+		}
+	loop
+	if qwertyxxlanfileblank=1:{
+		dialog langstr(560576),1,langstr(56057)
+		gsel 201,-1
+		gsel 0000,int(loadset("ALWAYSFRONT",settingdata))+1
+				
+		enablewindow hclient,1
+				
+		goto *systemrepeat
+	}
+
+	dialog langstr(560577),2,langstr(56057)
+	if stat!6:{
+		gsel 201,-1
+		gsel 0000,int(loadset("ALWAYSFRONT",settingdata))+1
+				
+		enablewindow hclient,1
+				
+		goto *systemrepeat
+	}
+
+	wait 100
+
+	notesel qwertyxxlanfile
+	repeat notemax
+		notesel qwertyxxlanname
+		noteget buf,cnt
+		title "("+(cnt+1)+"/"+notemax+")"+langstr(560578)+" :"+buf
+
+		launcherdatamax=int(loadset("launcherdatamax",launcherdata))
+
+		notesel qwertyxxlanfile
+		noteget buf,cnt
+		if buf!"":{
+			notesel qwertyxxlanmode
+			noteget buf,cnt
+			if int(buf)!-1:{
+				notesel qwertyxxlanfile
+				noteget buf,cnt
+				saveset ""+(launcherdatamax+1)+"_data",launcherdata,buf
+		
+				notesel qwertyxxlanname
+				noteget buf,cnt
+				saveset ""+(launcherdatamax+1)+"_name",launcherdata,buf
+		
+				notesel qwertyxxlanonadmin
+				noteget buf,cnt
+				saveset ""+(launcherdatamax+1)+"_runas",launcherdata,buf
+		
+				notesel qwertyxxlanicon
+				noteget buf,cnt
+				saveset ""+(launcherdatamax+1)+"_icon",launcherdata,buf
+		
+				saveset ""+(launcherdatamax+1)+"_opt",launcherdata,""
+	
+				repeat
+					notesel launcherdata
+					if notefind(""+(cnt+1)+"_data",1)=-1:{
+						saveset "launcherdatamax",launcherdata,str(cnt)
+						break
+					}
+				loop
+
+				pos xsiz(0),ysiz(0)
+				color 0,0,0
+				boxf 
+				color 255,255,255
+				mes "No."+(cnt+1)+" "+loadset(""+launcherdatamax+"_name",launcherdata)
+			}
+		}
+
+		wait 1
+	loop
+
+	dialog langstr(560579),0,langstr(56057)
+
+	gsel 201,-1
+	gsel 0000,int(loadset("ALWAYSFRONT",settingdata))+1
+	
+	enablewindow hclient,1
+
+	bufferallupdatestartupbuf=1
+	gosub *makescreen
+	bufferallupdatestartupbuf=0
+
+	goto *systemrepeat
+
+*takeoverstart
+	gsel 0000
+	bufx=ginfo(12)
+	bufy=ginfo(13)
+	redraw 0
+	onkey 0
+	onclick 0
+	beforex=ginfo(4)
+	beforey=ginfo(5)
+	enablewindow hclient,0
+	screen 201,xsiz(640),ysiz(450),4+8
+	gsel 201,2
+	GetWindowLong hwnd, -16
+	SetWindowLong hwnd, -16, stat - $80000
+	width xsiz(640),ysiz(450),beforex,beforey
+	boxfofmes int(loadset("dispcolormode",settingdata)),xsiz(0),ysiz(0),xsiz(640),ysiz(450)
+	font fontstr,fontsize,0
+	objmode 2,1
+	redraw 1
+
+	defaultpathlist={"C:\\qwerty-XX
+	"}+dir_mydoc+{"\\qwerty-XX
+	"}+dir_desktop+{"\\qwerty-XX"}
+
+	title ""+langstr(56056)+""
+
+	pos xsiz(10),ysiz(10)
+	boxfofmes onezero(loadset("dispcolormode",settingdata)),xsiz(10),ysiz(10),xsiz(630),ysiz(10)+fontysizedata.3
+	pos xsiz(12),ysiz(10)
+	mes ""+langstr(560561)
+
+	errorbuf=1
+	notesel defaultpathlist
+	repeat notemax
+		notesel defaultpathlist
+		noteget defaultpathlistbuf,cnt
+
+		dirlist dummy,defaultpathlistbuf,5
+		if stat!0:{
+			dirlist dummy,defaultpathlistbuf+"\\data",5
+			if stat!0:{
+				dialog ""+defaultpathlistbuf+"\n\n"+langstr(560564),2,langstr(56056)
+				if stat=6:{
+					errorbuf=0
+					qwertyxxcur=defaultpathlistbuf
+					break
+				}
+			}
+		}
+		wait 10
+	loop
+	if errorbuf=1:{
+		repeat
+			dialog langstr(560562),3,langstr(56056)
+			if stat!6:{
+				gsel 201,-1
+				gsel 0000,int(loadset("ALWAYSFRONT",settingdata))+1
+				
+				enablewindow hclient,1
+				
+				goto *systemrepeat
+			}
+	
+			testqwertyxxcur=folderdialog(langstr(560563))
+			dirlist dummy,testqwertyxxcur+"\\data",5
+			if stat=0:{
+				dirlist dummy,testqwertyxxcur+"\\qwerty-XX\\data",5
+				if stat=0:{
+					continue
+				}else{
+					dialog ""+testqwertyxxcur+"\\qwerty-XX\n\n"+langstr(560564),2,langstr(56056)
+					if stat=6:{
+						errorbuf=0
+						qwertyxxcur=testqwertyxxcur+"\\qwerty-XX"
+						break
+					}
+				}
+			}else{
+				dialog ""+testqwertyxxcur+"\n\n"+langstr(560564),2,langstr(56056)
+				if stat=6:{
+					errorbuf=0
+					qwertyxxcur=testqwertyxxcur
+					break
+				}
+			}
+		loop
+	}
+	//ここまででqwerty-XXフォルダの選択は確定
+	redraw 0
+	onkey 0
+	onclick 0
+	screen 201,xsiz(640),ysiz(450),4+8
+	gsel 201,2
+	GetWindowLong hwnd, -16
+	SetWindowLong hwnd, -16, stat - $80000
+	width xsiz(640),ysiz(450)
+	boxfofmes int(loadset("dispcolormode",settingdata)),xsiz(0),ysiz(0),xsiz(640),ysiz(450)
+	font fontstr,fontsize,0
+	objmode 2,1
+	redraw 1
+
+	title ""+langstr(56056)+""
+
+	pos xsiz(10),ysiz(10)
+	boxfofmes onezero(loadset("dispcolormode",settingdata)),xsiz(10),ysiz(10),xsiz(630),ysiz(10)+fontysizedata.3
+	pos xsiz(12),ysiz(10)
+	mes ""+langstr(560565)
+
+	chdir qwertyxxcur+"\\data"
+	exist "setting.ini"
+	if strsize=-1:{
+		dialog langstr(560566),1,langstr(56056)
+		gsel 201,-1
+		gsel 0000,int(loadset("ALWAYSFRONT",settingdata))+1
+				
+		enablewindow hclient,1
+				
+		goto *systemrepeat
+	}
+
+	qwertyxxsetting=""
+	notesel qwertyxxsetting
+	noteload "setting.ini"
+	noteget qwertyxxusepassword,23
+	noteget qwertyxxpassword,24
+	noteget qwertyxxpasswordkey,25
+	qwertyxxusepassword=int(qwertyxxusepassword)
+	qwertyxxpasswordkey=int(qwertyxxpasswordkey)
+	if qwertyxxusepassword=1:{
+		//ここからパスワード入力
+		redraw 0
+		onkey 0
+		onclick 0
+		screen 201,xsiz(640),ysiz(450),4+8
+		gsel 201,2
+		GetWindowLong hwnd, -16
+		SetWindowLong hwnd, -16, stat - $80000
+		width xsiz(640),ysiz(450)
+		boxfofmes int(loadset("dispcolormode",settingdata)),xsiz(0),ysiz(0),xsiz(640),ysiz(450)
+		font fontstr,fontsize,0
+		objmode 2,1
+		redraw 1
+
+		pos xsiz(10),ysiz(10)
+		boxfofmes onezero(loadset("dispcolormode",settingdata)),xsiz(10),ysiz(10),xsiz(630),ysiz(10)+fontysizedata.3
+		pos xsiz(12),ysiz(10)
+		mes ""+langstr(560567)
+
+		pos xsiz(10),ysiz(35)
+		objsize xsiz(520),ysiz(30)
+		nowpassword=""
+		input nowpassword,xsiz(520),ysiz(30),0
+		nowpasswordadr=stat
+		sendmsg objinfo(nowpasswordadr,2),$CC,'*'
+		pos xsiz(530),ysiz(35)
+		objsize xsiz(100),ysiz(30)
+		button gosub langstr(55035),*nowpasswordenable
+		nowpasswordenableadr=stat
+		nowpasswordenablebuf=0
+
+		pos xsiz(420),ysiz(420)
+		objsize xsiz(100),ysiz(30)
+		button goto langstr(560568),*takeoverstartyes
+	
+		pos xsiz(530),ysiz(420)
+		button goto langstr(560569),*takeoverstartno
+
+		stop
+	}
+
+	goto *takeoverstart2
+
+*takeoverstartyes
+	sdim bufpassword,32000
+	nagasa=strlen(qwertyxxpassword)
+	bufpassword=""
+	repeat nagasa
+		buf=(peek(qwertyxxpassword,cnt)-qwertyxxpasswordkey)
+	
+		poke bufpassword,cnt,buf
+	loop
+
+	if bufpassword!nowpassword:{
+		bufpassword=""
+		dialog langstr(55013),1,langstr(56056)
+		stop
+	}
+
+	goto *takeoverstart2
+
+*takeoverstartno
+	dialog langstr(5605610),3,langstr(56056)
+	if stat=6:{
+		gsel 201,-1
+		gsel 0000,int(loadset("ALWAYSFRONT",settingdata))+1
+				
+		enablewindow hclient,1
+				
+		goto *systemrepeat
+	}
+	
+	stop
+
+*takeoverstart2
+	//ここまででパスワード入力までOK
+	redraw 0
+	onkey 0
+	onclick 0
+	screen 201,xsiz(640),ysiz(450),4+8
+	gsel 201,2
+	GetWindowLong hwnd, -16
+	SetWindowLong hwnd, -16, stat - $80000
+	width xsiz(640),ysiz(450)
+	boxfofmes int(loadset("dispcolormode",settingdata)),xsiz(0),ysiz(0),xsiz(640),ysiz(450)
+	font fontstr,fontsize,0
+	objmode 2,1
+	redraw 1
+
+	title ""+langstr(5605611)+""
+
+	notesel qwertyxxsetting
+	noteget qwertyxxalwaysfront,9
+	noteget qwertyxxautomini,10
+	noteget qwertyxxfontset,11
+	noteget qwertyxxdismode,13
+	noteget qwertyxxupdatecheck,34
+	noteget qwertyxxbackpicmode,17
+	noteget qwertyxxbackpicr,19
+	noteget qwertyxxbackpicg,20
+	noteget qwertyxxbackpicb,21
+	noteget qwertyxxbackpicpath,22
+	noteget qwertyxxbackpicshow,64
+	noteget qwertyxxbackpicshowrandom,65
+	noteget qwertyxxsystemr,3
+	noteget qwertyxxsystemg,4
+	noteget qwertyxxsystemb,5
+
+	takeoverstrings=""
+
+	takeoverautochk=langstr(5605113),langstr(5605114)
+	takeoverautochkrev=langstr(5605114),langstr(5605113)
+	takeoverstrings.0=langstr(5605613)+" >>>"+takeoverautochk.int(qwertyxxalwaysfront)
+	;常に最前面に表示する
+	takeoverstrings.1=langstr(5605614)+" >>>"+takeoverautochk.int(qwertyxxautomini)
+	;ランチャーや外部ウィンドウを開く操作をした時、自動でqwerty-XXが最小化されるようにする
+	takeoverautochkbuf=langstr(560561501)
+	split takeoverautochkbuf,",",takeoverautochkbuf2
+	takeoverstrings.2=langstr(5605615)+" >>>"+takeoverautochkbuf2.int(qwertyxxfontset)
+	;qwerty-XXのフォント
+	takeoverautochkbuf=langstr(560561601)
+	split takeoverautochkbuf,",",takeoverautochkbuf2
+	takeoverstrings.3=langstr(5605616)+" >>>"+takeoverautochkbuf2.int(qwertyxxdismode)
+	;qwerty-XXのダークモード・ライトモード
+	takeoverstrings.4=langstr(5605617)+" >>>"+takeoverautochkrev.int(qwertyxxupdatecheck)
+	;qwerty-XX起動時にアップデートの確認を行うようにするrev
+	takeoverautochkbuf=langstr(560561801)
+	split takeoverautochkbuf,",",takeoverautochkbuf2
+	takeoverstrings.5=langstr(5605618)+" >>>"+takeoverautochkbuf2.int(qwertyxxbackpicmode)
+	;qwerty-XXの背景
+	takeoverstrings.6=langstr(5605619)+" >>>R:"+strf("%03d",qwertyxxbackpicr)+" G:"+strf("%03d",qwertyxxbackpicg)+" B:"+strf("%03d",qwertyxxbackpicb)
+	;単色の色選択
+	takeoverstrings.7=langstr(5605620)+" >>>"+qwertyxxbackpicpath
+	;画像ファイルパス
+	takeoverstrings.8=langstr(5605621)+" >>>"+qwertyxxbackpicshow
+	;スライドショーフォルダパス
+	takeoverstrings.9=langstr(5605622)+" >>>"+takeoverautochk.int(qwertyxxbackpicshowrandom)
+	;画像の表示順をランダムにする
+	takeoverstrings.10=langstr(5605623)+" >>>R:"+strf("%03d",qwertyxxsystemr)+" G:"+strf("%03d",qwertyxxsystemg)+" B:"+strf("%03d",qwertyxxsystemb)
+	;qwerty-XX スタイルカラー
+
+	pos xsiz(10),ysiz(10)
+	boxfofmes onezero(loadset("dispcolormode",settingdata)),xsiz(10),ysiz(10),xsiz(630),ysiz(10)+(fontysizedata.3*2)
+	pos xsiz(12),ysiz(10)
+	mes ""+langstr(5605611)
+
+	pos xsiz(10),ysiz(60)
+	winobj "listbox","",$200,$50200001|$8,xsiz(620),ysiz(325)
+	htakeoverlist=objinfo(stat,2)
+
+	font fontstr,fontsize,0
+	mref bmscr,67
+	hfont=bmscr.38
+	sendmsg htakeoverlist,$30,hfont,1
+
+	takeoverstringsmax=0
+	foreach takeoverstrings
+		sendmsg htakeoverlist,$180,,takeoverstrings.cnt
+		takeoverstringsmax+=1
+	loop
+
+	pos xsiz(10),ysiz(390)
+	boxfofmes onezero(loadset("dispcolormode",settingdata)),xsiz(10),ysiz(390),xsiz(630),ysiz(390)+fontysizedata.3
+	pos xsiz(12),ysiz(390)
+	mes ""+langstr(5605624)
+
+	pos xsiz(10),ysiz(420)
+	objsize xsiz(150),ysiz(30)
+	button goto langstr(5605625),*takeoverliston
+
+	pos xsiz(370),ysiz(420)
+	objsize xsiz(150),ysiz(30)
+	button goto langstr(5605626),*takeoverstart2yes
+
+	pos xsiz(530),ysiz(420)
+	objsize xsiz(100),ysiz(30)
+	button goto langstr(560516),*takeoverstart2no
+
+	stop
+
+*takeoverliston
+	sendmsg htakeoverlist,$190
+	if takeoverstringsmax=stat:{;全選択解除
+		foreach takeoverstrings
+			sendmsg htakeoverlist,$185,0,cnt
+		loop
+	}else{;全選択
+		foreach takeoverstrings
+			sendmsg htakeoverlist,$185,1,cnt
+		loop
+	}
+
+	stop
+	
+*takeoverstart2no
+	gsel 201,-1
+	gsel 0000,int(loadset("ALWAYSFRONT",settingdata))+1
+
+	enablewindow hclient,1
+
+	goto *systemrepeat
+
+*takeoverstart2yes
+	sendmsg htakeoverlist,$190
+	if stat=0:{
+		dialog langstr(5605627),1,langstr(56056)
+		stop
+	}
+
+	takeovernowstrings=""
+	foreach takeoverstrings
+		sendmsg htakeoverlist,$187,cnt
+		if stat=1:{
+			split takeoverstrings.cnt,">>>",splittakeoverstrings
+			notesel takeovernowstrings
+			noteadd splittakeoverstrings.0,-1
+		}
+	loop
+
+	dialog ""+takeovernowstrings+"\n\n"+langstr(5605628),0,langstr(56056)
+
+	notesel takeovernowstrings
+	repeat notemax
+		notesel takeovernowstrings
+		noteget buf,cnt
+		
+		foreach takeoverstrings
+			split takeoverstrings.cnt,">>>",splittakeoverstrings
+			if buf=splittakeoverstrings.0:{
+				backtakeoverbuf=cnt
+			}
+		loop
+
+		if backtakeoverbuf=0:{
+			saveset "alwaysfront",settingdata,qwertyxxalwaysfront
+		}else:if backtakeoverbuf=1:{
+			saveset "automini",settingdata,qwertyxxautomini
+		}else:if backtakeoverbuf=2:{
+			if int(qwertyxxfontset)=0:{
+				saveset "fontname",settingdata,"AUTO"
+			}else:if int(qwertyxxfontset)=1:{
+				saveset "fontname",settingdata,"Yu Gothic UI"
+			}else:if int(qwertyxxfontset)=2:{
+				saveset "fontname",settingdata,"Meiryo UI"
+			}else:if int(qwertyxxfontset)=3:{
+				saveset "fontname",settingdata,"MS UI Gothic"
+			}
+		}else:if backtakeoverbuf=3:{
+			saveset "dispcolormode",settingdata,qwertyxxdismode
+		}else:if backtakeoverbuf=4:{
+			saveset "startupdate",settingdata,str(onezero(qwertyxxupdatecheck))
+		}else:if backtakeoverbuf=5:{
+			if int(qwertyxxbackpicmode)=0:{
+				saveset "backgroundmode",settingdata,"COLOR"
+			}else:if int(qwertyxxbackpicmode)=1:{
+				saveset "backgroundmode",settingdata,"IMAGE"
+			}else:if int(qwertyxxbackpicmode)=2:{
+				saveset "backgroundmode",settingdata,"SLIDESHOW"
+			}
+		}else:if backtakeoverbuf=6:{
+			saveset "backgroundcolor",settingdata,""+qwertyxxbackpicr+","+qwertyxxbackpicg+","+qwertyxxbackpicb
+		}else:if backtakeoverbuf=7:{
+			saveset "backgroundfile",settingdata,qwertyxxbackpicpath
+		}else:if backtakeoverbuf=8:{
+			saveset "backgroundfolder",settingdata,qwertyxxbackpicshow
+		}else:if backtakeoverbuf=9:{
+			saveset "backgroundrandom",settingdata,qwertyxxbackpicshowrandom
+		}else:if backtakeoverbuf=10:{
+			saveset "systemrgb",settingdata,""+qwertyxsystemr+","+qwertyxxsystemg+","+qwertyxxsystemb
+		}
+	loop
+
+	dialog langstr(5605629),0,langstr(56056)
+
+	gsel 201,-1
+	gsel 0000,int(loadset("ALWAYSFRONT",settingdata))+1
+	
+	enablewindow hclient,1
+
+	bufferallupdatestartupbuf=1
+	gosub *makescreen
+	bufferallupdatestartupbuf=0
+
+	goto *systemrepeat
+
+*showdetail
+	gsel 0000
+	bufx=ginfo(12)
+	bufy=ginfo(13)
+	redraw 0
+	onkey 0
+	onclick 0
+	beforex=ginfo(4)
+	beforey=ginfo(5)
+	enablewindow hclient,0
+	screen 201,xsiz(640),ysiz(450),4+8
+	gsel 201,2
+	GetWindowLong hwnd, -16
+	SetWindowLong hwnd, -16, stat - $80000
+	width xsiz(640),ysiz(450),beforex,beforey
+	boxfofmes int(loadset("dispcolormode",settingdata)),xsiz(0),ysiz(0),xsiz(640),ysiz(450)
+	font fontstr,fontsize,0
+	objmode 2,1
+	redraw 1
+
+	title ""+langstr(56052)+""
+
+	sdim cpuname,4096
+	dim cpumhz
+	size=4096
+	regopenkeyex $80000002,("HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0"),0,1,varptr(hkey)
+	regqueryvalueex hkey,"ProcessorNameString",0,0,varptr(cpuname),varptr(size)
+	regqueryvalueex hkey,"~MHz",0,0,varptr(cpumhz),varptr(size)
+	if cpumhz>1000:{
+		cpumhzstr2=str(double(cpumhz)/1000.0)
+		cpumhzstr=""+strmid(cpumhzstr2,0,4)+" GHz"
+	}else{
+		cpumhzstr=""+cpumhz+" MHz"
+	}
+
+	if instr(windowsver,0,"NT")!-1:{
+		maxmem=GetFullMemory()
+		membyte="B"
+		if maxmem>1024.0:{
+			maxmem=(maxmem/1024.0);KB
+			membyte="KB"
+			if maxmem>1024.0:{
+				maxmem=(maxmem/1024.0);MB
+				membyte="MB"
+				if maxmem>1024.0:{
+					maxmem=(maxmem/1024.0);GB
+					membyte="GB"
+				}
+			}
+		}
+	}
+
+	pos xsiz(10),ysiz(10)
+	boxfofmes onezero(loadset("dispcolormode",settingdata)),xsiz(10),ysiz(10),xsiz(630),ysiz(10)+(fontysizedata.3*18)
+	pos xsiz(12),ysiz(10):mes ""+langstr(560527);qwerty3x
+	line xsiz(620),ysiz(10)+(ginfo(15)/2),xsiz(12)+ginfo(14)+xsiz(5),ysiz(10)+(ginfo(15)/2)
+	pos xsiz(12),ysiz(10)+(fontysizedata.3*1)
+	mes ""+langstr(0001)+""
+	pos xsiz(12),ysiz(10)+(fontysizedata.3*2):mes ""+langstr(5601);最終更新日
+	pos xsiz(200),ysiz(10)+(fontysizedata.3*2):mes ""+qwertydate
+	pos xsiz(12),ysiz(10)+(fontysizedata.3*3):mes ""+langstr(5602);コンパイル日時
+	pos xsiz(200),ysiz(10)+(fontysizedata.3*3):mes ""+__date__+" "+__time__
+	pos xsiz(12),ysiz(10)+(fontysizedata.3*4):mes ""+langstr(5603);合計コード行数
+	pos xsiz(200),ysiz(10)+(fontysizedata.3*4):mes ""+qwertybuild
+	pos xsiz(12),ysiz(10)+(fontysizedata.3*5):mes "Copyright (C) 2024-2025 hoyoqwerty All Rights Reserved."
+	pos xsiz(12),ysiz(10)+(fontysizedata.3*6):mes "qwerty3x is created in \"Hot Soup Processor.\""
+	;7は飛ばし
+	pos xsiz(12),ysiz(10)+(fontysizedata.3*8):mes langstr(560528);Windows システム
+	line xsiz(620),ysiz(10)+(fontysizedata.3*8)+(ginfo(15)/2),xsiz(12)+ginfo(14)+xsiz(5),ysiz(10)+(fontysizedata.3*8)+(ginfo(15)/2)
+	pos xsiz(12),ysiz(10)+(fontysizedata.3*9):mes ""+windowsname+" ("+sysinfo(0)+")"
+	pos xsiz(12),ysiz(10)+(fontysizedata.3*10):mes ""+langstr(560521)+"";プロセッサ(CPU)
+	if instr(windowsver,0,"NT")!-1:{
+		pos xsiz(200),ysiz(10)+(fontysizedata.3*10):mes ""+cpuname+""
+		pos xsiz(200),ysiz(10)+(fontysizedata.3*11):mes ""+cpumhzstr
+	}else{
+		pos xsiz(200),ysiz(10)+(fontysizedata.3*10):mes ""+langstr(560526);Windows 9xでは非対応です。
+	}
+	pos xsiz(12),ysiz(10)+(fontysizedata.3*12):mes ""+langstr(560522)+"";メモリ(RAM)
+	if instr(windowsver,0,"NT")!-1:{
+		pos xsiz(200),ysiz(10)+(fontysizedata.3*12):mes ""+str(int(round(maxmem)))+" "+membyte
+	}else{
+		pos xsiz(200),ysiz(10)+(fontysizedata.3*12):mes ""+langstr(560526)+"";Windows 9xでは非対応です。
+	}
+	;13は飛ばし
+	pos xsiz(12),ysiz(10)+(fontysizedata.3*14):mes langstr(560529);Windows 画面
+	line xsiz(620),ysiz(10)+(fontysizedata.3*14)+(ginfo(15)/2),xsiz(12)+ginfo(14)+xsiz(5),ysiz(10)+(fontysizedata.3*14)+(ginfo(15)/2)
+	pos xsiz(12),ysiz(10)+(fontysizedata.3*15):mes ""+langstr(560523)+"";ウィンドウサイズ
+	pos xsiz(200),ysiz(10)+(fontysizedata.3*15):mes ""+bufx+"x"+bufy
+	pos xsiz(12),ysiz(10)+(fontysizedata.3*16):mes ""+langstr(560524)+"";画面拡大率
+	pos xsiz(200),ysiz(10)+(fontysizedata.3*16):mes ""+screennowxsize+""
+	pos xsiz(12),ysiz(10)+(fontysizedata.3*17):mes ""+langstr(560525)+"";画面サイズ
+	pos xsiz(200),ysiz(10)+(fontysizedata.3*17):mes ""+ginfo(20)+"x"+ginfo(21)
+
+	pos xsiz(12),ysiz(450)-(fontysizedata.3*2)
+	boxfofmes onezero(loadset("dispcolormode",settingdata)),xsiz(10),ysiz(450)-(fontysizedata.3*2),xsiz(630),ysiz(450)
+	mes ""+langstr(5605210)+"";インストール位置
+	pos xsiz(12),ysiz(450)-(fontysizedata.3)
+	objsize xsiz(50),fontysizedata.3
+	button gosub langstr(5605211),*showdetailpath
+	pos xsiz(64),ysiz(450)-(fontysizedata.3)
+	mes ""+qwertycur+""
+	
+	pos xsiz(530),ysiz(420)
+	objsize xsiz(100),ysiz(30)
+	button goto langstr(560516),*showdetailno
+	
+	stop
+
+*showdetailpath
+	dirlist dummy,qwertycur,5
+	if stat=0:{
+		dialog langstr(0006),1,langstr(0001)
+		return
+	}
+	exec "explorer.exe "+qwertycur,0
+	return
+
+*showdetailno
+	gsel 201,-1
+	gsel 0000,int(loadset("ALWAYSFRONT",settingdata))+1
+
+	enablewindow hclient,1
+
+	goto *systemrepeat
+
+*benchmarkstart
+	gsel 0000
+	redraw 0
+	onkey 0
+	onclick 0
+	beforex=ginfo(4)
+	beforey=ginfo(5)
+	enablewindow hclient,0
+	screen 201,xsiz(640),ysiz(450),4+8
+	gsel 201,2
+	GetWindowLong hwnd, -16
+	SetWindowLong hwnd, -16, stat - $80000
+	width xsiz(640),ysiz(450),beforex,beforey
+	boxfofmes int(loadset("dispcolormode",settingdata)),xsiz(0),ysiz(0),xsiz(640),ysiz(450)
+	font fontstr,fontsize,0
+	objmode 2,1
+	redraw 1
+
+	title ""+langstr(560511)+""
+
+	pos xsiz(10),ysiz(10)
+	boxfofmes onezero(loadset("dispcolormode",settingdata)),xsiz(10),ysiz(10),xsiz(630),ysiz(10)+fontysizedata.3
+	pos xsiz(12),ysiz(10)
+	mes ""+langstr(560512)+" "+loadset("lastbenchmarkscore",settingdata)
+
+	pos xsiz(10),ysiz(40)
+	boxfofmes onezero(loadset("dispcolormode",settingdata)),xsiz(10),ysiz(40),xsiz(630),ysiz(40)+fontysizedata.3
+	pos xsiz(12),ysiz(40)
+	mes ""+langstr(560513)+" "+loadset("lastbenchmarkfps",settingdata)
+
+	pos xsiz(10),ysiz(100)
+	boxfofmes onezero(loadset("dispcolormode",settingdata)),xsiz(10),ysiz(100),xsiz(630),ysiz(100)+((fontysizedata.3)*2)
+	pos xsiz(12),ysiz(100)
+	mes ""+langstr(560514)+""
+
+	pos xsiz(10),ysiz(300)
+	objsize ginfo(12)-xsiz(20),ysiz(30)
+	button goto langstr(560515),*benchmarkyes
+
+	pos xsiz(10),ysiz(330)
+	button goto langstr(5605111),*benchmarkauto
+
+	pos xsiz(530),ysiz(420)
+	objsize xsiz(100),ysiz(30)
+	button goto langstr(560516),*benchmarkno
+	
+	stop
+
+*benchmarkyes
+	imagedir.0=""+qwertycur+"\\default\\defaultimage.jpg"
+	imagedir.1=""+qwertycur+"\\default\\defaultimage2.png"
+	imagedir.2=""+qwertycur+"\\default\\defaultimage3.png"
+	imagedir.3=""+qwertycur+"\\default\\defaultimage4.png"
+	imagedir.4=""+qwertycur+"\\default\\defaultimage5.png"
+
+	screen 201,xsiz(640),ysiz(450),4+8
+	gsel 201,2
+	GetWindowLong hwnd, -16
+	SetWindowLong hwnd, -16, stat - $80000
+	boxfofmes int(loadset("dispcolormode",settingdata)),xsiz(0),ysiz(0),xsiz(640),ysiz(450)
+	font fontstr,fontsize,0
+	objmode 2,1
+
+	title ""+langstr(560511)+" - "+langstr(560517)
+
+	error=0
+	repeat 5
+		exist imagedir.cnt
+		if strsize=-1:{
+			error=1
+			break
+		}
+		buffer (cnt+1500),1,1,0
+		picload imagedir.cnt,0
+	loop
+	if error=1:{
+		dialog langstr(560519),1,langstr(560511)
+		goto *benchmarkno
+	}
+
+	gsel 201,2
+	pos xsiz(530),ysiz(420)
+	objsize xsiz(100),ysiz(30)
+	button goto langstr(5605110),*benchmarkstart
+
+	maxsecond=120
+	secondbuf=0
+	result=0
+	repeat
+		rndcnt=rnd(5)
+
+		gsel (rndcnt+1500),0
+		bufferxsize=ginfo(12)
+		bufferysize=ginfo(13)
+
+		gsel 201,0
+		pos xsiz(rnd(640)),ysiz(rnd(450))
+		gzoom rnd(1280),rnd(720),(rndcnt+1500),0,0,bufferxsize,bufferysize,1
+
+		timegettime
+		if fpsbuf!(stat/1000):{
+			fpsbuf=(stat/1000)
+			fpsbufmes=fpsbufcnt
+			result+=fpsbufcnt
+			secondbuf+=1
+			fpsbufcnt=0
+		}else{
+			fpsbufcnt+=1
+		}
+
+		title ""+langstr(560511)+" - "+langstr(560518)+" score:"+result+" "+fpsbufmes+"fps "+secondbuf+"s/"+maxsecond+"s"
+		await
+
+		if secondbuf=maxsecond:{
+			break
+		}
+	loop
+
+	saveset "lastbenchmarkscore",settingdata,str(result)
+	saveset "lastbenchmarkfps",settingdata,str((result/maxsecond))
+	
+	gsel 201,-1
+	gsel 0000,int(loadset("ALWAYSFRONT",settingdata))+1
+
+	enablewindow hclient,1
+
+	goto *benchmarkstart
+
+*benchmarkno
+	gsel 201,-1
+	gsel 0000,int(loadset("ALWAYSFRONT",settingdata))+1
+
+	enablewindow hclient,1
+
+	goto *systemrepeat
+
+*benchmarkauto
+	benchmarkautobuf=""
+	benchmarkautomes=""
+	benchmarkautochk=langstr(5605113),langstr(5605114)
+
+	if int(loadset("lastbenchmarkscore",settingdata))>=10000:{
+		if int(loadset("lastbenchmarkscore",settingdata))>=12500:{
+			if int(loadset("useanimation",settingdata))=0:{
+				addtxt=" "+langstr(5206)+" \""+benchmarkautochk.int(loadset("useanimation",settingdata))+"\" -> \""+benchmarkautochk.1+"\""
+				notesel benchmarkautomes
+				noteadd addtxt,-1
+				notesel benchmarkautobuf
+				noteadd "useanimation",-1
+			}
+	
+			if loadset("backgroundmode",settingdata)!"SLIDESHOW":{
+				benchmarkautoinbackgroundmode=langstr(53022),langstr(53023),langstr(53024)
+				if loadset("backgroundmode",settingdata)="COLOR":{
+					benchmarkautoinbackgroundmodenow=benchmarkautoinbackgroundmode.0
+				}else:if loadset("backgroundmode",settingdata)="IMAGE":{
+					benchmarkautoinbackgroundmodenow=benchmarkautoinbackgroundmode.1
+				}else:if loadset("backgroundmode",settingdata)="SLIDESHOW":{
+					benchmarkautoinbackgroundmodenow=benchmarkautoinbackgroundmode.2
+				}
+				addtxt=" "+langstr(5302)+" \""+benchmarkautoinbackgroundmodenow+"\" -> \""+benchmarkautoinbackgroundmode.2+"\""
+				notesel benchmarkautomes
+				noteadd addtxt,-1
+				notesel benchmarkautobuf
+				noteadd "backgroundmode",-1
+			}
+		}else{
+			if int(loadset("useanimation",settingdata))=0:{
+				addtxt=" "+langstr(5206)+" \""+benchmarkautochk.int(loadset("useanimation",settingdata))+"\" -> \""+benchmarkautochk.1+"\""
+				notesel benchmarkautomes
+				noteadd addtxt,-1
+				notesel benchmarkautobuf
+				noteadd "useanimation",-1
+			}
+	
+			if loadset("backgroundmode",settingdata)!"IMAGE":{
+				benchmarkautoinbackgroundmode=langstr(53022),langstr(53023),langstr(53024)
+				if loadset("backgroundmode",settingdata)="COLOR":{
+					benchmarkautoinbackgroundmodenow=benchmarkautoinbackgroundmode.0
+				}else:if loadset("backgroundmode",settingdata)="IMAGE":{
+					benchmarkautoinbackgroundmodenow=benchmarkautoinbackgroundmode.1
+				}else:if loadset("backgroundmode",settingdata)="SLIDESHOW":{
+					benchmarkautoinbackgroundmodenow=benchmarkautoinbackgroundmode.2
+				}
+				addtxt=" "+langstr(5302)+" \""+benchmarkautoinbackgroundmodenow+"\" -> \""+benchmarkautoinbackgroundmode.1+"\""
+				notesel benchmarkautomes
+				noteadd addtxt,-1
+				notesel benchmarkautobuf
+				noteadd "backgroundmode",-1
+			}
+		}
+	}else{
+		if int(loadset("useanimation",settingdata))!0:{
+			addtxt=" "+langstr(5206)+" \""+benchmarkautochk.int(loadset("useanimation",settingdata))+"\" -> \""+benchmarkautochk.0+"\""
+			notesel benchmarkautomes
+			noteadd addtxt,-1
+			notesel benchmarkautobuf
+			noteadd "useanimation",-1
+		}
+
+		if loadset("backgroundmode",settingdata)!"COLOR":{
+			benchmarkautoinbackgroundmode=langstr(53022),langstr(53023),langstr(53024)
+			if loadset("backgroundmode",settingdata)="IMAGE":{
+				benchmarkautoinbackgroundmodenow=benchmarkautoinbackgroundmode.1
+			}else:if loadset("backgroundmode",settingdata)="SLIDESHOW":{
+				benchmarkautoinbackgroundmodenow=benchmarkautoinbackgroundmode.2
+			}
+			addtxt=" "+langstr(5302)+" \""+benchmarkautoinbackgroundmodenow+"\" -> \""+benchmarkautoinbackgroundmode.0+"\""
+			notesel benchmarkautomes
+			noteadd addtxt,-1
+			notesel benchmarkautobuf
+			noteadd "backgroundmode",-1
+		}
+	}
+
+	notesel benchmarkautobuf
+	if notemax=0:{
+		dialog langstr(5605115),0,langstr(560511)
+		stop
+	}
+
+	dialog langstr(5605112)+"\n\n"+benchmarkautomes,2,langstr(560511)
+	if stat!6:{
+		stop
+	}
+
+	notesel benchmarkautobuf
+	repeat notemax
+		notesel benchmarkautobuf
+		noteget buf,cnt
+
+		if int(loadset("lastbenchmarkscore",settingdata))>=10000:{
+			if int(loadset("lastbenchmarkscore",settingdata))>=12500:{
+				if buf="useanimation":{
+					saveset "useanimation",settingdata,"1"
+				}else:if buf="backgroundmode":{
+					saveset "backgroundmode",settingdata,"SLIDESHOW"
+				}
+			}else{
+				if buf="useanimation":{
+					saveset "useanimation",settingdata,"1"
+				}else:if buf="backgroundmode":{
+					saveset "backgroundmode",settingdata,"IMAGE"
+				}
+			}
+		}else{
+			if buf="useanimation":{
+				saveset "useanimation",settingdata,"0"
+			}else:if buf="backgroundmode":{
+				saveset "backgroundmode",settingdata,"COLOR"
+			}
+		}
+	loop
+
+	gsel 201,-1
+	gsel 0000,int(loadset("ALWAYSFRONT",settingdata))+1
+
+	bufferallupdatestartupbuf=1
+	gosub *makescreen
+	bufferallupdatestartupbuf=0
+
+	gsel 201,2
+
+	dialog langstr(5605116),0,langstr(560511)
+
+	goto *benchmarkstart

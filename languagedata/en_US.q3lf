@@ -48,7 +48,7 @@ Do not change the identifier number.
 1015===A new version has been found.
 1016===A new version of qwerty3x has been found.\nWould you like to switch to the Ågqwerty3x updateÅh screen?\n\nSelecting ÅgNoÅh will start the application as is.
 1017===A new development version has been found.
-1018===New development version of qwerty3x found.\nWould you like to switch to the Ågqwerty3x updateÅh screen? \n\nSelecting ÅgNoÅh will start normally.
+1018===Found a new version of qwerty3x (development).\nWould you like to switch to the Ågqwerty3x updateÅh screen?\n\nSelecting ÅgNoÅh will start as is.
 
 2001===Shutting down
 
@@ -63,7 +63,7 @@ Do not change the identifier number.
 3503===Run
 3504===Control Panel
 
-3701===Windows Power
+3701===Windows Power Options
 37011===Lock Windows
 37012===Shut Down Windows
 37013===Restart Windows
@@ -92,8 +92,8 @@ Do not change the identifier number.
 4017===Estimating Remaining Time
 4018===Not Charged Yet
 
-5001===Window Display Settings
-5002===Background Color Settings
+5001===Window/Screen Settings
+5002===Background/Color Settings
 5003===Operation Settings
 5004===qwerty3x Details
 5005===qwerty3x Update
@@ -102,20 +102,27 @@ Do not change the identifier number.
 
 52011===Window Behavior
 5201===Always on Top
+;ALWAYSFRONT 0
 5202===Automatically minimize qwerty3x when launching the launcher or opening external windows
+;AUTOMINI 1
 5203===Font Settings
 52031===Auto
 52032===Yu Gothic UI
 52033===Meiryo UI
 52034===MS UI Gothic
+;FONTNAME AUTO
 5204===Display Mode
 52041===Dark Mode
 52042===Light Mode
+;DISPCOLORMODE 0
 5205===Language Settings
+;LANGUAGE ja_JP
 5206===Use Display Animation
+;USEANIMATION 1
 
 5301===qwerty3x Style Color
 53011===Edit
+;SYSTEMRGB 000,141,181
 5302===Background
 53021===Mode :
 53022===Solid Color
@@ -129,10 +136,17 @@ Do not change the identifier number.
 53030===Apply/Switch image now
 53031===Please select a folder to use for the slideshow
 53032===Randomize Image Display Order
+;BACKGROUNDMODE COLOR
+;BACKGROUNDCOLOR 0,0,0
+;BACKGROUNDFILE %qwertycur%\\default\\defaultimage.jpg
+;BACKGROUNDFOLDER %qwertycur%\\default
+;BACKGROUNDRANDOM 1
 
 54011===Startup Behavior
-5401===Enable update checks upon qwerty3x startup
+5401===Enable update checks when qwerty3x starts
+;STARTUPDATE 0
 5402===Display a dialog when detecting an unsupported Windows version
+;WINDOWSVERSIONDIALOG 1
 
 55011===Password
 55012===The initial password and the confirmation password do not match. Please re-enter them correctly.
@@ -154,10 +168,11 @@ Do not change the identifier number.
 5501===Create Password
 5502===Change Password
 5503===Delete Password
+;PASSWORDSTRING 
 
 5601===Last Updated:
 5602===Compilation Date/Time:
-5603===Total Lines of Code:
+5603===Build Number:
 5604===Could not find ÅgRelease Note.txtÅh.
 5605===Advanced Features/Detailed View
 56051===Graphics Settings Optimization/Benchmark
@@ -196,43 +211,41 @@ Do not change the identifier number.
 560561===Searching for Ågqwerty-XXÅh folder...
 560562===Could not find the Ågqwerty-XXÅh folder.\n\nDo you want to manually select the Ågqwerty-XXÅh folder containing the qwerty-XX main file you wish to transfer?\n\nIf you select ÅgNoÅh, transferring settings from qwerty-XX will be canceled.
 560563===Please select the Ågqwerty-XXÅh folder containing the qwerty-XX main unit you wish to transfer directly.
-560564===Confirmed the presence of qwerty-XX in the above folder. \nDo you wish to transfer settings from this qwerty-XX? \n\nSelecting ÅgNoÅh will continue searching for qwerty-XX.
+560564===qwerty-XX has been confirmed in the above folder. \nWould you like to transfer settings from this qwerty-XX? \n\nSelecting ÅgNoÅh will continue searching for qwerty-XX.
 560565===Loading settings data from the selected Ågqwerty-XXÅh...
-560566===Could not verify qwerty-XX settings data.
-Interrupting settings transfer from qwerty-XX.
+560566===Could not verify qwerty-XX settings data.\nInterrupting settings transfer from qwerty-XX.
 560567===Please enter the password for the selected qwerty-XX.
 560568===Continue
 560569===Interrupt
-5605610===Do you want to interrupt the transfer of settings from qwerty-XX?
-5605611===Transfer from Ågqwerty-XX SettingsÅh\nPlease select the items to transfer. (Multiple selections allowed)
-5605612===Please select items to transfer from qwerty-XX's Ågqwerty-XX SettingsÅh.\nThese will be applied to the corresponding qwerty3x settings.
+5605610===Do you want to stop importing settings from qwerty-XX?
+5605611===Import from Ågqwerty-XX SettingsÅh\nSelect the items to import. (Multiple selections allowed)
+5605612===Please select the items to import from qwerty-XX's Ågqwerty-XX SettingsÅh. \nThese will be applied to the corresponding qwerty3x settings.
 5605613===Always display on top
 5605614===Automatically minimize qwerty-XX when opening launchers or external windows
-5605615===qwerty-XX Font
-560561501===Auto-detect from OS version, Yu Gothic UI, Meiryo UI, MS UI Gothic
-5605616===qwerty-XX Dark Mode/Light Mode
+5605615===qwerty-XX font
+560561501===Auto-set based on OS version, Yu Gothic UI, Meiryo UI, MS UI Gothic
+5605616===qwerty-XX Dark Mode / Light Mode
 560561601===Dark Mode, Light Mode
 5605617===Enable update checks when launching qwerty-XX
 5605618===qwerty-XX Background
-560561801===Solid color, Image, Slideshow
+560561801===Solid Color, Image, Slideshow
 5605619===Solid Color Selection
 5605620===Image File Path
-5605621===Slideshow Folder Path
-5605622===Randomize Image Display Order
-5605623===qwerty-XX Style Color
+5605621===Slideshow folder path
+5605622===Randomize image display order
+5605623===qwerty-XX style color
 5605624===Selecting an item changes its color.
-5605625===Select All/Deselect All
-5605626===Transfer Settings
-5605627===No settings are selected for transfer. \nTo transfer settings, you must select at least one setting.
-5605628===Transfer the above settings?
+5605625===Select all/Deselect all
+5605626===Transfer
+5605627===No settings have been selected for transfer.\nTo proceed with transfer, you must select at least one setting.
+5605628===Do you want to transfer the above settings?
 5605629===Settings transferred.
-56057===Inherit launcher from qwerty-XX
-560571===Do you want to cancel inheriting the launcher from qwerty-XX?
-560572===qwerty-XX was found in the above folder.\nDo you want to inherit the launcher from this qwerty-XX?\n\nSelecting ÅgNoÅh will continue searching for qwerty-XX.
-560573===The Ågqwerty-XXÅh folder was searched but not found.\n\nWould you like to manually select the Ågqwerty-XXÅh folder containing the qwerty-XX main file you wish to transfer?\n\nSelecting ÅgNoÅh will cancel the transfer of the launcher from qwerty-XX.
+56057===Transferring launcher from qwerty-XX
+560571===Do you want to cancel transferring the launcher from qwerty-XX?
+560572===qwerty-XX was found in the above folder.\nDo you want to transfer the launcher from this qwerty-XX?\n\nSelecting ÅgNoÅh will continue searching for qwerty-XX.
+560573===The Ågqwerty-XXÅh folder was searched but not found.\n\nDo you want to manually select the Ågqwerty-XXÅh folder containing the qwerty-XX main file you wish to transfer?\n\nSelecting ÅgNoÅh will cancel the transfer of the launcher from qwerty-XX.
 560574===Loading launcher data from the selected Ågqwerty-XXÅh...
-560575===Could not verify qwerty-XX's launcher data.
-Interrupting the transfer of launchers from qwerty-XX.
+560575===Could not verify qwerty-XX's launcher data.\nInterrupting the transfer of launchers from qwerty-XX.
 560576===No launcher data was configured in qwerty-XX.\nInterrupting the transfer of launchers from qwerty-XX.
 560577===Launcher data for qwerty-XX has been verified.\nWould you like to transfer launchers from qwerty-XX and add them to the qwerty3x launcher? \n\n<Note>\nLaunchers using qwerty-XX's macro launcher feature cannot be transferred.\nAdditionally, the ÅgOpen with other qwerty-XX applicationsÅh option will no longer be available in qwerty3x.
 560578===Transferring the following launcher...
@@ -246,12 +259,11 @@ Interrupting the transfer of launchers from qwerty-XX.
 5706===Checking for updates
 57061===Retrieving new update information for qwerty3x
 57062===Retrieving new update information for development version qwerty3x
-5707===Update check failed.\n\nCould not establish an Internet connection.
+5707===Update check failed.\n\nCould not establish an internet connection.
 5708===Update check failed.
-5709===Please verify your Internet connection.
+5709===Please verify your internet connection.
 5710===Update check failed.\n\nThe response took too long to complete normal processing.
-5711===Update check server is undergoing maintenance.
-Update checks are currently unavailable. Please try again later.
+5711===Update check server is undergoing maintenance.\nUpdate checks are currently unavailable. Please try again later.
 5712===Final confirmation:
 5713===New version of qwerty3x found:
 57131===New development version of qwerty3x found:
@@ -262,24 +274,25 @@ Update checks are currently unavailable. Please try again later.
 5731===Failed to download update data.\n\nCould not establish an Internet connection.
 5732===Failed to download update data.
 5733===Failed to download update data.\n\nThe response took too long to complete normal processing.
-5734===Update data download complete.\nqwerty3x will update and restart. \n\nDo not perform other operations during the update. \n\nIf User Account Control (UAC) appears, select ÅgYesÅh to allow execution.
+5734===Update data download complete.\nqwerty3x will update and restart. \n\nPlease refrain from performing other operations during the update. \n\nIf User Account Control (UAC) appears, select ÅgYesÅh to allow execution.
 5735===Downloading update data. Please wait.
 5736===Launching qwerty3x installer ver.%verbuf2%...
+5737===qwerty3x installer is not compatible with %windowsname%.
 5750===qwerty3x update options
 5751===Receive development version qwerty3x via qwerty3x update
-57511===The development version of qwerty3x may be less stable than the official release.
+57511===The development version of qwerty3x may be less stable than the official release.\n\nContinue with the configuration changes?
 5770===qwerty3x version change
 5771===Performing qwerty3x version change
 5772===Close
 5773===Retrieving version list
-5774===Failed to retrieve version list.\n\nCould not establish an Internet connection.
-5775===Failed to retrieve version downgrade.
-5776===Failed to retrieve version downgrade.\n\nResponse took too long to complete normal processing.
+5774===Failed to retrieve version list.\n\nCould not establish internet connection.
+5775===Failed to retrieve downgrade version.
+5776===Failed to retrieve downgrade version. \n\nThe response took too long to execute the normal process.
 5777===Development Version
 5778===Please select a qwerty3x version from the following.
 5779===Aggregating
-5780===Ågqwerty3x Version ChangeÅh is provided as one method to restore your environment\nif a critical issue occurs in the latest version of qwerty3x. \nAs it is intended as a last resort, please refrain from using it except under these\ncircumstances.
+5780===Ågqwerty3x Version ChangeÅh is provided as one method to restore your environment\nif a critical issue occurs with the latest version of qwerty3x. \n\nAs it is intended as a last resort,\nplease refrain from using it except under these circumstances.
 5781===Perform Version Change
 5782===WARNING!\n\nUse this operation only if a critical bug occurs in the latest version or your currently used qwerty3x. \n\nAre you sure you want to change the version to Åg%verbuf2%Åh?\nOnce started, this operation cannot be paused. \nSave all data currently being worked on in qwerty3x before proceeding. \nChanging the qwerty3x version requires restarting qwerty3x.
 
-Translated with DeepL.com (free version)
+6001===Loading launcher icon...

@@ -7,6 +7,20 @@
 #define ctype sizx(%1) int(%1*96/xdpi@)
 #define ctype sizy(%1) int(%1*96/ydpi@)
 
+#uselib "comdlg32"
+#cfunc ChooseColor "ChooseColorA" int
+
+#deffunc dialog_color int p1, int p2, int p3
+	dim sCHOOSECOLOR, 9
+	if p3 : lpCustColor = p3 : else : lpCustColor = varptr (hoge)
+	sCHOOSECOLOR = 36, hwnd, 0, p2, lpCustColor, $1 | p1
+
+	if ChooseColor (varptr (sCHOOSECOLOR)) {
+		mref BMSCR, 67
+		BMSCR.40 = sCHOOSECOLOR.3
+	}
+	return stat
+
 #deffunc testmodule
 
 	dialog defaultsettingdata@
@@ -14,7 +28,7 @@
 	return
 
 #deffunc encword int p1,var p2,var p3
-; encword命令 文字列を暗号化する
+;encword命令 文字列を暗号化する
 ;p1 int 暗号化強度bit
 ;p2 var 暗号化前文字列
 ;p3 var 暗号化後文字列
@@ -31,40 +45,64 @@
 
 	return
 
-#deffunc decword int p1,var p2,var p3
-; decword命令 文字列の暗号化を解除する
-;p1 int 暗号化強度bit
+#deffunc decword var p2,var p3
+;decword命令 文字列の暗号化を解除する
 ;p2 var 暗号化解除前文字列
 ;p3 var 暗号化解除後文字列
-	passwordkey=p1
-	nagasa=strlen(p2)
-	sdim password,(nagasa*2)
-	sdim p3,(nagasa*2)
-	repeat nagasa
-		buf=(peek(p2,cnt)-passwordkey)
+	decodeok=0
+	repeat 999
+		passwordkey=6+cnt
+		nagasa=strlen(p2)
+		sdim password,(nagasa*2)
+		sdim p3,(nagasa*2)
+		repeat nagasa
+			buf=(peek(p2,cnt)-passwordkey)
+	
+			poke password,cnt,buf
+		loop
 
-		poke password,cnt,buf
+		notesel password
+		if notefind("passwordconfirm",1)!-1&notefind("passwordconfirm2",1)!-1:{
+			noteget buf,notefind("passwordconfirm",1)
+			noteget buf2,notefind("passwordconfirm2",1)
+			split buf,"===",dummy,bufresult
+			split buf2,"===",dummy,bufresult2
+			if bufresult=loadset("PASSWORDCONFIRM",password):{
+				if bufresult2=loadset("PASSWORDCONFIRM2",password):{
+					decodeok=1
+					break
+				}
+			}
+		}
+
+		await 1
+		
 	loop
+
+	if decodeok=0:{
+		dialog "qwerty3x Critical error\n\nerror code: DECWORD_RUNNING_FAILED\n\ndecword関数による暗号化解除が正しく行えませんでした。\n\nerror function infomation:\np2="+p2+"\np3="+p3+"\npassword="+password,1,"qwerty3x 内部モジュールエラー"
+		end
+	}
+	
 	p3=password
 
 	return
 
 
 #defcfunc loadset str p1,var p2
-; loadset関数 設定を読み込む
+;loadset関数 設定を読み込む
 ;p1 str 参照設定名文字列
 ;p2 var 参照文字列変数
 ;戻り値:refstr=設定内容
 	notesel p2
-	if notefind(p1,1)=-1:{
-		notesel defaultsettingdata@
-		if notefind(p1,1)=-1:{
-			dialog "qwerty3x Critical error\n\nerror code: LOADSET_IN_SAVESET_DEFAULT_NOT_FOUND\n\nloadset関数内のsaveset命令から参照したデフォルト設定データに、指定された内容がありませんでした。\n指定内容が間違っている可能性があります。\n\nerror function infomation:\ndefaultsettingdata="+defaultsettingdata+"\np1:"+p1,1,"qwerty3x 内部モジュールエラー"
-			end
+	if notefind(getpath(p1,16),1)=-1:{
+		if notefind("settingdata",1)!-1:{
+			notesel defaultsettingdata@
+			if notefind(p1,1)=-1:{
+				dialog "qwerty3x Critical error\n\nerror code: LOADSET_IN_SAVESET_DEFAULT_NOT_FOUND\n\nloadset関数内のsaveset命令から参照したデフォルト設定データに、指定された内容がありませんでした。\n指定内容が間違っている可能性があります。\n\nerror function infomation:\ndefaultsettingdata="+defaultsettingdata@+"\np1="+p1,1,"qwerty3x 内部モジュールエラー"
+				end
+			}
 		}
-		noteget buf,notefind(p1,1)
-		notesel p2
-		noteadd buf,-1,0
 	}
 	modulesettingtype=""
 	modulesettingdata=""
@@ -88,21 +126,57 @@
 	return modulesettingdata
 
 #deffunc saveset str p1,var p2,str p3
-; saveset命令 設定を保存する
+;saveset命令 設定を保存する
 ;p1 str 参照設定名文字列
 ;p2 var 参照文字列変数
 ;p3 str 変更後設定内容
 ;戻り値:stat=参照設定の行数
 	notesel p2
-	if notefind(p1,1)=-1:{
-		notesel defaultsettingdata@
-		if notefind(p1,1)=-1:{
-			dialog "qwerty3x Critical error\n\nerror code: SAVESET_DEFAULT_NOT_FOUND\n\nsaveset命令から参照したデフォルト設定データに、指定された内容がありませんでした。\n指定内容が間違っている可能性があります。\n\nerror function infomation:\ndefaultsettingdata="+defaultsettingdata+"\np1:"+p1,1,"qwerty3x 内部モジュールエラー"
-			end
+	if notefind(getpath(p1,16),1)=-1:{
+		if notefind("settingdata",1)!-1:{
+			notesel defaultsettingdata@
+			if notefind(p1,1)=-1:{
+				dialog "qwerty3x Critical error\n\nerror code: SAVESET_DEFAULT_NOT_FOUND\n\nsaveset命令から参照したデフォルト設定データに、指定された内容がありませんでした。\n指定内容が間違っている可能性があります。\n\nerror function infomation:\ndefaultsettingdata="+defaultsettingdata+"\np1="+p1,1,"qwerty3x 内部モジュールエラー"
+				end
+			}else{
+				noteget addnewsetting,notefind(p1,1)
+				notesel p2
+				noteadd addnewsetting,-1,0
+			}
+		}else:if notefind("launcherdata",1)!-1:{
+			repeat
+				notesel defaultlauncherdata@
+				defaultdata=""
+				noteget defaultdata,notefind("default_data",2)
+				defaultname=""
+				noteget defaultname,notefind("default_name",2)
+				defaultrunas=""
+				noteget defaultname,notefind("default_runas",2)
+				defaulticon=""
+				noteget defaulticon,notefind("default_icon",2)
+				defaultopt=""
+				noteget defaultopt,notefind("default_opt",2)
+				notesel p2
+				noteget buf,notefind("launcherdatamax===",1)
+				split buf,"===",dummy,launcherdatamax
+				launcherdatamax=int(launcherdatamax)
+
+				noteadd "",-1
+				noteadd ""+(launcherdatamax+1)+"_data==="+defaultdata,-1
+				noteadd ""+(launcherdatamax+1)+"_name==="+defaultname,-1
+				noteadd ""+(launcherdatamax+1)+"_runas==="+defaultrunas,-1
+				noteadd ""+(launcherdatamax+1)+"_icon==="+defaulticon,-1
+				noteadd ""+(launcherdatamax+1)+"_opt==="+defaultopt,-1
+
+				noteadd "launcherdatamax==="+(launcherdatamax+1)+"",notefind("launcherdatamax===",1),1
+
+				if notefind(getpath(p1,16),1)!-1:{
+					break
+				}
+				await 10
+				title ""+launcherdatamax+""
+			loop
 		}
-		noteget buf,notefind(p1,1)
-		notesel p2
-		noteadd buf,-1,0
 	}
 	modulesettingtype=""
 	modulesettingdata=""
@@ -122,7 +196,7 @@
 	return p2
 
 #defcfunc langstr int p1
-; langstr関数 言語ファイル変換を行う
+;langstr関数 言語ファイル変換を行う
 ;p1 int 言語データの参照設定名文字列
 ;戻り値:refstr=変換後の文字列
 	titlestrdata=loadset(strf("%04d",p1),languagedata@)
@@ -133,21 +207,23 @@
 
 		strrep titlestrdata,modulelangstrback,modulelangstrnext
 	loop
+	noteunsel
 	titlestrdata2=""
 	notesel titlestrdata
 	if notefind("\\n",2)!-1:{
+		noteunsel
 		split titlestrdata,"\\n",modulelangstrsplit
 		repeat stat
 			notesel titlestrdata2
 			noteadd modulelangstrsplit.cnt,-1,0
 		loop
+		noteunsel
 	}else{
+		noteunsel
 		titlestrdata2=titlestrdata
 	}
 
-	return titlestrdata2
-
-	return
+	return str(titlestrdata2)
 
 #deffunc boxfofmes int p1,int p2,int p3,int p4,int p5
 ;boxfofmes命令 画面モードに合わせてboxf命令を動かす
@@ -173,13 +249,48 @@
 
 	return
 
+#deffunc alboxfofmes int p1,int p2,int p3,int p4,int p5,int p6
+;alboxfofmes命令 画面モードに合わせてboxf命令を半透明で動かす
+;p1 int 0or1 (ダークモードorライトモード)
+;p2 int boxf命令の1p (四角形描画の左上x座標)
+;p3 int boxf命令の2p (四角形描画の左上y座標)
+;p4 int boxf命令の3p (四角形描画の右下x座標)
+;p5 int boxf命令の4p (四角形描画の右下y座標)
+;p6 int gmode命令の4p (半透明合成時のブレンド率)
+	backactivewindow=ginfo(3)
+	nowcurposx=ginfo(22)
+	nowcurposy=ginfo(23)
+	buffer 0250,(p4-p2),(p5-p3),0
+
+	if p1=0:{
+		color 32,32,32
+	}else{
+		color 255,255,255
+	}
+
+	boxf 0,0,(p4-p2),(p5-p3)
+
+	gsel backactivewindow,0
+
+	pos nowcurposx,nowcurposy
+	gmode 3,(p4-p2),(p5-p3),p6
+	gcopy 0250,0,0,(p4-p2),(p5-p3)
+
+	if p1=0:{
+		color 255,255,255
+	}else{
+		color 0,0,0
+	}
+
+	return
+
 #defcfunc onezero str p1
 ;onezero関数 1を0に、0を1に変える
 ;p1 str 内容
 
 	if p1="0":{
 		result=1
-	}else:p1="1":{
+	}else:if p1="1":{
 		result=0
 	}else{
 		result=-1
@@ -203,7 +314,381 @@
 
 	return
 
+#deffunc colorsetting var p1
+;colorsetting命令 設定してあるスタイルカラーをcolorで反映させる
+;p1 var 参照文字列変数
+	sdim settingrgb,8,3
+	settingdatargb=loadset("SYSTEMRGB",p1)
+	split settingdatargb,",",settingrgb
+
+	color int(settingrgb.0),int(settingrgb.1),int(settingrgb.2)
+
+	return
+
 #global
+
+;https://menyukko.ifdef.jp/cauldron/hmscroll.html
+;上記のURLに掲載されているモジュールを流用/改造させていただきました。
+/*====================================================================
+          スクロールバーモジュール(ControlObjectModule2.1号)
+HSP3.3β3       2011. 7.25  プロトタイプ作成
+HSP3.3RC1             8. 1  モジュール化
+HSP3.3          2012. 3.10  作成：ScrollBar_GetSystemSize
+----------------------------------------------------------------------
+スクロールバーを配置する
+    ScrollBar_Create 横幅, 縦幅, flag, 最小値, 最大値, サイズ, 位置, 移動量A, 移動量B
+        横幅・縦幅      コントロールの大きさ
+        flag            0(横スク) or 1(たてスク)
+        最少値・最大値  スクロールバーの値の範囲
+        サイズ          バー(つまみ部分)の大きさ
+        位置            バーの現在位置
+        移動量A         矢印部分をクリックしたときのバーの移動量
+        移動量B         空白部分(バーの前後)をクリックしたときのバーの移動量
+        stat            HSPオブジェクトID(以降の操作で必要になる)
+
+スクロールバーの範囲を指定する
+    ScrollBar_SetRange オブジェクトID, 最小値, 最大値, サイズ
+
+スクロールバーを操作したときの移動量を指定する
+    ScrollBar_SetStep オブジェクトID, 矢印の移動量, ブランクの移動量
+
+スクロールバーの現在の位置を取得する関数
+    ScrollBar_GetPos( オブジェクトID )
+
+スクロールバーの位置を指定する
+    ScrollBar_SetPos オブジェクトID, 新しい位置
+
+スクロール時割り込み実行指定(#defineで定義)
+    ScrollBar_SetSubLabel ジャンプ先ラベル(*xxx)
+        ユーザーがスクロールバーを操作した時にサブルーチンジャンプを実行する(return必須)
+        ラベル省略で割り込み無効
+
+スクロール割り込み時に情報を取得する関数
+    ScrollBar_GetInfo( 種類 )
+        種類    0(ウィンドウID) or 1(メッセージID) or 2(操作要因) or 3(temp) or 4(ObjHandle)
+                メッセージID    $114(276)横スクロール or $115(277)縦スクロール
+                操作要因        5のときtempに位置が入る
+
+スクロールバーの大きさ(システム設定値)を取得する関数
+    ScrollBar_GetSystemSize()
+
+====================================================================*/
+#ifndef ScrollBarModuleIncluded
+#define ScrollBarModuleIncluded
+#module ScrollBarModule
+#uselib "user32.dll"    ;スクロールバー
+#func SetScrollInfo     "SetScrollInfo" int, int, var, int
+#func GetScrollInfo     "GetScrollInfo" int, int, var
+#define WS_CHILD            $40000000
+#define WS_VISIBLE          $10000000
+#define SBS_HORZ            0
+#define SBS_VERT            1
+#define WM_HSCROLL          $0114
+#define WM_VSCROLL          $0115
+
+#define SB_CTL              2
+
+#define SB_LINEUP           0
+#define SB_LINELEFT         0
+#define SB_LINEDOWN         1
+#define SB_LINERIGHT        1
+#define SB_PAGEUP           2
+#define SB_PAGELEFT         2
+#define SB_PAGEDOWN         3
+#define SB_PAGERIGHT        3
+#define SB_THUMBTRACK       5
+
+#define SIF_RANGE           $0001
+#define SIF_PAGE            $0002
+#define SIF_POS             $0004
+#define SIF_DISABLENOSCROLL $0008
+#define SIF_TRACKPOS        $0010
+#define SIF_ALL             (SIF_RANGE | SIF_PAGE | SIF_POS | SIF_TRACKPOS)
+
+#func GetWindowLong     "GetWindowLongA" int, int
+#func SetWindowLong     "SetWindowLongA" int, int, int
+#define GWL_USERDATA        -21     ;とりあえずここでいいや
+
+#func GetSystemMetrics  "GetSystemMetrics" int  ;システムのいろいろ取得
+#define SM_CXVSCROLL        2
+
+#define global ScrollBar_SetSubLabel(%1=0) SbmLabel@ScrollBarModule=%1
+
+#deffunc ScrollBar_Create int x, int y, int f, int n, int m, int s, int p, int a, int b, local i
+    if f & 1  : ib(8) = SBS_VERT  : else  : ib(8) = SBS_HORZ
+    winobj "SCROLLBAR", "", 0, WS_CHILD | WS_VISIBLE | ib(8), x, y, 0, 0  : i = stat
+    ib = 7 * 4, SIF_ALL | SIF_DISABLENOSCROLL, n, m, s, p, 0
+    SetScrollInfo objinfo(i, 2), SB_CTL, ib, 1
+    if ib(8) == 0  : oncmd gosub *sbmGetMessageLabel, WM_HSCROLL
+    if ib(8) == 1  : oncmd gosub *sbmGetMessageLabel, WM_VSCROLL
+    ScrollBar_SetStep i, a, b
+    return i
+
+#deffunc ScrollBar_SetRange int i, int n, int m, int s
+    ib = 7 * 4, SIF_ALL | SIF_DISABLENOSCROLL, 0, 0, 0, 0, 0
+    GetScrollInfo objinfo(i, 2), SB_CTL, ib
+    ib(2) = n, m, s
+    SetScrollInfo objinfo(i, 2), SB_CTL, ib, 1
+    return
+
+#deffunc ScrollBar_SetStep int i, int a, int b
+    SetWindowLong objinfo(i, 2), GWL_USERDATA, (a << 16 & $FFFF0000) | (b & $FFFF)
+    return
+
+#defcfunc ScrollBar_GetPos int i
+    ib = 7 * 4, SIF_POS, 0, 0, 0, 0, 0
+    GetScrollInfo objinfo(i, 2), SB_CTL, ib
+    return ib(5)
+
+#deffunc ScrollBar_SetPos int i, int p
+    ib = 7 * 4, SIF_ALL | SIF_DISABLENOSCROLL, 0, 0, 0, 0, 0
+    GetScrollInfo objinfo(i, 2), SB_CTL, ib
+    ib(5) = p
+    SetScrollInfo objinfo(i, 2), SB_CTL, ib, 1
+    return
+
+*sbmGetMessageLabel
+    SBMI = ginfo_intid, iparam, wparam >> 16 & $FFFF, wparam & $FFFF, lparam
+    if (0 <= SBMI(3) & SBMI(3) <= 3) | (SBMI(3) == 5) {
+        ib = 7 * 4, SIF_ALL | SIF_DISABLENOSCROLL, 0, 0, 0, 0, 0, 0
+        GetScrollInfo SBMI(4), SB_CTL, ib
+        ib(7) = ib(5)       ;動いたチェック
+        if SBMI(3) == 5 {
+            ib(5) = ib(6)
+        } else {
+            GetWindowLong SBMI(4), GWL_USERDATA
+            if SBMI(3) == 0  : ib(5) -= stat >> 16 & $FFFF
+            if SBMI(3) == 1  : ib(5) += stat >> 16 & $FFFF
+            if SBMI(3) == 2  : ib(5) -= stat       & $FFFF
+            if SBMI(3) == 3  : ib(5) += stat       & $FFFF
+        }
+        SetScrollInfo SBMI(4), SB_CTL, ib, 1
+        GetScrollInfo SBMI(4), SB_CTL, ib
+        if vartype(SbmLabel) == 1 & ib(7) != ib(5) : gosub SbmLabel
+    }
+    return
+
+#defcfunc ScrollBar_GetInfo int t
+    return SBMI(t)
+
+#defcfunc ScrollBar_GetSystemSize
+    GetSystemMetrics SM_CXVSCROLL
+    return stat
+
+; http://www.tvg.ne.jp/menyukko/ ; Copyright(C) 2011-2012 衣日和 All rights reserved.
+#global
+#endif
+
+#module folderdialogmodule
+
+#uselib "shel32.dll"
+#cfunc SHBrouseForFolder "SHBrowseForFolder" int
+#uselib "ole32.dll"
+#func CoTaskMemFree "CoTaskMemFree" int
+
+#defcfunc folderdialog str p1
+	dim ret
+	dim prm,16
+	sdim SubTitle,260
+	sdim FolderName,260
+	sdim FolderPath,260
+
+	SubTitle=p1
+	prm.0=hwnd,0,varptr(FolderName),varptr(SubTitle)
+	prm.4=$1,0,0,0
+	ret=SHBrowseForFolder(varptr(prm))
+	if ret=0:{
+		FolderPath=""
+	}else{
+		SHGetPathFromIDList ret,varptr(FolderPath)
+		CoTaskMemFree ret
+	}
+
+	return FolderPath
+
+#global
+
+#module
+#defcfunc GetFullMemory
+	#uselib "kernel32.dll"
+	#func GlobalMemoryStatusEx "GlobalMemoryStatusEx" var
+	ddim buf,8
+	lpoke buf,0,64
+	GlobalMemoryStatusEx buf
+	fmem=double(strf("%I64u",buf.1))
+return fmem
+#global
+
+;
+; HSP3.0 Utility macros and functions
+;
+#ifndef __obj__
+#define __obj__
+
+#module "llmod_obj"
+
+#uselib "user32.dll"
+#func _IsWindowEnabled "IsWindowEnabled" int
+#func _EnableWindow "EnableWindow" int,int
+#func _GetWindowRect "GetWindowRect" int,int
+#func _MoveWindow "MoveWindow" int,int,int,int,int,int
+#func _ScreenToClient "ScreenToClient" int,int
+
+;user32.asからの移植(ちょっと変えました)
+#func _RedrawWindow "RedrawWindow" sptr,sptr,sptr,sptr
+
+#deffunc objgray int v1,int v2
+
+	;================================================================================
+	; objgray n1,n2		オブジェクトの使用可、不可設定
+	;
+	;  n1 : オブジェクトのID
+	;  n2 : 使用可にするか不可するかのフラグ
+	;================================================================================
+	; buttonなどのオブジェクトを使用可にしたり、不可にしたりします。
+	; n1にはbuttonやlistviewなどのIDを代入します。
+	; n2を0にするとオブジェクトを使用できない状態にし、1にすると使用できる
+	; 状態にします。
+	; n2を-1にするとそのオブジェクトが使用可か不可かを調べます。
+	;
+	if v2<0 {
+		_IsWindowEnabled objinfo_hwnd(v1)
+	}else{
+		_EnableWindow objinfo_hwnd(v1),v2
+	}
+	return stat
+
+
+#deffunc p_scrwnd array v4
+
+	;================================================================================
+	; p_scrwnd v1			スクリーン座標系をウィンドウ座標系に変換
+	;
+	;  v1 : スクリーン座標系が入った数値変数
+	;================================================================================
+	;
+	;<>説明
+	; スクリーン座標系をウィンドウ座標系に変換します。
+	; v1にx座標、y座標を代入しておきます。
+	; 描画対象となっているウィンドを基準にします。
+	;例)
+	;	ginfo
+	;	x=prmx,prmy
+	;	p_scrwnd x	;スクリーン座標系をウィンドウ座標系に変換
+	;
+	mref bmscr,67
+	prm=bmscr.13
+	_ScreenToClient prm, varptr(v4)
+	return
+
+
+#deffunc getobjsize array v1,int v2
+
+	;================================================================================
+	; getobjsize v1,n2		オブジェクトのサイズと位置取得
+	;
+	;  v1 : オブジェクトのサイズ、位置を取得するための数値変数
+	;  n2 : オブジェクトのID
+	;================================================================================
+	;
+	;<>説明
+	; オブジェクトのサイズと位置を取得します。
+	; n2にはbuttonやlistviewなどのIDを代入します。
+	; v1にはオブジェクトのサイズ、位置が以下のように代入されます。
+	;	v1.0	幅
+	;	v1.1	高さ
+	;	v1.2	左上のx座標
+	;	v1.3	左上のy座標
+	;	v1.4	右下のx座標
+	;	v1.5	右下のy座標
+	; 各座標はウィンドウ座標系です。
+	;
+	;typedef struct _RECT {    // rc  
+	;    LONG left; 
+	;    LONG top; 
+	;    LONG right; 
+	;    LONG bottom; 
+	;} RECT; 
+
+	mref bmscr,67
+	prm=bmscr.13
+	v1.5=0
+
+	_GetWindowRect objinfo_hwnd(v2), varptr(v1)+8
+	res=stat
+	v1=v1.4-v1.2 , v1.5-v1.3
+	_ScreenToClient prm, varptr(v1)+8
+	_ScreenToClient prm, varptr(v1)+16
+	return res
+
+
+#deffunc resizeobj int v1,array v2,int v3
+
+	;================================================================================
+	; resizeobj n1,v2,n3		オブジェクトのサイズ変更
+	;
+	;  n1 : オブジェクトのID
+	;  v2 : サイズ、位置が入った数値変数
+	;  n3 : 位置、サイズを変更しないかどうかのフラグ
+	;================================================================================
+	;
+	;<>説明
+	; オブジェクトn1のサイズを変更します。
+	; v2には幅、高さ、x座標,y座表の順に代入しておきます。
+	; n3を1にすると位置を変えずにサイズだけ変更します。
+	; n3を2にするとサイズを変えずに位置だけ変更します。
+	;
+	;例)
+	;	button "width*2",wx2
+	;	button "height*2",hx2
+	;	input s,100,20
+	;	ipt_id=2
+	;	;幅を40、高さを30にして(0,80)に移動する
+	;	s=40,30,0,80
+	;	resizeobj ipt_id,s
+	;	stop
+	;*wx2
+	;	;幅を2倍にする
+	;	getobjsize s,ipt_id
+	;	s=s*2
+	;	resizeobj ipt_id,s
+	;	stop
+	;*hx2
+	;	;高さを2倍にする
+	;	getobjsize s,ipt_id
+	;	s.1=s.1*2
+	;	resizeobj ipt_id,s
+	;	stop
+	;
+	sx=v2(0):sy=v2(1):x=v2(2):y=v2(3)
+	if v3 {			
+		getobjsize m,v1		;getobjsizeでm.0からw,h,x,yが代入される
+		if stat=-1 : return stat
+		if v3=1 : x=m(2):y=m(3)		;位置を変更しない
+		if v3=2 : sx=m:sy=m(1)		;サイズを変更しない
+	}
+	_MoveWindow objinfo_hwnd(v1),x,y,sx,sy,0
+
+	;追加したもの
+	_RedrawWindow objinfo_hwnd(v1),0,0,$105
+	
+	return stat
+
+
+#global
+
+#module
+;文字コード判定関数
+;	Shift-JISの２バイト文字の１バイト目領域内かを判定します。
+;	RV = IsByte( int p1 )
+;	p1 : 判定する文字コード
+;	RV : 1=2byte文字の１文字目 (これ以外は 0)
+    #defcfunc IsByte int p1
+    return ((p1>=129)&(p1<=159) )|( (p1>=224)&(p1<=252))
+#global
+
+
+#endif
 
 #define DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2	-4
 #define HTLEFT						0x0000000A

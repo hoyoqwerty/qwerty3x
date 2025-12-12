@@ -1,0 +1,94 @@
+*appendmenuupdate
+
+	//max=6
+
+//////////////////////////////////////////////////////////////////////
+//Windows 電源
+//////////////////////////////////////////////////////////////////////
+
+	createpopupmenu
+	hmenu.1=stat
+
+	appendmenu hmenu.1,0,$100,langstr(37011);Windowsをロックする
+	appendmenu hmenu.1,$800,0,""
+	appendmenu hmenu.1,0,$101,langstr(37014);Windowsの電源ダイアログ
+	if okfullmode!-1:{
+		appendmenu hmenu.1,$800,0,""
+		appendmenu hmenu.1,0,$102,langstr(37012);Windowsをシャットダウンする
+		appendmenu hmenu.1,0,$103,langstr(37013);Windowsを再起動する
+	}
+
+//////////////////////////////////////////////////////////////////////
+//qwerty3xの操作
+//////////////////////////////////////////////////////////////////////
+
+	createpopupmenu
+	hmenu.2=stat
+
+	appendmenu hmenu.2,0,$100,langstr(37021);qwerty3xをロックする
+	appendmenu hmenu.2,$800,0,""
+	appendmenu hmenu.2,0,$101,langstr(37022);qwerty3xを終了する
+	appendmenu hmenu.2,0,$102,langstr(37023);qwerty3xを再起動する
+
+//////////////////////////////////////////////////////////////////////
+//便利機能
+//////////////////////////////////////////////////////////////////////
+
+	createpopupmenu
+	hmenu.3=stat
+
+	appendmenu hmenu.3,0,$100,langstr(56051);グラフィック設定最適化/ベンチマーク
+	appendmenu hmenu.3,0,$101,langstr(56052);詳細情報の表示
+	appendmenu hmenu.3,$800,0,""
+	appendmenu hmenu.3,0,$102,langstr(56053);開発者のX(Twitter)を開く
+	appendmenu hmenu.3,$800,0,""
+	appendmenu hmenu.3,0,$103,langstr(56055);Release Note.txtを開く
+	appendmenu hmenu.3,$800,0,""
+	appendmenu hmenu.3,0,$104,langstr(56056);qwerty-XXから設定を引き継ぐ
+	appendmenu hmenu.3,0,$105,langstr(56057);qwerty-XXからランチャーを引き継ぐ
+
+//////////////////////////////////////////////////////////////////////
+//スタートボタン右クリックメニュー
+//////////////////////////////////////////////////////////////////////
+
+	createpopupmenu
+	hmenu.4=stat
+
+	appendmenu hmenu.4,0,$300,langstr(37011);Windowsをロックする
+	appendmenu hmenu.4,$800,0,""
+	appendmenu hmenu.4,0,$301,langstr(37014);Windowsの電源ダイアログ
+	if okfullmode!-1:{
+		appendmenu hmenu.4,$800,0,""
+		appendmenu hmenu.4,0,$302,langstr(37012);Windowsをシャットダウンする
+		appendmenu hmenu.4,0,$303,langstr(37013);Windowsを再起動する
+	}
+
+	createpopupmenu
+	hmenu.5=stat
+
+	appendmenu hmenu.5,0,$400,langstr(37021);qwerty3xをロックする
+	appendmenu hmenu.5,$800,0,""
+	appendmenu hmenu.5,0,$401,langstr(37022);qwerty3xを終了する
+	appendmenu hmenu.5,0,$402,langstr(37023);qwerty3xを再起動する
+
+	createpopupmenu
+	hmenu.6=stat
+
+	appendmenu hmenu.6,0,$100,langstr(3001);ランチャー
+	appendmenu hmenu.6,0,$101,langstr(3005);qwerty3xの設定
+	appendmenu hmenu.6,$800,0,""
+	appendmenu hmenu.6,0,$200,langstr(3501);タスクマネージャー
+	winapp1cant=0
+	if okfullmode=0|okfullmode=-1{winapp1cant=1}
+	if okfullmode=1&windowsver="NT6.1"{winapp1cant=1}
+	if winapp1cant!1:{
+		appendmenu hmenu.6,0,$201,langstr(3502);Windowsの設定
+	}
+	appendmenu hmenu.6,0,$202,langstr(3503);ファイル名を指定して実行
+	appendmenu hmenu.6,0,$203,langstr(3504);コントロールパネル
+	appendmenu hmenu.6,$800,0,""
+	appendmenu hmenu.6,$10,hmenu.4,langstr(3701);Windowsの電源
+	appendmenu hmenu.6,$800,0,""
+	appendmenu hmenu.6,$10,hmenu.5,langstr(3702);qwerty3xの操作
+
+	return
