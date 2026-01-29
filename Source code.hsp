@@ -38,21 +38,21 @@
 	hspdebugmode=0
 #endif
 
-if qwertydebag=0:{
+if qwertydebug=0:{
 	onerror *systemerrordialog
 }
 
-#include "module/include code_1_module.hsp";766
+#include "module/include code_1_module.hsp";832
 ;#include "module/include code_2_default.hsp";144
-;#include "module/include code_3_buffer.hsp";314
+;#include "module/include code_3_buffer.hsp";323
 ;#include "module/include code_4_controlmakescreen.hsp";3504
-;#include "module/include code_5_appendmenu.hsp";94
+;#include "module/include code_5_appendmenu.hsp";119
 ;#include "module/include code_6_password.hsp";379
-;766+144+314+3504+94+379=5201 5201+2350=7551
+;832+144+323+3504+119+379=5301 5301+3179=8480
 
-	qwertyver="1.00_beta1"
-	qwertybuild="7551"
-	qwertydate="2025/12/12"
+	qwertyver="1.00_beta2"
+	qwertybuild="8480"
+	qwertydate="2026/01/29"
 	qwertycur=dir_cur
 	qwertypath=""+dir_cur+"\\qwerty3x.exe"
 	passwordkey=6+rnd(15)+rnd(15)+rnd(15)+rnd(15)+rnd(15)+rnd(15)
@@ -67,6 +67,13 @@ if qwertydebag=0:{
 	}
 
 #include "module/include code_2_default.hsp"
+
+	if strf("%4x",__hspver__)="3507":{
+		qwertyver+=" for legacy"
+		legacy3xmode=1
+	}else{
+		legacy3xmode=0
+	}
 
 	gosub *loadingsettingfile
 
@@ -91,7 +98,7 @@ if qwertydebag=0:{
 	mes "qwerty3x "
 	font "Terminal",25,0
 	mes "ver."+qwertyver+"\nis starting..."
-	font "Terminal",25,0
+	font msgothic,20,2+16
 	startwaittime=5
 
 	langstrrepstartupbuf=1
@@ -99,7 +106,7 @@ if qwertydebag=0:{
 
 	title ""+langstr(1002)+" | qwerty3x ver."+qwertyver;1002=起動中
 
-	pos 0,420
+	pos 5,420
 	color 0,0,0
 	boxf 0,420,640,450
 	color 255,255,255
@@ -211,7 +218,7 @@ if qwertydebag=0:{
 	dismaxx=ginfo(20)
 	dismaxy=ginfo(21)
 
-	pos 0,420
+	pos 5,420
 	color 0,0,0
 	boxf 0,420,640,450
 	color 255,255,255
@@ -236,10 +243,10 @@ if qwertydebag=0:{
 	conpage2=0
 	slideshowlist=0
 	updatecheckmes=""
-	settingfps=24;30fps
+	settingfps=24;24fps
 
 	if loadset("startupdate",settingdata)="1"|okfullmode!-1:{
-		pos 0,420
+		pos 5,420
 		color 0,0,0
 		boxf 0,420,640,450
 		color 255,255,255
@@ -443,7 +450,7 @@ if qwertydebag=0:{
 		loop
 	}
 
-	pos 0,420
+	pos 5,420
 	color 0,0,0
 	boxf 0,400,640,450
 	color 255,255,255
@@ -484,17 +491,17 @@ if qwertydebag=0:{
 
 	getkey ctrl,17
 	if ctrl=1:{
-		if qwertydebag=0:{
-			qwertydebag=1
+		if qwertydebug=0:{
+			qwertydebug=1
 		}else{
-			qwertydebag=0
+			qwertydebug=0
 		}
 	}
 
 	title ""+langstr(1003)+" | qwerty3x ver."+qwertyver	
 	titlebarstrbuf=""+langstr(1003)+" | qwerty3x ver."+qwertyver	
 
-	if qwertydebag=1:{
+	if qwertydebug=1:{
 		title "<デバッグ>No.1 :フォント名を指定中/Specifying font name | qwerty3x ver."+qwertyver
 	}
 	if loadset("FONTNAME",settingdata)="AUTO":{
@@ -503,13 +510,13 @@ if qwertydebag=0:{
 		fontstr=loadset("FONTNAME",settingdata)
 	}
 
-	if qwertydebag=1:{
+	if qwertydebug=1:{
 		title "<デバッグ>No.2 :スクリーンバッファを作成中/Creating screen buffer | qwerty3x ver."+qwertyver
 	}
 	gosub *bufferallupdate
 	gosub *appendmenuupdate
 
-	if qwertydebag=1:{
+	if qwertydebug=1:{
 		title "<デバッグ>No.3 :画面クリア中/Clearing screen | qwerty3x ver."+qwertyver
 	}	
 	repeat bgscrwindowmax
@@ -579,13 +586,13 @@ if qwertydebag=0:{
 	}
 	redraw 1
 
-	if qwertydebag=1:{
+	if qwertydebug=1:{
 		title "<デバッグ>No.4 :フォントを設定中/Setting font | qwerty3x ver."+qwertyver
 	}
 	font fontstr,fontsize,0
 	objmode 2,1
 
-	if qwertydebag=1:{
+	if qwertydebug=1:{
 		title "<デバッグ>No.5 :タイトルバーを描画中/Drawing titlebar | qwerty3x ver."+qwertyver
 	}
 	pos xsiz(0),ysiz(0)
@@ -636,7 +643,7 @@ if qwertydebag=0:{
 	button gosub "",*startmainmenuchange
 	startmainmenuadr=stat
 
-	if qwertydebag=1:{
+	if qwertydebug=1:{
 		title "<デバッグ>No.6 :qwerty3xアプリケーションの描画中/Drawing qwerty3x application | qwerty3x ver."+qwertyver
 	}
 	//初期pos xsiz(0),ysiz(30)
@@ -695,7 +702,16 @@ if qwertydebag=0:{
 		launcherscrollbaradr=stat
 		hlauncherscrollbar=objinfo(launcherscrollbaradr,2)
 
+		bufferbuttonY=ysiz(0)
+		bufferbuttonX=xsiz(160)
+		pos bufferbuttonX,ysiz(1)
+		objsize appbarxsiz.0+xsiz(10),ysiz(29)
+		objimage 2002,xsiz(0),bufferbuttonY,xsiz(0),bufferbuttonY,xsiz(300),bufferbuttonY
+		button gosub "",*launcheradd
+		launcheraddadr=stat
+
 		redraw 1
+	}else:if screenname=langstr(3006):{;ランチャーの編集
 	}else:if screenname=langstr(3005):{;qwerty3xの設定
 		clientwindowx=ginfo(12)
 		clientwindowy=ginfo(13)
@@ -1024,14 +1040,32 @@ if qwertydebag=0:{
 				}else{
 					sdim dl,2
 					getlogicaldrives
-					okdrives=stat
+					okdrive=stat
 					canusedrive=""
 					cantuse=0
 					repeat 26
-						
+						dl=strf("%c",'a'+cnt)
+						flag=1<<cnt
+						if okdrive&flag:{
+							notesel canusedrive
+							noteadd ""+dl+":\\",-1,0
+						}
 					loop
-					
-					nowlauncherloadmode="other"
+					notesel canusedrive
+					repeat notemax
+						noteget buf,cnt
+						if instr(buf,0,getpath(nowlauncherdata,16))!-1:{
+							cantuse=0
+							break
+						}else{
+							cantuse=1
+						}
+					loop
+					if cantuse!1:{
+						nowlauncherloadmode="folder"
+					}else{
+						nowlauncherloadmode="other"
+					}
 				}
 			}
 		}else{
@@ -1039,18 +1073,23 @@ if qwertydebag=0:{
 		}
 
 		pos xsiz(32)*(cnt-1),ysiz(0)
+		if loadset("dispcolormode",settingdata)="0":{
+			drawiconexp9=2
+		}else{
+			drawiconexp9=3
+		}
 		if nowlauncherloadmode="file"|nowlauncherloadmode="folder":{
 			dim shfileinfo,88
 			shgetfileinfo nowlauncherdata,0,varptr(shfileinfo),$160,$100
-			drawiconex hdc,xsiz(32)*(cnt-1),ysiz(0),shfileinfo.0,xsiz(32),ysiz(32),0,0,2
+			drawiconex hdc,xsiz(32)*(cnt-1),ysiz(0),shfileinfo.0,xsiz(32),ysiz(32),0,0,drawiconexp9
 		}else:if nowlauncherloadmode="other":{
 			hIcon = ExtractIcon( hInstance, "shell32.dll", 54)
-			drawiconex hdc,xsiz(32)*(cnt-1),ysiz(0),hIcon,xsiz(32),ysiz(32),0,0,2
+			drawiconex hdc,xsiz(32)*(cnt-1),ysiz(0),hIcon,xsiz(32),ysiz(32),0,0,drawiconexp9
 		}else:if nowlauncherloadmode="custom":{
 			exist nowlaunchericon
 			if strsize=-1:{
 				hIcon = ExtractIcon( hInstance, "shell32.dll", 54)
-				drawiconex hdc,xsiz(32)*(cnt-1),ysiz(0),hIcon,xsiz(32),ysiz(32),0,0,2
+				drawiconex hdc,xsiz(32)*(cnt-1),ysiz(0),hIcon,xsiz(32),ysiz(32),0,0,drawiconexp9
 			}else{
 				buffer 501,xsiz(1),ysiz(1),0
 				picload nowlaunchericon,0
@@ -1127,6 +1166,15 @@ if qwertydebag=0:{
 		colorsetting settingdata
 		mes launcherbufferstr.cnt
 
+		if qwertydebug=1:{
+			pos posbufx+xsiz(60),posbufy+ysiz(10)
+			boxfofmes int(loadset("dispcolormode",settingdata))
+			mes "No."+(cnt+1)
+			pos posbufx+xsiz(320),posbufy+ysiz(10)
+			colorsetting settingdata
+			mes "No."+(cnt+1)
+		}
+
 		boxfofmes int(loadset("dispcolormode",settingdata))
 		boxf posbufx,posbufy+ysiz(68),posbufx+xsiz(250),posbufy+ysiz(70);横250px 縦2px
 		boxf posbufx+xsiz(247),posbufy,posbufx+xsiz(250),posbufy+ysiz(70);横3px 縦70px
@@ -1160,7 +1208,7 @@ if qwertydebag=0:{
 	repeat int(loadset("launcherdatamax",launcherdata))
 		pos posbufx,posbufy
 		objimage 503,posbufx2,posbufy2,posbufx2,posbufy2,posbufx2+xsiz(260),posbufy2
-		button "",*systemrepeat
+		button "",*launch
 		launcherbuttonadr.cnt=stat
 
 		if (ginfo(13)-firstposbufy)<=(posbufy+addposbufy+firstposbufy+endposbufy):{
@@ -1294,6 +1342,783 @@ if qwertydebag=0:{
 
 	return
 
+*launch
+	pullbuttonadr=stat
+	repeat int(loadset("launcherdatamax",launcherdata)),1
+		if launcherbuttonadr.(cnt-1)=pullbuttonadr:{
+			pulllauncherbuttoncnt=cnt
+			break
+		}
+	loop
+	if loadset(""+pulllauncherbuttoncnt+"_data",launcherdata)="":{
+		dialog langstr(6002),0,langstr(0001)
+		goto *systemrepeat
+	}
+
+	pullbuttonopt=loadset(""+pulllauncherbuttoncnt+"_opt",launcherdata)
+
+	if instr(windowsver,0,"NT")=-1:{
+		ntmode=0
+	}else{
+		ntmode=1
+	}
+
+	launchoption=""
+	if instr(pullbuttonopt,0,"/min")!-1:{
+		if ntmode=1:{
+			launchoption+="/min"
+		}else{;9x
+			launchoption+="/m"
+		}
+	}
+	if instr(pullbuttonopt,0,"/max")!-1:{
+		if ntmode=1:{
+			launchoption+="/max"
+		}else{;9x
+			launchoption+="/max"
+		}
+	}
+
+	launchonstart=""
+	if instr(pullbuttonopt,0,"/onstart:")!-1:{
+		launchonstartbuf=instr(pullbuttonopt,0,"/onstart:<path>")+strlen("/onstart:<path>")
+		launchonstart=strmid(pullbuttonopt,launchonstartbuf,instr(pullbuttonopt,0,"</path>")-launchonstartbuf)
+		launchonstart="\""+launchonstart+"\""
+	}
+
+	if ntmode=1:{
+		if loadset(""+pulllauncherbuttoncnt+"_runas",launcherdata)="1":{
+			windowsbatsign="launcherrunasnt"
+			gosub *windowsbat
+		}else{
+			exec "cmd /c start \"\" "+launchoption+" "+launchonstart+" \""+loadset(""+pulllauncherbuttoncnt+"_data",launcherdata)+"\"",2
+		}
+	}else{;9x
+		if loadset(""+pulllauncherbuttoncnt+"_runas",launcherdata)="1":{
+			windowsbatsign="launcherrunas9x"
+			gosub *windowsbat
+		}else{
+			exec "start "+launchoption+" "+launchonstart+" \""+loadset(""+pulllauncherbuttoncnt+"_data",launcherdata)+"\"",2
+		}
+	}
+
+	if loadset("automini",settingdata)="1":{
+		sendmsg hwnd,$112,$F020;SC_MINIMIZE
+	}
+
+	goto *systemrepeat
+
+*launcheradd
+	if launcheraddcurrent=0:{
+		launcheraddcurrent=1
+		
+		gsel 0000
+		bufx=ginfo(12)
+		bufy=ginfo(13)
+		redraw 0
+		onkey 0
+		onclick 0
+		beforex=ginfo(4)
+		beforey=ginfo(5)
+		enablewindow hclient,0
+		screen 201,xsiz(640),ysiz(450),4+8
+		gsel 201,2
+		GetWindowLong hwnd, -16
+		SetWindowLong hwnd, -16, stat - $80000
+		width xsiz(640),ysiz(450),beforex,beforey
+		boxfofmes int(loadset("dispcolormode",settingdata)),xsiz(0),ysiz(0),xsiz(640),ysiz(450)
+		font fontstr,fontsize,0
+		objmode 2,1
+		redraw 1
+	
+		title ""+langstr(60031)+""
+	
+		pos xsiz(10),ysiz(10)
+		boxfofmes onezero(loadset("dispcolormode",settingdata)),xsiz(10),ysiz(10),xsiz(630),ysiz(40)
+		pos xsiz(12),ysiz(10)
+		font fontstr,fontsize+6,1
+		mes langstr(6101)
+		font fontstr,fontsize,0
+	
+		pos xsiz(10),ysiz(50)
+		boxfofmes onezero(loadset("dispcolormode",settingdata)),xsiz(10),ysiz(50),xsiz(630),ysiz(70)
+		pos xsiz(12),ysiz(50)
+		mes langstr(6102)
+	
+		pos xsiz(10),ysiz(90)
+		objsize xsiz(620),ysiz(30)
+		radiobuttonbuf=1
+		chkbox langstr(6103),radiobuttonbuf
+		radiobuttonbufadr=stat
+		setwindowlong objinfo(radiobuttonbufadr,2),-16,$50000009|$20000
+	
+		pos xsiz(30),ysiz(130)
+		boxfofmes onezero(loadset("dispcolormode",settingdata)),xsiz(30),ysiz(130),xsiz(630),ysiz(170)
+		pos xsiz(32),ysiz(130)
+		mes langstr(61031)
+	
+		pos xsiz(10),ysiz(180)
+		radiobuttonbuf2=0
+		chkbox langstr(6104),radiobuttonbuf2
+		radiobuttonbuf2adr=stat
+		sendmsg objinfo(radiobuttonbuf2adr,2),$F4,$9
+	
+		pos xsiz(30),ysiz(220)
+		boxfofmes onezero(loadset("dispcolormode",settingdata)),xsiz(30),ysiz(220),xsiz(630),ysiz(260)
+		pos xsiz(32),ysiz(220)
+		mes langstr(61041)
+	
+		pos xsiz(10),ysiz(270)
+		radiobuttonbuf3=0
+		chkbox langstr(6105),radiobuttonbuf3
+		radiobuttonbuf3adr=stat
+		sendmsg objinfo(radiobuttonbuf3adr,2),$F4,$9
+	
+		pos xsiz(30),ysiz(310)
+		boxfofmes onezero(loadset("dispcolormode",settingdata)),xsiz(30),ysiz(310),xsiz(630),ysiz(350)
+		pos xsiz(32),ysiz(310)
+		mes langstr(61051)
+
+		pos xsiz(530),ysiz(420)
+		objsize xsiz(100),ysiz(30)
+		button langstr(6106),*launcheraddno
+
+		pos xsiz(420),ysiz(420)
+		button langstr(6107),*launcheradd
+	}else:if launcheraddcurrent=1:{
+		sendmsg objinfo(radiobuttonbuf3adr,2),$F0
+		if stat=1:{
+			dialog "現在マクロランチャーは未開発状態です。\n開発完了するまではこの方法を使用することはできません。"
+			goto *launcheraddrepeat
+		}
+		sendmsg objinfo(radiobuttonbuf2adr,2),$F0
+		if stat=1:{;空ランチャー作成を選択した場合
+			launcheraddcurrent=4
+			editlauncherdata=""
+			editlaunchername=""
+			editlaunchericon=""
+			editoption1=0
+			editoption2=0
+			editoption3=0
+			editoption4=0
+			editoption5=0
+			editoption6=0
+
+			goto *launcheradd
+		}
+
+		launcheraddcurrent=2
+
+		redraw 0
+		onkey 0
+		onclick 0
+		cls 0
+		boxfofmes int(loadset("dispcolormode",settingdata)),xsiz(0),ysiz(0),xsiz(640),ysiz(450)
+		font fontstr,fontsize,0
+		objmode 2,1
+		redraw 1
+
+		pos xsiz(10),ysiz(10)
+		boxfofmes onezero(loadset("dispcolormode",settingdata)),xsiz(10),ysiz(10),xsiz(630),ysiz(40)
+		pos xsiz(12),ysiz(10)
+		font fontstr,fontsize+6,1
+		mes langstr(6108)
+		font fontstr,fontsize,0
+
+		pos xsiz(10),ysiz(50)
+		boxfofmes onezero(loadset("dispcolormode",settingdata)),xsiz(10),ysiz(50),xsiz(630),ysiz(70)
+		pos xsiz(12),ysiz(50)
+		mes langstr(6109)
+
+		pos xsiz(10),ysiz(80)
+		objsize xsiz(520),ysiz(30)
+		if editlauncherdata=0:{
+			editlauncherdata=""
+		}
+		input editlauncherdata,xsiz(520),ysiz(30),0
+		editlauncherdataadr=stat
+		pos xsiz(530),ysiz(80)
+		objsize xsiz(100),ysiz(30)
+		button langstr(61091),*launcheradddialog
+		launcheradddialogadr=stat
+
+		pos xsiz(30),ysiz(120)
+		boxfofmes onezero(loadset("dispcolormode",settingdata)),xsiz(30),ysiz(120),xsiz(630),ysiz(160)
+		pos xsiz(32),ysiz(120)
+		mes langstr(61094)
+
+		pos xsiz(10),ysiz(200)
+		boxfofmes onezero(loadset("dispcolormode",settingdata)),xsiz(10),ysiz(200),xsiz(630),ysiz(220)
+		pos xsiz(12),ysiz(200)
+		mes langstr(6110)
+
+		pos xsiz(10),ysiz(230)
+		objsize xsiz(620),ysiz(30)
+		if editlaunchername=0:{
+			editlaunchername=""
+		}
+		input editlaunchername,xsiz(620),ysiz(30),0
+		editlaunchernameadr=stat
+
+		pos xsiz(30),ysiz(270)
+		boxfofmes onezero(loadset("dispcolormode",settingdata)),xsiz(30),ysiz(270),xsiz(630),ysiz(310)
+		pos xsiz(32),ysiz(270)
+		mes langstr(61101)
+
+		pos xsiz(530),ysiz(420)
+		objsize xsiz(100),ysiz(30)
+		button langstr(6106),*launcheraddno
+
+		pos xsiz(420),ysiz(420)
+		button langstr(6107),*launcheradd
+
+		pos xsiz(310),ysiz(420)
+		button langstr(61071),*launcheraddback
+	}else:if launcheraddcurrent=2:{
+		if editlauncherdata="":{
+			dialog langstr(6111),1,langstr(60031)
+			goto *launcheraddrepeat
+		}
+		if editlaunchername="":{
+			dialog langstr(6112),1,langstr(60031)
+			goto *launcheraddrepeat
+		}
+
+		launcheraddcurrent=3
+
+		redraw 0
+		onkey 0
+		onclick 0
+		cls 0
+		boxfofmes int(loadset("dispcolormode",settingdata)),xsiz(0),ysiz(0),xsiz(640),ysiz(450)
+		font fontstr,fontsize,0
+		objmode 2,1
+		buffer 504,xsiz(32),ysiz(32),0
+		gsel 201,0
+		redraw 1
+
+		editlaunchericonbuf="<none>"
+
+		pos xsiz(10),ysiz(10)
+		boxfofmes onezero(loadset("dispcolormode",settingdata)),xsiz(10),ysiz(10),xsiz(630),ysiz(40)
+		pos xsiz(12),ysiz(10)
+		font fontstr,fontsize+6,1
+		mes langstr(6113)
+		font fontstr,fontsize,0
+
+		pos xsiz(10),ysiz(50)
+		boxfofmes onezero(loadset("dispcolormode",settingdata)),xsiz(10),ysiz(50),xsiz(630),ysiz(70)
+		pos xsiz(12),ysiz(50)
+		mes langstr(6114)
+
+		pos xsiz(30),ysiz(85)
+		boxfofmes onezero(loadset("dispcolormode",settingdata)),xsiz(30),ysiz(85),xsiz(630),ysiz(105)
+		pos xsiz(32),ysiz(85)
+		mes langstr(6115)
+
+		pos xsiz(10),ysiz(160)
+		boxfofmes onezero(loadset("dispcolormode",settingdata)),xsiz(10),ysiz(160),xsiz(630),ysiz(180)
+		pos xsiz(12),ysiz(160)
+		mes langstr(6116)
+
+		pos xsiz(10),ysiz(190)
+		objsize xsiz(520),ysiz(30)
+		if editlaunchericon=0:{
+			editlaunchericon=""
+		}
+		input editlaunchericon,xsiz(520),ysiz(30),0
+		editlaunchericonadr=stat
+		pos xsiz(530),ysiz(190)
+		objsize xsiz(100),ysiz(30)
+		button langstr(61091),*launcheradddialog2
+		launcheradddialog2adr=stat
+
+		pos xsiz(30),ysiz(230)
+		boxfofmes onezero(loadset("dispcolormode",settingdata)),xsiz(30),ysiz(230),xsiz(630),ysiz(330)
+		pos xsiz(32),ysiz(230)
+		mes langstr(61161)
+
+		pos xsiz(530),ysiz(420)
+		objsize xsiz(100),ysiz(30)
+		button langstr(6106),*launcheraddno
+
+		pos xsiz(420),ysiz(420)
+		button langstr(6107),*launcheradd
+
+		pos xsiz(310),ysiz(420)
+		button langstr(61071),*launcheraddback
+	}else:if launcheraddcurrent=3:{
+		launcheraddcurrent=4
+
+		redraw 0
+		onkey 0
+		onclick 0
+		cls 0
+		boxfofmes int(loadset("dispcolormode",settingdata)),xsiz(0),ysiz(0),xsiz(640),ysiz(450)
+		font fontstr,fontsize,0
+		objmode 2,1
+		buffer 504,xsiz(32),ysiz(32),0
+		gsel 201,0
+		redraw 1
+
+		editoption5buf=2
+
+		pos xsiz(10),ysiz(10)
+		boxfofmes onezero(loadset("dispcolormode",settingdata)),xsiz(10),ysiz(10),xsiz(630),ysiz(40)
+		pos xsiz(12),ysiz(10)
+		font fontstr,fontsize+6,1
+		mes langstr(6113)
+		font fontstr,fontsize,0
+
+		pos xsiz(10),ysiz(60)
+		objsize xsiz(620),ysiz(30)
+		chkbox langstr(6118),editoption1
+		editoption1adr=stat
+
+		if editoption3=0&editoption4=0:{
+			editoption4=1
+		}
+
+		pos xsiz(10),ysiz(110)
+		chkbox langstr(6119),editoption2
+		editoption2adr=stat
+		pos xsiz(30),ysiz(150)
+		objsize xsiz(600),ysiz(30)
+		chkbox langstr(6120),editoption3
+		editoption3adr=stat
+		setwindowlong objinfo(editoption3adr,2),-16,$50000009|$20000
+		pos xsiz(30),ysiz(180)
+		chkbox langstr(6121),editoption4
+		editoption4adr=stat
+		sendmsg objinfo(editoption4adr,2),$F4,$9
+
+		pos xsiz(10),ysiz(230)
+		chkbox langstr(6122),editoption5
+		editoption5adr=stat
+
+		editoption6objbuf=0
+		if editoption5=1:{
+			pos xsiz(30),ysiz(270)
+			boxfofmes onezero(loadset("dispcolormode",settingdata)),xsiz(30),ysiz(270),xsiz(630),ysiz(290)
+			pos xsiz(32),ysiz(270)
+			mes langstr(6123)
+	
+			pos xsiz(30),ysiz(300)
+			objsize xsiz(500),ysiz(30)
+			if editoption6=0:{
+				editoption6=""
+			}
+			input editoption6,xsiz(500),ysiz(30),0
+			editoption6adr=stat
+			pos xsiz(530),ysiz(300)
+			objsize xsiz(100),ysiz(30)
+			button langstr(61091),*launcheradddialog3
+			launcheradddialog3adr=stat
+
+			editoption6objbuf=1
+		}
+		editoption5buf=editoption5
+
+		pos xsiz(530),ysiz(420)
+		objsize xsiz(100),ysiz(30)
+		button langstr(6106),*launcheraddno
+
+		pos xsiz(420),ysiz(420)
+		button langstr(6107),*launcheradd
+
+		pos xsiz(310),ysiz(420)
+		button langstr(61071),*launcheraddback
+	}else:if launcheraddcurrent=4:{
+		if editoption5=1:{
+			if editoption6="":{
+				dialog langstr(61231),1,langstr(60031)
+				goto *launcheraddrepeat
+			}
+		}
+		
+		launcheraddcurrent=5
+
+		redraw 0
+		onkey 0
+		onclick 0
+		cls 0
+		boxfofmes int(loadset("dispcolormode",settingdata)),xsiz(0),ysiz(0),xsiz(640),ysiz(450)
+		font fontstr,fontsize,0
+		objmode 2,1
+		buffer 504,xsiz(32),ysiz(32),0
+		gsel 201,0
+		redraw 1
+
+		pos xsiz(10),ysiz(10)
+		boxfofmes onezero(loadset("dispcolormode",settingdata)),xsiz(10),ysiz(10),xsiz(630),ysiz(40)
+		pos xsiz(12),ysiz(10)
+		font fontstr,fontsize+6,1
+		mes langstr(6124)
+		font fontstr,fontsize,0
+
+		pos xsiz(10),ysiz(60)
+		boxfofmes onezero(loadset("dispcolormode",settingdata)),xsiz(10),ysiz(60),xsiz(630),ysiz(80)
+		pos xsiz(12),ysiz(60)
+		mes langstr(6125)
+
+		;番号 - ランチャーの名前
+		pos xsiz(30),ysiz(90)
+		boxfofmes onezero(loadset("dispcolormode",settingdata)),xsiz(30),ysiz(90),xsiz(630),ysiz(240)
+		pos xsiz(32),ysiz(90)
+		if editlaunchername="":{
+			mes "No."+(int(loadset("launcherdatamax",launcherdata))+1)+" - "+langstr(6127)
+		}else{
+			mes "No."+(int(loadset("launcherdatamax",launcherdata))+1)+" - "+editlaunchername
+		}
+
+		;ランチャーのパス
+		font fontstr,fontsize-2,0
+		pos xsiz(32),ysiz(120)
+		if editlauncherdata="":{
+			mes ""+langstr(6133)+""+langstr(6126)
+		}else{
+			mes ""+langstr(6133)+""+editlauncherdata+""
+		}
+		font fontstr,fontsize,0
+
+		;ランチャーのアイコン
+		pos xsiz(32),ysiz(150)
+		if editlaunchericon="":{
+			mes ""+langstr(6134)+""+langstr(6128)+""
+		}else{
+			mes ""+langstr(6134)+""+editlaunchericon+""
+		}
+
+		;ランチャーのオプション
+		pos xsiz(32),ysiz(180)
+		editlauncheroptionmes=""+langstr(6135)+""
+		if editoption1=1:{
+			editlauncheroptionmes+=""+langstr(6129)+","
+		}
+		if editoption2=1:{
+			if editoption3=1:{
+				editlauncheroptionmes+=""+langstr(6130)+","
+			}else:if editoption4=1{
+				editlauncheroptionmes+=""+langstr(6131)+","
+			}
+		}
+		mes editlauncheroptionmes
+
+		;ランチャーのオプション2行目
+		pos xsiz(32),ysiz(210)
+		editlauncheroptionmes=""
+		if editoption5=1:{
+			if editoption6!"":{
+				editlauncheroptionmes+=""+langstr(6132)+""+editoption6
+			}
+		}
+		mes editlauncheroptionmes
+
+		pos xsiz(530),ysiz(420)
+		objsize xsiz(100),ysiz(30)
+		button langstr(6106),*launcheraddno
+
+		pos xsiz(420),ysiz(420)
+		button langstr(6107),*launcheradd
+
+		pos xsiz(310),ysiz(420)
+		button langstr(61071),*launcheraddback
+	}else:if launcheraddcurrent=5:{
+		launcherdatamax=int(loadset("launcherdatamax",launcherdata))
+
+		saveset ""+(launcherdatamax+1)+"_data",launcherdata,editlauncherdata
+
+		if editlaunchername="":{
+			saveset ""+(launcherdatamax+1)+"_name",launcherdata,langstr(6127)
+		}else{
+			saveset ""+(launcherdatamax+1)+"_name",launcherdata,editlaunchername
+		}
+
+		saveset ""+(launcherdatamax+1)+"_runas",launcherdata,str(editoption1)
+
+		saveset ""+(launcherdatamax+1)+"_icon",launcherdata,editlaunchericon
+
+		addoptionmes=""
+		if editoption2=1:{
+			if editoption3=1:{
+				addoptionmes+="/max"
+			}else:if editoption4=1:{
+				addoptionmes+="/min"
+			}
+		}
+		if editoption5=1:{
+			if editoption6!"":{
+				addoptionmes+="/onstart:<path>"+editoption6+"</path>"
+			}
+		}
+		saveset ""+(launcherdatamax+1)+"_opt",launcherdata,addoptionmes
+
+		saveset "launcherdatamax",launcherdata,str(launcherdatamax+1)
+		launcherdatamax=int(loadset("launcherdatamax",launcherdata))
+
+		dialog "No."+launcherdatamax+" - "+loadset(""+launcherdatamax+"_name",launcherdata)+"\n\n"+langstr(6136),0,langstr(60031)
+		
+		launcheraddcurrent=0
+		editlauncherdata=""
+		editlaunchername=""
+		editlaunchericon=""
+		editoption1=0
+		editoption2=0
+		editoption3=0
+		editoption4=0
+		editoption5=0
+		editoption6=0
+		gsel 201,-1
+		gsel 0000,int(loadset("ALWAYSFRONT",settingdata))+1
+		enablewindow hclient,1
+
+		bufferallupdatestartupbuf=1
+		gosub *makescreen
+		bufferallupdatestartupbuf=0
+		goto *systemrepeat
+	}
+
+	goto *launcheraddrepeat
+
+*launcheraddback
+	if launcheraddcurrent=2:{
+		launcheraddcurrent=0
+	}else:if launcheraddcurrent=3:{
+		launcheraddcurrent=1
+	}else:if launcheraddcurrent=4:{
+		launcheraddcurrent=2
+	}else:if launcheraddcurrent=5:{
+		launcheraddcurrent=3
+	}
+
+	goto *launcheradd
+
+*launcheradddialog3
+	dialog "exe",16,"アプリケーションファイル"
+	if stat!1:{
+		goto *launcheraddrepeat
+	}
+	buf=refstr
+	objprm editoption6adr,buf
+
+	goto *launcheraddrepeat
+
+*launcheradddialog2
+	dialog "jpg;*.png;*.ico;*.bmp;*.",16,"画像ファイル"
+	if stat!1:{
+		goto *launcheraddrepeat
+	}
+	buf=refstr
+	objprm editlaucnhericonadr,buf
+
+	goto *launcheraddrepeat
+
+*launcheradddialog
+	dim rect,4
+	hlauncheradddialog=objinfo(launcheradddialogadr,2)
+
+	getwindowrect hlauncheradddialog,varptr(rect)
+	trackpopupmenu hmenu.7,$100,rect.0,rect.3,0,hwnd,0
+	if stat=$100:{;ファイルの参照
+		dialog "",16,"ファイル"
+		if stat!1:{
+			goto *launcheraddrepeat
+		}
+		buf=refstr
+		objprm editlauncherdataadr,buf
+		objprm editlaunchernameadr,getpath(buf,1+8)
+	}else:if stat=$101:{;フォルダの参照
+		buf=folderdialog(langstr(53031))
+		if buf="":{
+			goto *launcheraddrepeat
+		}
+		objprm editlauncherdataadr,buf
+		if strlen(buf)<=3:{;C:\のように文字数が3以下の場合
+			objprm editlaunchernameadr,buf
+		}else{;文字数が4以上の場合
+			objprm editlaunchernameadr,getpath(buf,1+8)
+		}
+	}
+
+	goto *launcheraddrepeat
+
+*launcheraddrepeat
+	onkey 0
+	onclick 0
+	oncmd 0
+
+	if launcheraddcurrent=2:{
+		getkey tab,9
+		if tab=1:{
+			objsel -1
+			if stat=launcheradddialogadr:{
+				objsel editlaunchernameadr
+			}
+		}
+	}else:if launcheraddcurrent=3:{
+		if editlaunchericonbuf!editlaunchericon:{
+			editlaunchericonbuf=editlaunchericon
+
+			if editlaunchericon="":{
+				exist editlauncherdata
+				if strsize!-1:{
+					nowlauncherloadmode="file"
+				}else{
+					dirlist dummy,editlauncherdata,5
+					if stat!0:{
+						nowlauncherloadmode="folder"
+					}else{
+						sdim dl,2
+						getlogicaldrives
+						okdrive=stat
+						canusedrive=""
+						cantuse=0
+						repeat 26
+							dl=strf("%c",'a'+cnt)
+							flag=1<<cnt
+							if okdrive&flag:{
+								notesel canusedrive
+								noteadd ""+dl+":\\",-1,0
+							}
+						loop
+						cantuse=0
+						notesel canusedrive
+						repeat notemax
+							noteget buf,cnt
+							if instr(buf,0,getpath(editlauncherdata,16))!-1:{
+								cantuse=0
+								break
+							}else{
+								cantuse=1
+							}
+						loop
+						if cantuse!1:{
+							nowlauncherloadmode="folder"
+						}else{
+							nowlauncherloadmode="other"
+						}
+					}
+				}
+			}else{
+				nowlauncherloadmode="custom"
+			}
+
+			if loadset("dispcolormode",settingdata)="0":{
+				drawiconexp9=2
+			}else{
+				drawiconexp9=3
+			}
+			gsel 504,0
+			if nowlauncherloadmode="file"|nowlauncherloadmode="folder":{
+				dim shfileinfo,88
+				shgetfileinfo editlauncherdata,0,varptr(shfileinfo),$160,$100
+				drawiconex hdc,xsiz(0),ysiz(0),shfileinfo.0,xsiz(32),ysiz(32),0,0,drawiconexp9
+			}else:if nowlauncherloadmode="other":{
+				hIcon=ExtractIcon(hInstance,"shell32.dll",54)
+				drawiconex hdc,xsiz(0),ysiz(0),hIcon,xsiz(32),ysiz(32),0,0,drawiconexp9
+			}else:if nowlauncherloadmode="custom":{
+				exist editlaunchericon
+				if strsize=-1:{
+					hIcon=ExtractIcon(hInstance,"shell32.dll",54)
+					drawiconex hdc,xsiz(0),ysiz(0),hIcon,xsiz(32),ysiz(32),0,0,drawiconexp9
+				}else{
+					buffer 505,xsiz(1),ysiz(1),0
+					picload editlaunchericon,0
+					backpicx=ginfo(12)
+					backpicy=ginfo(13)
+					gsel 504,01
+					gzoom xsiz(32),ysiz(32),505,xsiz(0),ysiz(0),backpicx,backpicy,1
+				}
+			}
+
+			gsel 201,0
+			pos xsiz(40),ysiz(120)
+			gzoom xsiz(28),ysiz(28),504,xsiz(0),ysiz(0),xsiz(32),ysiz(32),1
+		}
+	}else:if launcheraddcurrent=4:{
+		if editoption2=1:{
+			objenable editoption3adr,1
+			objenable editoption4adr,1
+		}else{
+			objenable editoption3adr,0
+			objenable editoption4adr,0
+		}
+		
+		if editoption5buf!editoption5:{
+			editoption5buf=editoption5
+			if editoption5=0:{
+				pos xsiz(30),ysiz(270)
+				boxfofmes int(loadset("dispcolormode",settingdata)),xsiz(30),ysiz(270),xsiz(630),ysiz(290)
+
+				if editoption6objbuf=1:{
+					clrobj editoption6adr,editoption6adr
+					clrobj launcheradddialog3adr,launcheradddialog3adr
+
+					editoption6objbuf=0
+				}
+			}else:if editoption5=1:{
+				pos xsiz(30),ysiz(270)
+				boxfofmes onezero(loadset("dispcolormode",settingdata)),xsiz(30),ysiz(270),xsiz(630),ysiz(290)
+				pos xsiz(32),ysiz(270)
+				mes langstr(6123)
+	
+				pos xsiz(30),ysiz(300)
+				objsize xsiz(500),ysiz(30)
+				if editoption6=0:{
+					editoption6=""
+				}
+				input editoption6,xsiz(500),ysiz(30),0
+				editoption6adr=stat
+				pos xsiz(530),ysiz(300)
+				objsize xsiz(100),ysiz(30)
+				button langstr(61091),*launcheradddialog3
+				launcheradddialog3adr=stat
+
+				editoption6objbuf=1
+			}
+		}
+	}
+
+	if fpsbufmes>settingfps:{
+		await (1000/(settingfps-1))
+	}else:if fpsbufmes=settingfps:{
+		await (1000/(settingfps))
+	}else:if fpsbufmes<settingfps:{
+		await (1000/(settingfps+1))
+	}
+
+	if qwertydebug=1:{
+		timeGetTime
+		if fpsbuf!(stat/1000):{
+			fpsbuf=(stat/1000)
+			fpsbufmes=fpsbufcnt
+			fpsbufcnt=0
+		}else{
+			fpsbufcnt+=1
+		}
+		title "<デバッグ> "+fpsbufmes+"fps"
+	}
+	
+	goto *launcheraddrepeat
+
+*launcheraddno
+	launcheraddcurrent=0
+	editlauncherdata=""
+	editlaunchername=""
+	editlaunchericon=""
+	editoption1=0
+	editoption2=0
+	editoption3=0
+	editoption4=0
+	editoption5=0
+	editoption6=0
+	gsel 201,-1
+	gsel 0000,int(loadset("ALWAYSFRONT",settingdata))+1
+
+	enablewindow hclient,1
+
+	goto *systemrepeat
+
 //////////////////////////////////////////////////
 //スタートメインメニュー
 //////////////////////////////////////////////////
@@ -1403,6 +2228,12 @@ if qwertydebag=0:{
 		start \"\" \""}+qwertypath+{"\"
 		exit
 		0"}
+	}else:if windowsbatsign="launcherrunasnt":{
+		windowsbatnote={"cmd /c start \"\" "}+launchoption+{" "}+launchonstart+{" \""}+loadset(""+pulllauncherbuttoncnt+"_data",launcherdata)+{"\"
+		1"}
+	}else:if windowsbatsign="launcherrunas9x":{
+		windowsbatnote={"start "}+launchoption+{" "}+launchonstart+{" \""}+loadset(""+pulllauncherbuttoncnt+"_data",launcherdata)+{"\"
+		1"}
 	}
 	if okfullmode=-1:{
 		bittype="x86"
@@ -1529,7 +2360,7 @@ if qwertydebag=0:{
 	}
 	systemsizechange=0
 
-	if qwertydebag=1:{
+	if qwertydebug=1:{
 		timeGetTime
 		if fpsbuf!(stat/1000):{
 			fpsbuf=(stat/1000)
@@ -1602,7 +2433,7 @@ if qwertydebag=0:{
 		iszoom=stat
 	}
 
-	if qwertydebag=1:{
+	if qwertydebug=1:{
 		timeGetTime
 		if fpsbuf!(stat/1000):{
 			fpsbuf=(stat/1000)
@@ -1752,12 +2583,16 @@ if qwertydebag=0:{
 	}
 	batterytimestr2=batterytimestr2+":"+strf("%02d",batterytimesecond)
 
+	onexit 1
+	onclick 1
+	oncmd 1
+
 	//ジャンプ
 	onexit *shutdownwindowssystem
 	onclick gosub *onclickjump
 	onkey 0
 
-	if qwertydebag=0:{
+	if qwertydebug=0:{
 		onerror *systemerrordialog
 	}else{
 		onerror 0
@@ -1802,7 +2637,7 @@ if qwertydebag=0:{
 	}else{
 		titlebarstr=""+screenname
 	}
-	if qwertydebag=1:{
+	if qwertydebug=1:{
 		titlebarstr="<デバッグ> "+fpsbufmes+"fps/"+settingfps+"fps posx:"+ginfo(4)+" posy:"+ginfo(5)+" sizx:"+ginfo(12)+" sizy:"+ginfo(13)+" test:"+startmenugroll+" "+titlebarstr
 	}
 	if titlebarstr!titlebarstrbuf:{

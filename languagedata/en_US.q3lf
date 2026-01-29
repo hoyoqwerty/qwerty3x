@@ -1,25 +1,28 @@
 languagedata===English
-;In the languagedata field, enter the language name in that language. Example: For English, enter ÅgEnglishÅh.
-;This will appear in the list of language settings within the Window/Screen Settings of the qwerty3x configuration.
+;In the languagedata field, enter the language name in that language. Example: ÅgEnglishÅh for English.
+;This will appear in the list of language settings within the qwerty3x settings window/screen settings.
 
 languagesetting===en_US
-;Enter the identifier for this language file in the languagesetting field.
-;There are no naming rules for identifiers. However, identifiers must not conflict.
-;This file uses country code & language code to create the identifier,
-;but you are not required to follow this naming convention.
-;This identifier is not displayed within qwerty3x,
-;but it is included in the configuration file and saved when qwerty3x uses this file.
-;The most important point is that Ågthe identifier and the filename (excluding the extension) must be identicalÅh.
-;Example: ÅgIf the identifier is Åeen_USÅf, the filename must be Åeen_US.q3lfÅfÅh.
+;In the languagesetting field, enter the identifier for this language file.
+;There are no naming rules for identifiers. However, identifiers must not be duplicated.
+; This file uses the country code & language code to create the identifier,
+; but you are not required to follow this naming convention.
+; This identifier is not displayed within qwerty3x,
+; but it is stored in the configuration file when qwerty3x uses this file.
+; The most important point is that Ågthe identifier and the filename (excluding the extension) must be identicalÅh.
+;Example: If the identifier is Ågen_USÅh, the filename must be Ågen_US.q3lfÅh.
 
-Lines starting with Åg;Åh are recognized as comments,
-so they can be used as memo areas.
+;Lines starting with Åg;Åh are recognized as comments,
+;so they can be used as a memo area.
 
-Portions enclosed in Åg%Åh like Åg%qwertyver%Åh are replaced with variables within qwerty3x.
-Therefore, do not modify the string enclosed within Åg%Åh.
+;Places written as Åg\nÅh are automatically replaced with line break codes internally by qwerty3x.
+;Use these for line breaks.
 
-The structure is Ågidentifier number===stringÅh.
-Do not change the identifier number.
+; Parts enclosed in Åg%Åh like Åg%qwertyver%Åh are replaced with variables within qwerty3x.
+; Therefore, do not modify the string enclosed within Åg%Åh.
+
+; The structure is Ågidentifier number===stringÅh.
+; Do not change the identifier number.
 
 0001===qwerty3x ver.%qwertyver%
 0002===Could not find Ågappicon.pngÅh. Exiting qwerty3x.
@@ -27,48 +30,59 @@ Do not change the identifier number.
 0004===Based on system settings
 0005===File not found.
 0006===Folder not found.
-0007===Failed to check for updates at startup.
-0008===Checking for updates at startup. Please wait.
+0007===Failed to check for updates at startup.\n\nCould not establish internet connection.
+0008===Checking for updates during startup. Please wait.
 0009===New qwerty3x found.
 
-1001===Detected unsupported Windows version: %windowsname%\nStartup may continue, but unexpected behavior may occur.
+1001===Detected unsupported Windows version: %windowsname%\nStartup can continue, but unexpected behavior may occur.
 1002===Starting...
+;Starting...
+;Starting...
 1003===Loading application. Please wait...
 1004===Start
 1005===Close
 1006===Detecting Windows version...
-1007===Creating MDI window...
-1008===Reading screen buffer...
+;Detecting Windows version...
+;Detecting Windows version...
+1007===Creating window...
+;Creating MDI windows...
+;Creating MDI windows...
+1008===Reading buffer...
+;Reading screen buffer...
+;Reading screen buffer...
 1009===Complete
-1010===Could not locate files required for qwerty3x operation. Please reinstall.
+1010===The files required for qwerty3x operation could not be found. Please reinstall.
 1011===Enter password
 1012===Login
-1013===Display animation playback is taking longer than expected. Your environment may not be suitable for displaying animations. \nYou can continue, but display may be delayed. \n\nSelect ÅgYesÅh to continue with animation playback, \nor ÅgNoÅh to disable animation playback and proceed.
+1013===Display animation playback is taking longer than expected. Your environment may not be suitable for displaying animations. \nYou can continue, but display may be delayed. \n\nSelect ÅgYesÅh to continue playing the display animation, \nor select ÅgNoÅh to disable it and proceed.
 1014===Checking for updates on startup...
+;Checking for updates on startup...
+;Checking for updates on startup...
 1015===A new version has been found.
-1016===A new version of qwerty3x has been found.\nWould you like to switch to the Ågqwerty3x updateÅh screen?\n\nSelecting ÅgNoÅh will start the application as is.
-1017===A new development version has been found.
-1018===Found a new version of qwerty3x (development).\nWould you like to switch to the Ågqwerty3x updateÅh screen?\n\nSelecting ÅgNoÅh will start as is.
+1016===A new version of qwerty3x has been found.\nWould you like to switch to the Ågqwerty3x updateÅh screen?\n\nSelecting ÅgNoÅh will start normally.
+1017===New development version found.
+1018===New development version of qwerty3x found.\nWould you like to switch to the Ågqwerty3x updateÅh screen? \n\nSelecting ÅgNoÅh will start as is.
 
 2001===Shutting down
 
 3001===Launcher
-3002===Start Menu
-3003===qwerty3x Application
-3004===Windows Application
+3002===Start Main Menu
+3003===qwerty3x Applications
+3004===Windows Applications
 3005===qwerty3x Settings
+3006===Launcher Editing
 
 3501===Task Manager
 3502===Windows Settings
 3503===Run
 3504===Control Panel
 
-3701===Windows Power Options
+3701===Windows Power
 37011===Lock Windows
-37012===Shut Down Windows
+37012===Shut down Windows
 37013===Restart Windows
 37014===Windows Power Dialog
-3702===qwerty3x Operations
+3702===qwerty3x operations
 37021===Lock qwerty3x
 37022===Exit qwerty3x
 37023===Restart qwerty3x
@@ -86,13 +100,13 @@ Do not change the identifier number.
 4011===Minutes
 4012===Seconds
 4013===AC Power
-4014===Battery Fully Charged
-4015===Battery Charging
+4014===Battery fully charged
+4015===Battery charging
 4016===Battery
-4017===Estimating Remaining Time
-4018===Not Charged Yet
+4017===Estimating remaining time
+4018===Not yet charged
 
-5001===Window/Screen Settings
+5001===Window/Display Settings
 5002===Background/Color Settings
 5003===Operation Settings
 5004===qwerty3x Details
@@ -103,7 +117,7 @@ Do not change the identifier number.
 52011===Window Behavior
 5201===Always on Top
 ;ALWAYSFRONT 0
-5202===Automatically minimize qwerty3x when launching the launcher or opening external windows
+5202===Automatically minimize qwerty3x when opening launchers or external windows
 ;AUTOMINI 1
 5203===Font Settings
 52031===Auto
@@ -130,11 +144,11 @@ Do not change the identifier number.
 53024===Slideshow
 53025===Edit
 53026===Browse
-53027===Open in another app
+53027===Open in Another App
 53028===Apply
 53029===Open in Explorer
-53030===Apply/Switch image now
-53031===Please select a folder to use for the slideshow
+53030===Apply/Switch Image Now
+53031===Select Folder for Slideshow
 53032===Randomize Image Display Order
 ;BACKGROUNDMODE COLOR
 ;BACKGROUNDCOLOR 0,0,0
@@ -145,13 +159,13 @@ Do not change the identifier number.
 54011===Startup Behavior
 5401===Enable update checks when qwerty3x starts
 ;STARTUPDATE 0
-5402===Display a dialog when detecting an unsupported Windows version
+5402===Notify via dialog when detecting unsupported Windows versions
 ;WINDOWSVERSIONDIALOG 1
 
 55011===Password
 55012===The initial password and the confirmation password do not match. Please re-enter them correctly.
-55013===The password is incorrect. Please re-enter it correctly.
-55014===The password is less than 5 characters. Please enter 5 or more characters.
+55013===The passwords do not match. Please re-enter them correctly.
+55014===Password is less than 5 characters. Please enter 5 or more characters.
 55015===Password created successfully.
 55016===Password changed successfully.
 55017===Password deleted successfully.
@@ -171,33 +185,33 @@ Do not change the identifier number.
 ;PASSWORDSTRING 
 
 5601===Last Updated:
-5602===Compilation Date/Time:
+5602===Compiled Date/Time:
 5603===Build Number:
 5604===Could not find ÅgRelease Note.txtÅh.
-5605===Advanced Features/Detailed View
+5605===Advanced Features/Details
 56051===Graphics Settings Optimization/Benchmark
 560511===qwerty3x Benchmark
 560512===Final Measurement Score:
 560513===Final Measurement Average FPS:
-560514===Do not move the window during benchmarking. \nThis may significantly degrade results.
+560514===Do not move the window during benchmarking.\nResults may be significantly degraded.
 560515===Run Benchmark
 560516===Close
 560517===Processing in Progress
 560518===Benchmarking
 560519===Required files for benchmarking were not found.
 5605110===Stop
-5605111===Optimize Graphics Settings
+5605111===Optimize graphics settings
 5605112===Do you want to change the following settings?
 5605113===Disable
 5605114===Enable
 5605115===Current settings are already optimized.
-5605116===Optimization complete.
-56052===Display detailed information
+5605116===Setting optimization complete.
+56052===Displaying detailed information
 560521===Processor (CPU):
 560522===Memory (RAM):
-560523===Window Size:
-560524===Screen Scaling:
-560525===Screen Size:
+560523===Window size:
+560524===Screen scaling:
+560525===Screen size:
 560526===Not supported on Windows 9x.
 560527===qwerty3x
 560528===Windows System
@@ -209,21 +223,21 @@ Do not change the identifier number.
 56055===Open Release Note.txt
 56056===Transfer settings from qwerty-XX
 560561===Searching for Ågqwerty-XXÅh folder...
-560562===Could not find the Ågqwerty-XXÅh folder.\n\nDo you want to manually select the Ågqwerty-XXÅh folder containing the qwerty-XX main file you wish to transfer?\n\nIf you select ÅgNoÅh, transferring settings from qwerty-XX will be canceled.
+560562===Could not find the Ågqwerty-XXÅh folder.\n\nDo you want to manually select the Ågqwerty-XXÅh folder containing the qwerty-XX main application you wish to transfer settings from?\n\nIf you select ÅgNoÅh, transferring settings from qwerty-XX will be canceled.
 560563===Please select the Ågqwerty-XXÅh folder containing the qwerty-XX main unit you wish to transfer directly.
-560564===qwerty-XX has been confirmed in the above folder. \nWould you like to transfer settings from this qwerty-XX? \n\nSelecting ÅgNoÅh will continue searching for qwerty-XX.
-560565===Loading settings data from the selected Ågqwerty-XXÅh...
-560566===Could not verify qwerty-XX settings data.\nInterrupting settings transfer from qwerty-XX.
+560564===qwerty-XX was found in the above folder. \nDo you want to transfer settings from this qwerty-XX? \n\nSelecting ÅgNoÅh will continue searching for qwerty-XX.
+560565===Reading settings data from the selected Ågqwerty-XXÅh...
+560566===Could not locate qwerty-XX configuration data.\nInterrupting configuration transfer from qwerty-XX.
 560567===Please enter the password for the selected qwerty-XX.
 560568===Continue
 560569===Interrupt
-5605610===Do you want to stop importing settings from qwerty-XX?
-5605611===Import from Ågqwerty-XX SettingsÅh\nSelect the items to import. (Multiple selections allowed)
-5605612===Please select the items to import from qwerty-XX's Ågqwerty-XX SettingsÅh. \nThese will be applied to the corresponding qwerty3x settings.
+5605610===Do you want to cancel transferring settings from qwerty-XX?
+5605611===Transferring from Ågqwerty-XX SettingsÅh\nPlease select the items to transfer. (Multiple selections allowed)
+5605612===Please select items to transfer from qwerty-XX's Ågqwerty-XX SettingsÅh.\nThese will be applied to the corresponding qwerty3x settings.
 5605613===Always display on top
 5605614===Automatically minimize qwerty-XX when opening launchers or external windows
-5605615===qwerty-XX font
-560561501===Auto-set based on OS version, Yu Gothic UI, Meiryo UI, MS UI Gothic
+5605615===qwerty-XX Font
+560561501===Auto-detect from OS version, Yu Gothic UI, Meiryo UI, MS UI Gothic
 5605616===qwerty-XX Dark Mode / Light Mode
 560561601===Dark Mode, Light Mode
 5605617===Enable update checks when launching qwerty-XX
@@ -236,14 +250,14 @@ Do not change the identifier number.
 5605623===qwerty-XX style color
 5605624===Selecting an item changes its color.
 5605625===Select all/Deselect all
-5605626===Transfer
+5605626===Transfer settings
 5605627===No settings have been selected for transfer.\nTo proceed with transfer, you must select at least one setting.
 5605628===Do you want to transfer the above settings?
 5605629===Settings transferred.
 56057===Transferring launcher from qwerty-XX
 560571===Do you want to cancel transferring the launcher from qwerty-XX?
 560572===qwerty-XX was found in the above folder.\nDo you want to transfer the launcher from this qwerty-XX?\n\nSelecting ÅgNoÅh will continue searching for qwerty-XX.
-560573===The Ågqwerty-XXÅh folder was searched but not found.\n\nDo you want to manually select the Ågqwerty-XXÅh folder containing the qwerty-XX main file you wish to transfer?\n\nSelecting ÅgNoÅh will cancel the transfer of the launcher from qwerty-XX.
+560573===The Ågqwerty-XXÅh folder was searched but not found.\n\nWould you like to manually select the Ågqwerty-XXÅh folder containing the qwerty-XX main file you wish to transfer?\n\nSelecting ÅgNoÅh will cancel the transfer of the launcher from qwerty-XX.
 560574===Loading launcher data from the selected Ågqwerty-XXÅh...
 560575===Could not verify qwerty-XX's launcher data.\nInterrupting the transfer of launchers from qwerty-XX.
 560576===No launcher data was configured in qwerty-XX.\nInterrupting the transfer of launchers from qwerty-XX.
@@ -273,26 +287,78 @@ Do not change the identifier number.
 5730===Do you want to start updating qwerty3x?\nOnce started, it cannot be paused.\n\nSave all data currently being worked on in qwerty3x before starting the update.\nUpdating qwerty3x requires restarting qwerty3x.
 5731===Failed to download update data.\n\nCould not establish an Internet connection.
 5732===Failed to download update data.
-5733===Failed to download update data.\n\nThe response took too long to complete normal processing.
-5734===Update data download complete.\nqwerty3x will update and restart. \n\nPlease refrain from performing other operations during the update. \n\nIf User Account Control (UAC) appears, select ÅgYesÅh to allow execution.
+5733===Failed to download update data.\n\nThe response took too long to complete successfully.
+5734===Update data download complete. \nUpdating qwerty3x and restarting. \n\nDo not perform other operations during the update. \n\nIf User Account Control (UAC) appears, select ÅgYesÅh to allow execution.
 5735===Downloading update data. Please wait.
 5736===Launching qwerty3x installer ver.%verbuf2%...
 5737===qwerty3x installer is not compatible with %windowsname%.
 5750===qwerty3x update options
 5751===Receive development version qwerty3x via qwerty3x update
-57511===The development version of qwerty3x may be less stable than the official release.\n\nContinue with the configuration changes?
+57511===The development version of qwerty3x may be less stable than the official version.\n\nContinue with the configuration changes?
 5770===qwerty3x version change
 5771===Performing qwerty3x version change
 5772===Close
 5773===Retrieving version list
 5774===Failed to retrieve version list.\n\nCould not establish internet connection.
-5775===Failed to retrieve downgrade version.
-5776===Failed to retrieve downgrade version. \n\nThe response took too long to execute the normal process.
-5777===Development Version
+5775===Failed to retrieve version downgrade.
+5776===Failed to retrieve version downgrade.\n\nResponse took too long to execute normal processing.
+5777===Development version
 5778===Please select a qwerty3x version from the following.
 5779===Aggregating
-5780===Ågqwerty3x Version ChangeÅh is provided as one method to restore your environment\nif a critical issue occurs with the latest version of qwerty3x. \n\nAs it is intended as a last resort,\nplease refrain from using it except under these circumstances.
-5781===Perform Version Change
+5780===Ågqwerty3x Version ChangeÅh is provided as one method to restore your environment\nif a critical issue occurs in the latest version of qwerty3x.\n\nAs it is intended as a last resort, please refrain from using it unless absolutely necessary.
+5781===Perform version change
 5782===WARNING!\n\nUse this operation only if a critical bug occurs in the latest version or your currently used qwerty3x. \n\nAre you sure you want to change the version to Åg%verbuf2%Åh?\nOnce started, this operation cannot be paused. \nSave all data currently being worked on in qwerty3x before proceeding. \nChanging the qwerty3x version requires restarting qwerty3x.
 
-6001===Loading launcher icon...
+6001===Loading launcher icons...
+6002===This launcher is empty. \nPlease register items and try again.
+6003===New Creation
+60031===Create New Launcher
+
+6101===Welcome to the New Launcher Wizard
+6102===Please select your creation method from the following:
+6103===Quick Creation
+61031===Create a launcher easily in just 3 steps.
+6104===Create an Empty Launcher
+61041===Create an empty launcher first, then edit its contents later.
+6105===Create a Macro Launcher
+61051===Unlock advanced features and use all of qwerty3x's functionality at once.
+6106===Cancel
+6107===Next
+61071===Previous
+6108===Specify Launcher Path and Name (1/3)
+6109===ÅESpecify the launcher path
+61091===Browse
+61092===Browse File
+61093===Browse Folder
+610931===Select the folder to specify as the launcher path.
+61094===Enter the path to the file/folder to open, \nwebsite URL, etc.
+6110===ÅESpecify Launcher Name
+61101===Enter the launcher name to display on the button.
+6111===No launcher path has been entered.\n\nPlease enter the path and name before proceeding.
+6112===No launcher name has been entered.\n\nPlease enter the path and name before proceeding.
+6113===Specifying the launcher icon (2/3)
+6114===ÅESpecifying the launcher icon
+6115===Icon preview
+6116===Custom icon path
+61161===When specifying your own icon, enter the image file path in the input box.
+6117===Specifying launcher options (3/3)
+6118===Always open with administrator privileges
+6119===Specify window size
+6120===Always open with window maximized
+6121===Always open with window minimized
+6122===Specify the application to open launcher contents
+6123===Path to open application
+61231===The path to the application to open has not been entered. \n\nIf ÅgSpecify the application to open launcher contentsÅh is enabled, enter the path to the application to open before proceeding.
+6124===Confirming new launcher creation details
+6125===Create a new launcher with the following information?
+6126===(Empty)
+6127===New Launcher
+6128===(Automatically load icon)
+6129===Administrator privileges
+6130===Maximize
+6131===Minimize
+6132===Specify application :
+6133===Path :
+6134===Icon :
+6135===Options :
+6136===The above launcher has been created.

@@ -80,7 +80,12 @@
 	loop
 
 	if decodeok=0:{
-		dialog "qwerty3x Critical error\n\nerror code: DECWORD_RUNNING_FAILED\n\ndecword関数による暗号化解除が正しく行えませんでした。\n\nerror function infomation:\np2="+p2+"\np3="+p3+"\npassword="+password,1,"qwerty3x 内部モジュールエラー"
+		errormes={"qwerty3x Critical Error
+		error code: DECWORD_RUNNING_FAILED
+
+		qwerty3xに重大なエラーが発生しました。qwerty3xを終了します。
+		A serious error has occurred in qwerty3x. qwerty3x will now exit."}
+		dialog ""+errormes+"\n\nerror function infomation:\np2="+p2+"\np3="+p3+"\npassword="+password,1,"qwerty3x 内部モジュールエラー / qwerty3x internal module error"
 		end
 	}
 	
@@ -99,7 +104,12 @@
 		if notefind("settingdata",1)!-1:{
 			notesel defaultsettingdata@
 			if notefind(p1,1)=-1:{
-				dialog "qwerty3x Critical error\n\nerror code: LOADSET_IN_SAVESET_DEFAULT_NOT_FOUND\n\nloadset関数内のsaveset命令から参照したデフォルト設定データに、指定された内容がありませんでした。\n指定内容が間違っている可能性があります。\n\nerror function infomation:\ndefaultsettingdata="+defaultsettingdata@+"\np1="+p1,1,"qwerty3x 内部モジュールエラー"
+				errormes={"qwerty3x Critical Error
+				error code: LOADSET_IN_SAVESET_DEFAULT_NOT_FOUND
+		
+				qwerty3xに重大なエラーが発生しました。qwerty3xを終了します。
+				A serious error has occurred in qwerty3x. qwerty3x will now exit."}
+				dialog ""+errormes+"\n\nerror function infomation:\ndefaultsettingdata="+defaultsettingdata@+"\np1="+p1,1,"qwerty3x 内部モジュールエラー / qwerty3x internal module error"
 				end
 			}
 		}
@@ -118,7 +128,12 @@
 		}
 	loop
 	if moduleok!1:{
-		dialog "qwerty3x Critical error\n\nerror code: LOADSET_NOT_FOUND\n\nloadset関数の指定内容が間違っている可能性があります。\n\nerror function infomation:\nmoduleok="+moduleok+"\nmodulesettingtype="+modulesettingtype+"\nmodulesettingdata="+modulesettingdata+"\np1="+p1,1,"qwerty3x 内部モジュールエラー"
+		errormes={"qwerty3x Critical Error
+		error code: LOADSET_NOT_FOUND
+
+		qwerty3xに重大なエラーが発生しました。qwerty3xを終了します。
+		A serious error has occurred in qwerty3x. qwerty3x will now exit."}
+		dialog ""+errormes+"\n\nerror function infomation:\nmoduleok="+moduleok+"\nmodulesettingtype="+modulesettingtype+"\nmodulesettingdata="+modulesettingdata+"\np1="+p1,1,"qwerty3x 内部モジュールエラー / qwerty3x internal module error"
 		end
 	}
 	noteunsel
@@ -136,7 +151,12 @@
 		if notefind("settingdata",1)!-1:{
 			notesel defaultsettingdata@
 			if notefind(p1,1)=-1:{
-				dialog "qwerty3x Critical error\n\nerror code: SAVESET_DEFAULT_NOT_FOUND\n\nsaveset命令から参照したデフォルト設定データに、指定された内容がありませんでした。\n指定内容が間違っている可能性があります。\n\nerror function infomation:\ndefaultsettingdata="+defaultsettingdata+"\np1="+p1,1,"qwerty3x 内部モジュールエラー"
+				errormes={"qwerty3x Critical Error
+				error code: SAVESET_DEFAULT_NOT_FOUND
+		
+				qwerty3xに重大なエラーが発生しました。qwerty3xを終了します。
+				A serious error has occurred in qwerty3x. qwerty3x will now exit."}
+				dialog ""+errormes+"\n\nerror function infomation:\ndefaultsettingdata="+defaultsettingdata+"\np1="+p1,1,"qwerty3x 内部モジュールエラー / qwerty3x internal module error"
 				end
 			}else{
 				noteget addnewsetting,notefind(p1,1)
@@ -161,12 +181,18 @@
 				split buf,"===",dummy,launcherdatamax
 				launcherdatamax=int(launcherdatamax)
 
+				split defaultdata,"===",dummy,defaultdata2
+				split defaultname,"===",dummy,defaultname2
+				split defaultrunas,"===",dummy,defaultrunas2
+				split defaulticon,"===",dummy,defaulticon2
+				split defaultopt,"===",dummy,defaultopt2
+
 				noteadd "",-1
-				noteadd ""+(launcherdatamax+1)+"_data==="+defaultdata,-1
-				noteadd ""+(launcherdatamax+1)+"_name==="+defaultname,-1
-				noteadd ""+(launcherdatamax+1)+"_runas==="+defaultrunas,-1
-				noteadd ""+(launcherdatamax+1)+"_icon==="+defaulticon,-1
-				noteadd ""+(launcherdatamax+1)+"_opt==="+defaultopt,-1
+				noteadd ""+(launcherdatamax+1)+"_data==="+defaultdata2,-1
+				noteadd ""+(launcherdatamax+1)+"_name==="+defaultname2,-1
+				noteadd ""+(launcherdatamax+1)+"_runas==="+defaultrunas2,-1
+				noteadd ""+(launcherdatamax+1)+"_icon==="+defaulticon2,-1
+				noteadd ""+(launcherdatamax+1)+"_opt==="+defaultopt2,-1
 
 				noteadd "launcherdatamax==="+(launcherdatamax+1)+"",notefind("launcherdatamax===",1),1
 
@@ -180,11 +206,14 @@
 	}
 	modulesettingtype=""
 	modulesettingdata=""
+	errorbuf=1
+	notesel p2
 	repeat notemax
 		noteget buf,cnt
 		split buf,"===",modulesettingtype,modulesettingdata
 
 		if getpath(modulesettingtype,16)=getpath(p1,16):{
+			errorbuf=0
 			buf2=""+modulesettingtype+"==="+p3
 			buf3=cnt
 			noteadd buf2,buf3,1
@@ -192,6 +221,16 @@
 		}
 	loop
 	noteunsel
+
+	if errorbuf!0:{
+		errormes={"qwerty3x Critical Error
+		error code: SAVESET_PARAMETER_NOT_FOUND
+
+		qwerty3xに重大なエラーが発生しました。qwerty3xを終了します。
+		A serious error has occurred in qwerty3x. qwerty3x will now exit."}
+		dialog ""+errormes+"\n\nerror function infomation:\n\np1="+p1+"\np3="+p3,1,"qwerty3x 内部モジュールエラー / qwerty3x internal module error"
+		end
+	}
 
 	return p2
 
@@ -224,6 +263,33 @@
 	}
 
 	return str(titlestrdata2)
+
+#deffunc drivecheck str p1
+;drivecheck命令 ドライブレターの存在を確認する
+;p1 str ドライブ文字を含むドライブ直下のフォルダパス
+	sdim dl,2
+	getlogicaldrives
+	okdrives=stat
+	canusedrive=""
+	cantuse=0
+	repeat 26
+		dl=strf("%c",'a'+cnt)
+		flag=1<<cnt
+		if okdrive&flag:{
+			notesel canusedrive
+			noteadd ""+dl+":\\",-1,0
+		}
+	loop
+	cantuse=0
+	notesel canusedrive
+	repeat notemax
+		noteget buf,cnt
+		if instr(buf,0,getpath(p1,16))=-1:{
+			cantuse=1
+		}
+	loop
+	
+	return cantuse
 
 #deffunc boxfofmes int p1,int p2,int p3,int p4,int p5
 ;boxfofmes命令 画面モードに合わせてboxf命令を動かす

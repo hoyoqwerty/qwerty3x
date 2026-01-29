@@ -217,7 +217,16 @@ if bufferallupdatestartupbuf=1:{
 
 	ysizbuf=ysiz(0)
 	if screenname=langstr(3001):{;ランチャー
-
+		ysizbuf+=ysiz(0)
+		pos xsiz(0),ysizbuf;通常
+		boxfofmes int(loadset("DISPCOLORMODE",settingdata))
+		pos xsiz(5),ysizbuf+ysiz(5)
+		mes ">"+langstr(6003);ランチャーの追加
+		pos xsiz(300),ysizbuf;マウスオーバー
+		colorsetting settingdata
+		pos xsiz(305),ysizbuf+ysiz(5)
+		mes ">"+langstr(6003);ランチャーの追加
+		appbarxsiz.0=ginfo(14)
 	}else:if screenname=langstr(3005):{;qwerty3xの設定
 		if loadset("controlpage",settingdata)="WINDOWSCREEN":{;ウィンドウ&画面設定
 		}else:if loadset("controlpage",settingdata)="BACKGROUNDCOLOR":{;背景&色設定
